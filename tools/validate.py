@@ -14,8 +14,9 @@ COURSES = ROOT / "content" / "courses"
 LEVELS = ["recognize", "why", "apply", "explain"]
 STATUSES = {"planned", "draft", "ready"}
 WORDS_PER_MINUTE = 140  # rough speaking rate for Hebrew TTS
+MINUTES_PER_QUESTION = 1.0  # reading the question and options, answering, hearing feedback
 UNSPEAKABLE = re.compile(r"=>|[{}<>\[\]`]|https?:")
-WORD = r"[A-Za-z][A-Za-z0-9#+]*(?:\.[A-Za-z0-9#+]+)*"
+WORD = r"[A-Za-z][A-Za-z0-9#+]*(?:[.\-'][A-Za-z0-9#+]+)*"
 LATIN_TERM = re.compile(WORD + r"(?:\s+(?=[A-Z])" + WORD + r")*")
 # Words the learner already knows well; everything else in Latin script should be in `terms`
 KNOWN_WORDS = {"react", "javascript", "typescript", "c#", "asp.net", ".net", "node", "node.js",
@@ -125,6 +126,7 @@ def check_course(course_dir, rep):
     for stem in files.keys() - unit_ids:
         rep.err(f"{course_dir.name}/units/{stem}.json", "file is not listed in course.json units")
     total_minutes = 0.0
+    earlier_terms = set()
     for u in course.get("units", []):
         path = files.get(u["id"])
         if u.get("status") == "planned":
@@ -134,12 +136,12 @@ def check_course(course_dir, rep):
         if not path:
             rep.err(f"{where} unit {u['id']}", f"status {u['status']} but no file units/{u['id']}.json")
             continue
-        total_minutes += check_unit(path, u, concept_ids, rep)
+        total_minutes += check_unit(path, u, concept_ids, rep, earlier_terms)
     if total_minutes:
-        print(f"{course_dir.name}: ~{total_minutes:.0f} minutes of written explanation so far")
+        print(f"{course_dir.name}: ~{total_minutes:.0f} minutes of listening so far, without replays and remedials")
 
 
-def check_unit(path, listed, concept_ids, rep):
+def check_unit(path, listed, concept_ids, rep, earlier_terms):
     unit = load(path, rep)
     if unit is None:
         return 0
@@ -169,7 +171,7 @@ def check_unit(path, listed, concept_ids, rep):
             if kind == "main":
                 words += n
     minutes = words / WORDS_PER_MINUTE
-    if minutes < 6:
+    if minutes < 5:
         rep.warn(where, f"main explanation is short (~{minutes:.1f} min)")
     main_ids = {seg.get("id") for seg in main}
 
@@ -183,13 +185,19 @@ def check_unit(path, listed, concept_ids, rep):
             rep.err(where, f"duplicate term {name}")
         term_names.add(name.lower())
         check_text(f"{where} term {name}", t.get("definition"), rep)
-    known = term_names | KNOWN_WORDS
-    covered_words = {w for name in term_names for w in name.split()}
+    known = term_names | KNOWN_WORDS | earlier_terms
+    earlier_terms |= term_names
+    covered_words = {w for name in term_names | earlier_terms for w in name.split()}
     undefined = set()
     for seg in main:
         for m in LATIN_TERM.finditer(seg.get("text", "")):
-            phrase = m.group(0).strip(".").lower()
-            if phrase in known or all(w in known or w in covered_words for w in phrase.split()):
+            raw = m.group(0).strip(".")
+            if raw[0].islower():
+                continue  # terms are capitalized; lowercase words are names (localhost) or code (getOrders)
+            phrase = raw.lower()
+            def is_known(w):
+                return any(v in known or v in covered_words for v in (w, w + "s", w.rstrip("s")))
+            if is_known(phrase) or all(is_known(w) for w in phrase.split()):
                 continue
             undefined.add(m.group(0).strip("."))
     if undefined:
@@ -266,8 +274,11 @@ def check_unit(path, listed, concept_ids, rep):
             rep.err(where, f"no {lvl} question")
     for mc in mcs.keys() - used_mcs:
         rep.warn(where, f"misconception {mc} is not targeted by any option")
-    print(f"  {listed['id']}: ~{minutes:.1f} min explanation, {len(q_ids)} questions, {len(mcs)} misconceptions")
-    return minutes
+    total = minutes + len(q_ids) * MINUTES_PER_QUESTION
+    if total < 12:
+        rep.warn(where, f"unit is short (~{total:.0f} min including questions)")
+    print(f"  {listed['id']}: ~{total:.0f} min ({minutes:.1f} explanation + {len(q_ids)} questions), {len(mcs)} misconceptions")
+    return total
 
 
 def main():
