@@ -41,7 +41,8 @@
 | `content/courses/nodejs-backend/units/` | יחידות הלימוד המלאות |
 | `progress/` | לוגים מהאפליקציה (אחרי כל נסיעה) |
 | `tools/` | סקריפטים לבדיקת התוכן ולהפקת הגרסה הקריאה |
-| `app/` | אפליקציית האנדרואיד (בשלב הבא) |
+| `android/` | אפליקציית האנדרואיד (Kotlin) |
+| `.github/workflows/` | בנייה אוטומטית של קובץ ההתקנה |
 
 ## בדיקת תוכן
 
@@ -49,3 +50,12 @@
 python3 tools/validate.py          # בודק את כל היחידות מול הסכמה ומפת המושגים
 python3 tools/render_curriculum.py # מפיק את curriculum.md מתוך course.json
 ```
+
+## התקנת האפליקציה
+
+1. בכל שינוי, GitHub בונה את האפליקציה ומפרסם אותה ב-Releases בשם `latest`.
+2. בטלפון: נכנסים לדף ה-Releases של ה-repo, מורידים את `drive-learning.apk` ופותחים אותו. בפעם הראשונה צריך לאשר התקנה ממקור לא ידוע.
+3. כדי שהאפליקציה תופיע ב-Android Auto: בהגדרות Android Auto לוחצים 10 פעמים על Version and permission info, ואז בתפריט שלוש הנקודות נכנסים ל-Developer settings ומסמנים Unknown sources.
+4. גרסה חדשה מותקנת מעל הקודמת, וההתקדמות נשמרת.
+
+אפשר להשתמש גם בלי Android Auto: מפעילים מהטלפון, והקול עובר לרכב ב-Bluetooth.

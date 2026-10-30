@@ -1,11 +1,12 @@
 # Android / Gradle
-app/.gradle/
-app/build/
-app/**/build/
-app/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/build.log
 *.iml
 .idea/
-# Secrets
-*.keystore
-.env
+# Python
 __pycache__/
+# Secrets (the debug signing key in android/app is intentionally committed)
+.env
