@@ -11,6 +11,9 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
   voice can't read (`=>`, `{}`, `/`). Say "סלאש" or rephrase instead.
 - **Teach before asking.** Every question must be answerable from the unit's explanation.
 - **Architecture over syntax.** Explain what, why and when; not how to type it.
+- **The learner is a junior developer.** Define every technical term the first time it appears in
+  the unit, in one plain sentence, and add it to the unit's `terms`. Prefer a concrete example or
+  an everyday analogy over an abstract statement. One main idea per segment.
 - **Bridge from .NET where it helps.** The learner works daily with ASP.NET and React/TypeScript.
 - No ASCII double quotes inside strings (use ״ or rephrase) to keep the JSON hand-editable.
 
@@ -55,6 +58,9 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
     "simple": [ { "id": "simple-1", "text": "…" } ],           // same ideas through an analogy
     "deep":   [ { "id": "deep-1", "text": "…" } ]              // for when the basics are solid
   },
+  "terms": [                           // glossary, answered when the learner asks ״מה זה …״
+    { "term": "Middleware", "definition": "…" }
+  ],
   "misconceptions": [
     {
       "id": "mc-client-validation-enough",
@@ -68,6 +74,7 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
       "id": "q1",
       "concept": "backend-role",
       "level": "recognize",            // recognize | why | apply | explain
+      "segments": ["s1", "s2"],        // main segments that teach this; replayed after a wrong answer
       "prompt": "…",
       "hint": "…",                     // offered if the learner says ״רמז״
       "options": [                      // 3–4 options for recognize/why/apply; numbered 1..n by the app
@@ -90,6 +97,28 @@ Rules:
 - `explain` questions have no options; they have `rubric` and `minPoints` and are graded later
   (Gemini after the drive, Claude at night).
 - Questions are listed in ladder order: recognize → why → apply → explain.
+
+## Replay and navigation (implemented by the app)
+
+The learner can always go back. Voice commands, available at any point in a drive:
+
+| Say | What happens |
+|---|---|
+| ״תחזור״ | Replays the last few sentences |
+| ״מההתחלה״ | Restarts the current segment |
+| ״אחורה״ / ״קדימה״ | Previous / next segment |
+| ״תסביר אחרת״ | Plays the `simple` version of the current idea |
+| ״תעמיק״ | Plays the `deep` version |
+| ״מה זה …״ | Reads the term's definition from `terms` (this unit, then earlier units) |
+| ״רמז״ | Reads the question's `hint` |
+| ״תחזור על השאלה״ | Repeats the question and its options |
+| ״עצור״ / ״המשך״ | Pause / resume |
+| ״חזרה על יחידה …״ | Replays a finished unit from the start (review mode) |
+| ״סיכום״ | Plays the `recap` of the current or last unit |
+
+After a wrong answer the app plays the misconception's `remedial`, then offers
+״רוצה לשמוע שוב את החלק הזה?״ and, on yes, replays the question's `segments` before asking a
+new question on the same concept. Finished units stay available for replay from the car screen.
 
 ## Mastery rules (implemented by the app, listed here so generators know the target)
 

@@ -43,7 +43,23 @@ details{margin-top:8px}
 summary{cursor:pointer;color:var(--accent);font-size:.95rem}
 .rubric li{margin:2px 0}
 .belief{font-weight:600}
+.terms{margin:0}.terms dt{font-weight:700;margin-top:10px;color:var(--accent);text-align:right}
+.terms dd{margin:2px 0 0}
 """
+
+REPLAY = [
+    ("תחזור", "חוזר על המשפטים האחרונים"),
+    ("מההתחלה", "מתחיל את החלק הנוכחי מחדש"),
+    ("אחורה / קדימה", "עובר לחלק הקודם או הבא"),
+    ("תסביר אחרת", "מסביר שוב בגרסה פשוטה, עם משל"),
+    ("תעמיק", "מוסיף הסבר מעמיק יותר"),
+    ("מה זה …", "מקריא את ההגדרה מהמילון"),
+    ("רמז", "נותן רמז לשאלה"),
+    ("תחזור על השאלה", "קורא שוב את השאלה והתשובות"),
+    ("סיכום", "מקריא את הסיכום של היחידה"),
+    ("חזרה על יחידה …", "משמיע יחידה שכבר סיימת מההתחלה"),
+    ("עצור / המשך", "עוצר וממשיך"),
+]
 
 JS = """
 document.querySelectorAll('.q').forEach(function(q){
@@ -71,8 +87,9 @@ def render(path: Path) -> Path:
 
     add(f"<header><div class='meta'>יחידה לבדיקה · Drive Learning</div><h1>{esc(unit['title'])}</h1>")
     add(f"<div class='meta'>כ-{unit['estimatedMinutes']} דקות · {len(unit['questions'])} שאלות</div></header>")
-    add("<nav><a href='#lesson'>ההסבר</a><a href='#questions'>שאלות</a>"
-        "<a href='#mistakes'>טעויות נפוצות</a><a href='#variants'>גרסאות נוספות</a></nav>")
+    add("<nav><a href='#lesson'>ההסבר</a><a href='#questions'>שאלות</a><a href='#terms'>מילון מונחים</a>"
+        "<a href='#mistakes'>טעויות נפוצות</a><a href='#variants'>גרסאות נוספות</a><a href='#replay'>חזרה ברכב</a></nav>")
+    seg_title = {s["id"]: s["title"] for s in unit["explanations"]["main"]}
 
     add("<h2 id='lesson'>ההסבר</h2>")
     for seg in unit["explanations"]["main"]:
@@ -98,8 +115,16 @@ def render(path: Path) -> Path:
             add("".join(f"<li>{esc(p)}</li>" for p in q["rubric"]))
             add("</ul></details>")
         add(f"<details><summary>רמז</summary><p>{esc(q['hint'])}</p></details>")
+        taught = " · ".join(esc(seg_title[s]) for s in q.get("segments", []))
+        add(f"<p class='meta'>אם טועים, אפשר לשמוע שוב: {taught}</p>")
         add("</div>")
 
+    add("<h2 id='terms'>מילון מונחים</h2>")
+    add("<p class='meta'>ברכב אפשר לשאול ״מה זה Middleware?״ ולשמוע את ההגדרה.</p>")
+    add("<div class='card'><dl class='terms'>")
+    for t in unit.get("terms", []):
+        add(f"<dt dir='ltr'>{esc(t['term'])}</dt><dd>{esc(t['definition'])}</dd>")
+    add("</dl></div>")
     add("<h2 id='mistakes'>טעויות נפוצות</h2>")
     for m in unit["misconceptions"]:
         add(f"<div class='card'><p class='belief'>{esc(m['belief'])}</p>"
@@ -111,6 +136,10 @@ def render(path: Path) -> Path:
     add(f"<div class='card'><h3>גרסה פשוטה</h3><p class='meta'>מושמעת כשקשה</p><p>{simple}</p></div>")
     add(f"<div class='card'><h3>העמקה</h3><p class='meta'>מושמעת כשהבסיס יושב</p><p>{deep}</p></div>")
     add(f"<h2>סיכום</h2><div class='card'><p>{esc(unit['recap'])}</p></div>")
+    add("<h2 id='replay'>חזרה ברכב</h2><div class='card'><p class='meta'>אפשר להגיד בכל רגע בנסיעה:</p><dl class='terms'>")
+    for say, does in REPLAY:
+        add(f"<dt>״{esc(say)}״</dt><dd>{esc(does)}</dd>")
+    add("</dl></div>")
 
     page = (
         "<!DOCTYPE html><html lang='he' dir='rtl'><head><meta charset='utf-8'>"

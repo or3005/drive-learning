@@ -8,3 +8,4 @@ app/local.properties
 # Secrets
 *.keystore
 .env
+__pycache__/

@@ -15,6 +15,11 @@ LEVELS = ["recognize", "why", "apply", "explain"]
 STATUSES = {"planned", "draft", "ready"}
 WORDS_PER_MINUTE = 140  # rough speaking rate for Hebrew TTS
 UNSPEAKABLE = re.compile(r"=>|[{}<>\[\]`]|https?:")
+WORD = r"[A-Za-z][A-Za-z0-9#+]*(?:\.[A-Za-z0-9#+]+)*"
+LATIN_TERM = re.compile(WORD + r"(?:\s+(?=[A-Z])" + WORD + r")*")
+# Words the learner already knows well; everything else in Latin script should be in `terms`
+KNOWN_WORDS = {"react", "javascript", "typescript", "c#", "asp.net", ".net", "node", "node.js",
+               "google", "nestjs", "express", "fastify", "net"}
 
 
 class Report:
@@ -166,6 +171,29 @@ def check_unit(path, listed, concept_ids, rep):
     minutes = words / WORDS_PER_MINUTE
     if minutes < 6:
         rep.warn(where, f"main explanation is short (~{minutes:.1f} min)")
+    main_ids = {seg.get("id") for seg in main}
+
+    terms = unit.get("terms", [])
+    if not terms:
+        rep.err(where, "terms (glossary) is empty")
+    term_names = set()
+    for t in terms:
+        name = t.get("term", "")
+        if name.lower() in term_names:
+            rep.err(where, f"duplicate term {name}")
+        term_names.add(name.lower())
+        check_text(f"{where} term {name}", t.get("definition"), rep)
+    known = term_names | KNOWN_WORDS
+    covered_words = {w for name in term_names for w in name.split()}
+    undefined = set()
+    for seg in main:
+        for m in LATIN_TERM.finditer(seg.get("text", "")):
+            phrase = m.group(0).strip(".").lower()
+            if phrase in known or all(w in known or w in covered_words for w in phrase.split()):
+                continue
+            undefined.add(m.group(0).strip("."))
+    if undefined:
+        rep.warn(where, "terms in the explanation without a glossary entry: " + ", ".join(sorted(undefined)))
 
     mcs = {}
     for mc in unit.get("misconceptions", []):
@@ -195,6 +223,12 @@ def check_unit(path, listed, concept_ids, rep):
         last_level = LEVELS.index(level)
         if q.get("concept") not in unit_concepts:
             rep.err(qw, f"concept {q.get('concept')} is not one of the unit's concepts")
+        segs = q.get("segments", [])
+        if not segs:
+            rep.err(qw, "segments is empty (which part of the lesson teaches this?)")
+        for s in segs:
+            if s not in main_ids:
+                rep.err(qw, f"segment {s} is not a main explanation segment")
         check_text(f"{qw}.prompt", q.get("prompt"), rep)
         check_text(f"{qw}.hint", q.get("hint"), rep)
         if level == "explain":

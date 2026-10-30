@@ -35,6 +35,9 @@ def render(path: Path) -> Path:
             out += [f"- {p}" for p in q["rubric"]]
         out += ["", f"> רמז: {q['hint']}", ""]
 
+    out += ["## מילון מונחים", ""]
+    out += [f"- **{t['term']}**: {t['definition']}" for t in unit.get("terms", [])]
+    out += [""]
     out += ["## הסברים לטעויות נפוצות", ""]
     for m in unit["misconceptions"]:
         out += [f"**הטעות:** {m['belief']}", "", m["remedial"], ""]
