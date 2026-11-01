@@ -92,7 +92,8 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
 ```
 
 Rules:
-- Exactly one `correct: true` option per multiple-choice question.
+- Exactly one `correct: true` option per multiple-choice question. The app shuffles the options every
+  time it reads a question, so the position in the file doesn't matter.
 - Every wrong option has either `misconception` (must exist in the unit) or `feedback`.
 - `explain` questions have no options; they have `rubric` and `minPoints` and are graded later
   (Gemini after the drive, Claude at night).

@@ -278,7 +278,7 @@ class LearningController(private val app: Application) {
                 } else {
                     buildString {
                         append(q.prompt).append(' ')
-                        q.options.forEachIndexed { i, o -> append("תשובה ${HebrewNumbers.word(i + 1)}: ${o.text} ") }
+                        step.displayedOptions.forEachIndexed { i, o -> append("תשובה ${HebrewNumbers.word(i + 1)}: $o ") }
                         append("מה התשובה?")
                     }
                 }
@@ -439,7 +439,7 @@ class LearningController(private val app: Application) {
                     options = emptyList(), awaiting = null)
                 is Step.Ask -> s.copy(mode = mode, unitTitle = unitTitle,
                     label = if (step.question.isExplain) "הסבר במילים שלך" else "שאלה",
-                    prompt = step.question.prompt, options = step.question.options.map { it.text },
+                    prompt = step.question.prompt, options = step.displayedOptions,
                     awaiting = if (step.question.isExplain) ListenContext.EXPLAIN else ListenContext.ANSWER)
                 is Step.AskConfidence -> s.copy(mode = mode, unitTitle = unitTitle, label = "כמה אתה בטוח?",
                     prompt = "בטוח, או לא בטוח?", options = emptyList(), awaiting = ListenContext.CONFIDENCE)

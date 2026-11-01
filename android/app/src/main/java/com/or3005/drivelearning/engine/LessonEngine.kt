@@ -4,6 +4,7 @@ import com.or3005.drivelearning.content.LearningUnit
 import com.or3005.drivelearning.content.Question
 import com.or3005.drivelearning.content.Term
 import java.time.LocalDate
+import kotlin.random.Random
 
 /** One thing the player does next. The controller speaks Say steps and listens on Ask steps. */
 sealed interface Step {
@@ -16,8 +17,23 @@ sealed interface Step {
         val label: String = "",
     ) : Step
 
-    data class Ask(override val unitId: String, val question: Question, val repeatOk: Boolean = false) : Step
-    data class AskConfidence(override val unitId: String, val question: Question, val choice: Int) : Step
+    /** [order] is the shuffled order of the options as read out: order[0] is the option read as ״one״. */
+    data class Ask(
+        override val unitId: String,
+        val question: Question,
+        val repeatOk: Boolean = false,
+        val order: List<Int> = question.options.indices.toList(),
+    ) : Step {
+        val displayedOptions: List<String> get() = order.map { question.options[it].text }
+    }
+
+    /** [choice] is the 1-based index in the question's original option list. */
+    data class AskConfidence(
+        override val unitId: String,
+        val question: Question,
+        val choice: Int,
+        val order: List<Int>,
+    ) : Step
     data class AskReplay(override val unitId: String, val question: Question) : Step
     data class UnitDone(override val unitId: String) : Step
     data object End : Step {
@@ -38,6 +54,7 @@ class LessonEngine(
     private val store: ProgressStore,
     private val today: LocalDate,
     private val now: () -> Long = { System.currentTimeMillis() },
+    private val random: Random = Random.Default,
 ) {
     var progress: ProgressState = store.load()
         private set
@@ -82,12 +99,12 @@ class LessonEngine(
 
     // ---- answers ----------------------------------------------------------------------------
 
-    /** A multiple-choice answer, 1-based. */
+    /** A multiple-choice answer: the 1-based number of the option as it was read out. */
     fun answer(choice: Int): Boolean {
         val ask = current as? Step.Ask ?: return false
         val q = ask.question
         if (q.isExplain || choice !in 1..q.options.size) return false
-        queue.addFirst(Step.AskConfidence(ask.unitId, q, choice))
+        queue.addFirst(Step.AskConfidence(ask.unitId, q, ask.order[choice - 1] + 1, ask.order))
         advance()
         return true
     }
@@ -119,7 +136,7 @@ class LessonEngine(
             val right = q.options.indexOfFirst { it.correct }
             if (right >= 0) {
                 follow += Step.Say(
-                    "התשובה הנכונה היא ${HebrewNumbers.word(right + 1)}: ${q.options[right].text}",
+                    "התשובה הנכונה היא ${HebrewNumbers.word(step.order.indexOf(right) + 1)}: ${q.options[right].text}",
                     step.unitId, label = "התשובה הנכונה",
                 )
             }
@@ -138,7 +155,7 @@ class LessonEngine(
         if (yes) follow += segmentSteps(step.unitId, step.question.segments)
         alternativeQuestion(step.unitId, step.question)?.let { alt ->
             follow += Step.Say("עכשיו שאלה נוספת על אותו נושא.", step.unitId)
-            follow += Step.Ask(step.unitId, alt)
+            follow += ask(step.unitId, alt)
         }
         queue.addAll(0, follow)
         advance()
@@ -262,7 +279,7 @@ class LessonEngine(
         val review = reviewQuestions(max = 6)
         if (review.isNotEmpty()) {
             queue += Step.Say("לפני שממשיכים, חזרה קצרה על דברים מנסיעות קודמות.")
-            review.forEach { (unitId, q) -> queue += Step.Ask(unitId, q, repeatOk = true) }
+            review.forEach { (unitId, q) -> queue += ask(unitId, q, repeatOk = true) }
         }
         val remaining = units.filter { it.id !in progress.completedUnits }
         if (remaining.isEmpty()) {
@@ -277,19 +294,37 @@ class LessonEngine(
     }
 
     private fun addUnit(unit: LearningUnit) {
+        val earlier = progress.attempts.filter { it.unitId == unit.id }
+        if (earlier.isNotEmpty()) {
+            // Started on an earlier drive: a short reminder, then only the questions that are left.
+            val solid = earlier.filter { it.correct && it.sure }.map { it.questionId }.toSet()
+            queue += Step.Say(
+                "ממשיכים מאיפה שעצרנו, ביחידה ${unitNumber(unit.id)}: ${unit.title}. קודם תזכורת קצרה. " +
+                    "אם תרצה לשמוע את כל ההסבר מההתחלה, תגיד חזרה על יחידה ${unitNumber(unit.id)}.",
+                unit.id, label = "המשך",
+            )
+            if (unit.recap.isNotBlank()) queue += Step.Say(unit.recap, unit.id, label = "תזכורת")
+            unit.questions.filter { it.id !in solid }.forEach { queue += ask(unit.id, it) }
+            queue += Step.UnitDone(unit.id)
+            return
+        }
         queue += Step.Say("יחידה ${unitNumber(unit.id)}: ${unit.title}.", unit.id, label = "פתיחה")
         unit.explanations.main.indices.forEach { queue += segmentStep(unit, it) }
-        unit.questions.forEach { queue += Step.Ask(unit.id, it) }
+        unit.questions.forEach { queue += ask(unit.id, it) }
         if (unit.recap.isNotBlank()) queue += Step.Say(unit.recap, unit.id, label = "סיכום")
         queue += Step.UnitDone(unit.id)
     }
+
+    /** A question step with the options in a fresh random order, so the right answer's position means nothing. */
+    private fun ask(unitId: String, q: Question, repeatOk: Boolean = false): Step.Ask =
+        Step.Ask(unitId, q, repeatOk, q.options.indices.shuffled(random))
 
     /** Replays a finished unit from the start. */
     fun replayUnit(number: Int): Boolean {
         val unit = units.getOrNull(number - 1) ?: return false
         val steps = mutableListOf<Step>(Step.Say("חוזרים ליחידה $number: ${unit.title}.", unit.id, label = "פתיחה"))
         unit.explanations.main.indices.forEach { steps += segmentStep(unit, it) }
-        unit.questions.filter { !it.isExplain }.forEach { steps += Step.Ask(unit.id, it, repeatOk = true) }
+        unit.questions.filter { !it.isExplain }.forEach { steps += ask(unit.id, it, repeatOk = true) }
         if (unit.recap.isNotBlank()) steps += Step.Say(unit.recap, unit.id, label = "סיכום")
         queue.addAll(0, steps)
         advance()
@@ -317,7 +352,7 @@ class LessonEngine(
         repeat(2) {
             val (uid, q) = retryLater.removeFirstOrNull() ?: return@repeat
             if (retries.isEmpty()) retries += Step.Say("בוא נחזור לשאלה שהייתה קשה קודם.", uid, label = "חזרה")
-            retries += Step.Ask(uid, q, repeatOk = true)
+            retries += ask(uid, q, repeatOk = true)
         }
         queue.addAll(0, retries)
     }
