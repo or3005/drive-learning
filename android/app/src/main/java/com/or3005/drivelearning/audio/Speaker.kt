@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import com.or3005.drivelearning.engine.Pronunciation
 import com.or3005.drivelearning.engine.Runs
 import com.or3005.drivelearning.engine.Sentences
 import java.util.Locale
@@ -28,6 +29,7 @@ class Speaker(context: Context, private val onReady: (hebrewAvailable: Boolean) 
     /** Read English terms with an English voice. Off by default: the Hebrew voice usually copes. */
     var englishVoiceForTerms = false
     var rate = 1.0f
+    var pronunciation: Pronunciation = Pronunciation.NONE
 
     private val tts: TextToSpeech = TextToSpeech(
         context.applicationContext,
@@ -85,7 +87,7 @@ class Speaker(context: Context, private val onReady: (hebrewAvailable: Boolean) 
             val pieces = if (englishVoiceForTerms && englishAvailable && hebrewAvailable) {
                 Runs.split(sentences[i])
             } else {
-                listOf(com.or3005.drivelearning.engine.Run(sentences[i], latin = false))
+                listOf(com.or3005.drivelearning.engine.Run(pronunciation.apply(sentences[i]), latin = false))
             }
             pieces.forEachIndexed { j, piece ->
                 if (englishVoiceForTerms) tts.setLanguage(if (piece.latin) Locale.US else HEBREW)

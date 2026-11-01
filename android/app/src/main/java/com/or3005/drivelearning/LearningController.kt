@@ -5,6 +5,8 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.or3005.drivelearning.audio.Beeper
 import com.or3005.drivelearning.audio.Listener
@@ -16,8 +18,11 @@ import com.or3005.drivelearning.engine.FileProgressStore
 import com.or3005.drivelearning.engine.HebrewNumbers
 import com.or3005.drivelearning.engine.LessonEngine
 import com.or3005.drivelearning.engine.ListenContext
+import com.or3005.drivelearning.engine.Sentences
 import com.or3005.drivelearning.engine.Step
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -27,7 +32,7 @@ import java.time.LocalDate
 
 /**
  * Runs a drive: speaks the engine's steps, listens for answers and commands, and publishes a
- * [UiState] for the phone screen and the car screen. Everything runs on the main thread.
+ * [UiState] for the phone screen and the car. Everything runs on the main thread.
  */
 class LearningController(private val app: Application) {
 
@@ -49,14 +54,19 @@ class LearningController(private val app: Application) {
         val totalUnits: Int = 0,
         val masteredConcepts: Int = 0,
         val englishVoiceForTerms: Boolean = false,
+        val uploadConfigured: Boolean = false,
+        val lastUpload: String = "",
     )
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
 
+    private val main = Handler(Looper.getMainLooper())
     private val scope = MainScope()
     private val repo = ContentRepository(app)
-    private val store = FileProgressStore(File(app.filesDir, "progress.json"))
+    private val progressFile = File(app.filesDir, "progress.json")
+    private val store = FileProgressStore(progressFile)
+    private val uploader = ProgressUploader(app)
     private val listener = Listener(app)
     private val speaker = Speaker(app) { hebrew ->
         _state.update { it.copy(voiceReady = true, hebrewVoice = hebrew, recognizerReady = listener.available) }
@@ -64,14 +74,17 @@ class LearningController(private val app: Application) {
 
     private var engine: LessonEngine? = null
 
-    /** Index of the next sentence to speak in the current Say step, for pause, resume and repeat. */
+    /** Index of the sentence being spoken in the current Say step, for pause, resume and seeking. */
     private var sentence = 0
     private var resumeTarget: Step.Say? = null
     private var resumeSentence = 0
     private var listenTries = 0
+    private var uploadJob: Job? = null
 
+    // Audio focus: pause while Waze or a phone call talks, continue when it's done.
     private val audioManager = app.getSystemService(AudioManager::class.java)
-    private var pausedByFocusLoss = false
+    private var pausedByInterruption = false
+    private var listeningWhenInterrupted: ListenContext? = null
     private val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
         .setAudioAttributes(
             AudioAttributes.Builder()
@@ -79,16 +92,19 @@ class LearningController(private val app: Application) {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build(),
         )
-        .setOnAudioFocusChangeListener { change ->
-            android.os.Handler(android.os.Looper.getMainLooper()).post { onFocusChange(change) }
-        }
+        // Speech shouldn't be ducked under navigation prompts. Ask the system to tell us instead,
+        // and pause, like a podcast app does.
+        .setWillPauseWhenDucked(true)
+        .setOnAudioFocusChangeListener { change -> main.post { onFocusChange(change) } }
         .build()
 
     init {
+        speaker.pronunciation = repo.loadPronunciation()
         refreshCounts()
+        refreshUploadState()
     }
 
-    // ---- public API used by the phone and car screens ----------------------------------------
+    // ---- public API used by the phone screen and the car ------------------------------------------
 
     fun start() {
         val loaded = runCatching { repo.load() }.getOrElse {
@@ -109,6 +125,7 @@ class LearningController(private val app: Application) {
         resumeTarget = engine?.current as? Step.Say
         resumeSentence = sentence
         _state.update { it.copy(mode = Mode.PAUSED, awaiting = null) }
+        uploadNow()
     }
 
     fun resume() {
@@ -125,6 +142,7 @@ class LearningController(private val app: Application) {
         stopService()
         _state.update { it.copy(mode = Mode.IDLE, awaiting = null, label = "", prompt = "", options = emptyList()) }
         refreshCounts()
+        uploadNow()
     }
 
     /** Mic button: listen for an answer if one is expected, otherwise for a command. */
@@ -151,13 +169,16 @@ class LearningController(private val app: Application) {
         listenTries = 0
         when (command) {
             is Command.Answer -> if (!e.answer(command.n)) return retryListen()
-            is Command.Sure -> if (!e.confidence(command.sure)) return retryListen()
+            is Command.Sure -> if (e.confidence(command.sure)) uploadSoon() else return retryListen()
             is Command.YesNo -> if (!e.replayAnswer(command.yes)) return retryListen()
-            is Command.Explain -> e.explain(command.transcript)
-            is Command.Replay -> if (interruptedSay != null) {
-                resumeAt(interruptedSay, (at - 2).coerceAtLeast(0))
+            is Command.Explain -> {
+                e.explain(command.transcript)
+                uploadSoon()
             }
+            is Command.Replay -> if (interruptedSay != null) resumeAt(interruptedSay, (at - 2).coerceAtLeast(0))
             is Command.RestartSegment -> if (interruptedSay != null) resumeAt(interruptedSay, 0)
+            is Command.Rewind -> rewind(e, interruptedSay, at)
+            is Command.FastForward -> fastForward(e, interruptedSay, at)
             is Command.Back -> e.back()
             is Command.Forward -> e.skip()
             is Command.Simpler -> insert(e, e.simplerSteps(), interruptedSay, at, resume = true)
@@ -170,11 +191,13 @@ class LearningController(private val app: Application) {
                 resumeTarget = interruptedSay
                 resumeSentence = at
                 _state.update { it.copy(mode = Mode.PAUSED, awaiting = null) }
+                uploadNow()
                 return
             }
             is Command.Resume -> if (interruptedSay != null) resumeAt(interruptedSay, at)
             is Command.LiveQuestion -> {
                 e.saveLiveQuestion(command.text)
+                uploadSoon()
                 insert(
                     e,
                     listOf(Step.Say("שמרתי את השאלה. אענה עליה בנסיעה הבאה.", e.current.unitId, label = "שאלה")),
@@ -198,6 +221,7 @@ class LearningController(private val app: Application) {
         scope.launch {
             repo.sync()
                 .onSuccess { n ->
+                    speaker.pronunciation = repo.loadPronunciation()
                     message("התוכן עודכן: $n יחידות.")
                     refreshCounts()
                 }
@@ -205,7 +229,31 @@ class LearningController(private val app: Application) {
         }
     }
 
-    // ---- the player loop -----------------------------------------------------------------------
+    fun setGithubToken(token: String) {
+        uploader.token = token
+        refreshUploadState()
+        message(if (token.isBlank()) "הטוקן נמחק." else "הטוקן נשמר. שולח התקדמות…")
+        if (token.isNotBlank()) uploadNow(report = true)
+    }
+
+    fun uploadNow(report: Boolean = false) {
+        uploadJob?.cancel()
+        if (!uploader.configured) {
+            if (report) message("כדי לשלוח התקדמות צריך קודם לשמור טוקן של GitHub.")
+            return
+        }
+        uploadJob = scope.launch {
+            uploader.upload(progressFile)
+                .onSuccess { if (report) message("ההתקדמות נשלחה.") }
+                .onFailure { if (report) message("השליחה נכשלה: ${it.message}") }
+            refreshUploadState()
+        }
+    }
+
+    /** The progress file as text, for the share button. */
+    fun progressText(): String = runCatching { progressFile.readText() }.getOrDefault("{}")
+
+    // ---- the player loop ---------------------------------------------------------------------------
 
     private fun run() {
         val e = engine ?: return
@@ -252,9 +300,9 @@ class LearningController(private val app: Application) {
             }
             Step.End -> {
                 abandonFocus()
-                stopService()
                 _state.update { it.copy(mode = Mode.FINISHED, awaiting = null, label = "סוף", prompt = "", options = emptyList()) }
                 refreshCounts()
+                uploadNow()
             }
         }
     }
@@ -263,13 +311,18 @@ class LearningController(private val app: Application) {
         _state.update { it.copy(mode = Mode.LISTENING, awaiting = ctx.takeIf { c -> c != ListenContext.COMMAND } ?: it.awaiting) }
         Beeper.listen()
         // Give the beep a moment so it isn't recorded as speech.
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            listener.listen(long = ctx == ListenContext.EXPLAIN) { results -> heard(results, ctx) }
+        main.postDelayed({
+            listener.listen(long = ctx == ListenContext.EXPLAIN) { results, error -> heard(results, error, ctx) }
         }, 250)
     }
 
-    private fun heard(results: List<String>, ctx: ListenContext) {
+    private fun heard(results: List<String>, error: Int?, ctx: ListenContext) {
         val e = engine ?: return
+        val problem = error?.let { Listener.describe(it) }
+        if (problem != null) {
+            message("🎤 $problem")
+            e.logDiagnostic("microphone: $problem")
+        }
         _state.update { it.copy(heard = results.firstOrNull().orEmpty()) }
         if (ctx == ListenContext.EXPLAIN) {
             val text = results.firstOrNull().orEmpty()
@@ -286,6 +339,12 @@ class LearningController(private val app: Application) {
             // Nothing understood: carry on where we stopped.
             (e.current as? Step.Say)?.let { resumeAt(it, resumeSentence) }
             run()
+            return
+        }
+        if (problem != null) {
+            // The microphone itself failed. Retrying won't help; wait for a tap.
+            _state.update { it.copy(mode = Mode.WAITING, awaiting = ctx) }
+            speaker.speak("המיקרופון לא זמין כרגע. אפשר לענות בלחיצה על המסך.") {}
             return
         }
         retryListen()
@@ -311,7 +370,42 @@ class LearningController(private val app: Application) {
         speaker.speak(help) { listen(ctx) }
     }
 
-    // ---- helpers -----------------------------------------------------------------------------------
+    // ---- seeking: about 15 seconds of speech ------------------------------------------------------
+
+    private fun rewind(e: LessonEngine, say: Step.Say?, at: Int) {
+        if (say == null) return // in a question: run() reads it again
+        val words = Sentences.split(say.text).map { it.split(' ').size }
+        if (words.isEmpty()) return
+        var i = at.coerceIn(0, words.lastIndex)
+        if (i == 0) {
+            // At the start of a segment: go to the previous segment, if there is one.
+            if (e.back() === say) resumeAt(say, 0)
+            return
+        }
+        var skipped = 0
+        while (i > 0 && skipped < SEEK_WORDS) {
+            i--
+            skipped += words[i]
+        }
+        resumeAt(say, i)
+    }
+
+    private fun fastForward(e: LessonEngine, say: Step.Say?, at: Int) {
+        if (say == null) {
+            e.skip()
+            return
+        }
+        val words = Sentences.split(say.text).map { it.split(' ').size }
+        var i = at.coerceAtLeast(0)
+        var skipped = 0
+        while (i < words.size && skipped < SEEK_WORDS) {
+            skipped += words[i]
+            i++
+        }
+        if (i >= words.size) e.skip() else resumeAt(say, i)
+    }
+
+    // ---- helpers ---------------------------------------------------------------------------------------
 
     private fun insert(e: LessonEngine, steps: List<Step>, interrupted: Step.Say?, at: Int, resume: Boolean) {
         if (interrupted != null && resume) resumeAt(interrupted, at)
@@ -360,6 +454,20 @@ class LearningController(private val app: Application) {
         _state.update { it.copy(message = text) }
     }
 
+    private fun refreshUploadState() {
+        _state.update { it.copy(uploadConfigured = uploader.configured, lastUpload = uploader.lastUpload) }
+    }
+
+    private fun uploadSoon() {
+        if (!uploader.configured) return
+        uploadJob?.cancel()
+        uploadJob = scope.launch {
+            delay(30_000)
+            uploader.upload(progressFile)
+            refreshUploadState()
+        }
+    }
+
     private fun refreshCounts() {
         val e = engine
         if (e != null) {
@@ -379,8 +487,10 @@ class LearningController(private val app: Application) {
         }
     }
 
+    // ---- audio focus ---------------------------------------------------------------------------------
+
     private fun requestFocus() {
-        pausedByFocusLoss = false
+        pausedByInterruption = false
         audioManager?.requestAudioFocus(focusRequest)
     }
 
@@ -388,28 +498,45 @@ class LearningController(private val app: Application) {
         audioManager?.abandonAudioFocusRequest(focusRequest)
     }
 
-    /** Pause for phone calls and navigation-heavy moments; continue when they end. */
     private fun onFocusChange(change: Int) {
+        val s = _state.value
+        val active = s.mode == Mode.SPEAKING || s.mode == Mode.LISTENING
         when (change) {
-            AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                val active = _state.value.mode == Mode.SPEAKING || _state.value.mode == Mode.LISTENING
-                if (active) {
-                    pause()
-                    pausedByFocusLoss = change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
-                }
+            // Waze prompts and phone calls: pause now, continue when they finish.
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (active) {
+                listeningWhenInterrupted = if (s.mode == Mode.LISTENING) s.awaiting ?: ListenContext.COMMAND else null
+                pause()
+                pausedByInterruption = true
             }
-            AudioManager.AUDIOFOCUS_GAIN -> if (pausedByFocusLoss) {
-                pausedByFocusLoss = false
-                resume()
+            // Another app started playing: pause and stay paused.
+            AudioManager.AUDIOFOCUS_LOSS -> if (active) {
+                pause()
+                pausedByInterruption = false
+            }
+            AudioManager.AUDIOFOCUS_GAIN -> if (pausedByInterruption) {
+                pausedByInterruption = false
+                val ctx = listeningWhenInterrupted
+                listeningWhenInterrupted = null
+                if (ctx != null && ctx != ListenContext.COMMAND && engine?.let { contextFor(it.current) } == ctx) {
+                    listen(ctx)
+                } else {
+                    resume()
+                }
             }
         }
     }
 
     private fun startService() {
+        if (PlaybackService.running) return
         runCatching { ContextCompat.startForegroundService(app, Intent(app, PlaybackService::class.java)) }
     }
 
     private fun stopService() {
         runCatching { app.stopService(Intent(app, PlaybackService::class.java)) }
+    }
+
+    companion object {
+        /** About 15 seconds of Hebrew speech. */
+        private const val SEEK_WORDS = 32
     }
 }

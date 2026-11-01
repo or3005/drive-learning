@@ -11,6 +11,10 @@ sealed interface Command {
     data class ReplayUnit(val number: Int) : Command
     data object Replay : Command
     data object RestartSegment : Command
+    /** About 15 seconds back or forward in what is being read. */
+    data object Rewind : Command
+    data object FastForward : Command
+    /** Previous lesson segment. */
     data object Back : Command
     data object Forward : Command
     data object Simpler : Command
@@ -86,8 +90,10 @@ object CommandParser {
             text.contains("תסביר שוב") -> Command.Simpler
         tokens.contains("תעמיק") || text.contains("לעומק") -> Command.Deeper
         tokens.contains("רמז") -> Command.Hint
-        tokens.contains("אחורה") || tokens.contains("הקודם") -> Command.Back
-        tokens.contains("קדימה") || tokens.contains("דלג") || tokens.contains("תדלג") || tokens.contains("הבא") -> Command.Forward
+        tokens.contains("אחורה") -> Command.Rewind
+        tokens.contains("קדימה") -> Command.FastForward
+        tokens.contains("הקודם") -> Command.Back
+        tokens.contains("דלג") || tokens.contains("תדלג") || tokens.contains("הבא") -> Command.Forward
         tokens.contains("עצור") || tokens.contains("הפסק") || tokens.contains("חכה") || tokens.contains("תעצור") -> Command.Pause
         tokens.contains("סיכום") -> Command.Recap
         tokens.contains("תחזור") || tokens.contains("שוב") || text.contains("עוד פעם") -> Command.Replay

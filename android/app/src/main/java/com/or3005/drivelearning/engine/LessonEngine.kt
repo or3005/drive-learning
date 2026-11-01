@@ -175,6 +175,11 @@ class LessonEngine(
         store.save(progress)
     }
 
+    fun logDiagnostic(text: String) {
+        progress = progress.copy(diagnostics = (progress.diagnostics + "${today}: $text").takeLast(50))
+        store.save(progress)
+    }
+
     // ---- navigation commands --------------------------------------------------------------
 
     /** Plays the previous segment of the current unit, then the current one again. */

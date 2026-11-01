@@ -10,13 +10,17 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.text.InputType
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.or3005.drivelearning.PlaybackService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -47,9 +51,13 @@ class MainActivity : ComponentActivity() {
     private lateinit var progressText: TextView
     private lateinit var setupText: TextView
     private lateinit var englishSwitch: Switch
+    private lateinit var tokenField: EditText
+    private lateinit var uploadText: TextView
     private val optionButtons = mutableListOf<Button>()
 
-    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
+    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        startStandbyService()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +68,31 @@ class MainActivity : ComponentActivity() {
                 controller.state.collect { render(it) }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        startStandbyService()
+    }
+
+    /**
+     * Starting the service while this screen is visible is what allows voice answers later, when
+     * the lesson runs from the car with the phone locked.
+     */
+    private fun startStandbyService() {
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!granted || PlaybackService.running) return
+        runCatching { ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java)) }
+    }
+
+    private fun shareProgress() {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Drive Learning progress")
+            putExtra(Intent.EXTRA_TEXT, controller.progressText())
+        }
+        runCatching { startActivity(Intent.createChooser(send, "שליחת התקדמות")) }
     }
 
     private fun askPermissions() {
@@ -103,10 +136,16 @@ class MainActivity : ComponentActivity() {
         val setup = mutableListOf<String>()
         if (s.voiceReady && !s.hebrewVoice) setup += "⚠️ אין קול עברי. התקן את Google Speech Services והורד עברית, ואז הפעל מחדש."
         if (s.voiceReady && !s.recognizerReady) setup += "⚠️ זיהוי דיבור לא זמין. אפשר לענות בלחיצות."
+        if (!PlaybackService.microphoneReady) setup += "🎤 כדי לענות בקול ברכב, פתח את האפליקציה בטלפון לפני הנסיעה."
         if (s.message.isNotBlank()) setup += s.message
         setupText.text = setup.joinToString("\n")
         setupText.visibility = if (setup.isEmpty()) View.GONE else View.VISIBLE
         englishSwitch.isChecked = s.englishVoiceForTerms
+        uploadText.text = when {
+            !s.uploadConfigured -> "שליחה אוטומטית ל-GitHub: כבויה (אין טוקן)"
+            s.lastUpload.isBlank() -> "שליחה אוטומטית ל-GitHub: פעילה, עוד לא נשלח"
+            else -> "שליחה אוטומטית ל-GitHub: פעילה · נשלח לאחרונה ${s.lastUpload}"
+        }
 
         val active = s.mode == Mode.SPEAKING || s.mode == Mode.LISTENING
         if (active) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -158,8 +197,8 @@ class MainActivity : ComponentActivity() {
         }.also { it.textSize = 20f }
         root.addView(playButton, top(20))
         root.addView(horizontal(
-            button("↺ תחזור") { controller.onCommand(Command.Replay) },
-            button("⏮ אחורה") { controller.onCommand(Command.Back) },
+            button("⏪ 15 שניות") { controller.onCommand(Command.Rewind) },
+            button("⏩ 15 שניות") { controller.onCommand(Command.FastForward) },
             button("⏭ דלג") { controller.onCommand(Command.Forward) },
         ))
         root.addView(horizontal(
@@ -182,6 +221,23 @@ class MainActivity : ComponentActivity() {
         root.addView(horizontal(
             button("⬇ עדכן תוכן") { controller.sync() },
             button("הגדרות הקראה") { openTtsSettings() },
+        ))
+
+        root.addView(text("התקדמות", 18f, bold = true), top(28))
+        uploadText = text("", 13f, color = GREY).also { root.addView(it) }
+        tokenField = EditText(this).apply {
+            hint = "טוקן של GitHub (Fine-grained)"
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            isSingleLine = true
+        }
+        root.addView(tokenField, top(4))
+        root.addView(horizontal(
+            button("💾 שמור טוקן") {
+                controller.setGithubToken(tokenField.text.toString())
+                tokenField.setText("")
+            },
+            button("⬆ שלח עכשיו") { controller.uploadNow(report = true) },
+            button("📤 שתף") { shareProgress() },
         ))
         root.addView(
             text(

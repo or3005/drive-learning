@@ -42,6 +42,8 @@ data class ProgressState(
     val completedUnits: Set<String> = emptySet(),
     val explainAnswers: List<ExplainAnswer> = emptyList(),
     val liveQuestions: List<LiveQuestion> = emptyList(),
+    /** Recent technical problems (microphone errors and so on), so they can be fixed remotely. */
+    val diagnostics: List<String> = emptyList(),
 )
 
 interface ProgressStore {

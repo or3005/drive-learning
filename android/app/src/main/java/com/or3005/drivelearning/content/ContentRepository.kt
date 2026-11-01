@@ -1,6 +1,7 @@
 package com.or3005.drivelearning.content
 
 import android.content.Context
+import com.or3005.drivelearning.engine.Pronunciation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -29,6 +30,10 @@ class ContentRepository(private val context: Context) {
         return Loaded(course, units)
     }
 
+    /** How the voice should say English terms and tricky Hebrew words. */
+    fun loadPronunciation(): Pronunciation =
+        runCatching { Pronunciation.parse(read("pronunciation.json")) }.getOrDefault(Pronunciation.NONE)
+
     private fun read(path: String): String {
         val synced = File(syncedRoot, path)
         if (synced.exists()) return synced.readText()
@@ -48,6 +53,11 @@ class ContentRepository(private val context: Context) {
             val unitsDir = File(syncedRoot, "courses/$courseId/units").apply { mkdirs() }
             texts.forEach { (id, text) -> File(unitsDir, "$id.json").writeText(text) }
             File(syncedRoot, "courses/$courseId/course.json").writeText(courseText)
+            runCatching {
+                val pronunciation = download("content/pronunciation.json")
+                Pronunciation.parse(pronunciation) // only save it if it parses
+                File(syncedRoot, "pronunciation.json").writeText(pronunciation)
+            }
             texts.size
         }
     }

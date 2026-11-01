@@ -97,9 +97,10 @@ class LessonMediaService : MediaLibraryService() {
             emptyList()
         } else {
             listOf(
-                Button(REPLAY, "תחזור על זה", R.drawable.ic_replay),
                 Button(SIMPLER, "תסביר אחרת", R.drawable.ic_bubble),
+                Button(SKIP, "דלג לחלק הבא", R.drawable.ic_skip),
                 Button(VOICE, "פקודה קולית", R.drawable.ic_mic),
+                Button(REPLAY, "תחזור על זה", R.drawable.ic_replay),
             )
         }
     }
@@ -114,6 +115,7 @@ class LessonMediaService : MediaLibraryService() {
             SIMPLER -> learning.onCommand(Command.Simpler)
             HINT -> learning.onCommand(Command.Hint)
             VOICE -> learning.listenNow()
+            SKIP -> learning.onCommand(Command.Forward)
             else -> action.removePrefix("answer").toIntOrNull()?.let { learning.onCommand(Command.Answer(it)) }
         }
     }
@@ -212,7 +214,8 @@ class LessonMediaService : MediaLibraryService() {
         private const val SIMPLER = "simpler"
         private const val HINT = "hint"
         private const val VOICE = "voice"
-        private val ALL_ACTIONS = listOf(SURE, UNSURE, YES, NO, REPLAY, SIMPLER, HINT, VOICE) +
+        private const val SKIP = "skip"
+        private val ALL_ACTIONS = listOf(SURE, UNSURE, YES, NO, REPLAY, SIMPLER, HINT, VOICE, SKIP) +
             (1..4).map { "answer$it" }
         private val ANSWER_ICONS = listOf(R.drawable.ic_n1, R.drawable.ic_n2, R.drawable.ic_n3, R.drawable.ic_n4)
     }

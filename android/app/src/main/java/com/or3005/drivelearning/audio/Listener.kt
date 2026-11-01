@@ -24,13 +24,14 @@ class Listener(private val context: Context) {
 
     /**
      * Listens once. [long] allows a longer answer with pauses (explain-back questions).
-     * [onResult] gets the recognizer's candidate transcripts, empty on silence or error.
+     * [onResult] gets the recognizer's candidate transcripts, and the error code if it failed
+     * (null on success). Silence comes back as an empty list with an error code.
      */
     fun listen(
         long: Boolean,
         audio: ParcelFileDescriptor? = null,
         onEnd: () -> Unit = {},
-        onResult: (List<String>) -> Unit,
+        onResult: (results: List<String>, error: Int?) -> Unit,
     ) {
         cancel()
         val id = ++session
@@ -61,13 +62,13 @@ class Listener(private val context: Context) {
                 if (id != session) return
                 val list = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: arrayListOf()
                 finish()
-                onResult(list)
+                onResult(list, null)
             }
 
             override fun onError(error: Int) {
                 if (id != session) return
                 finish()
-                onResult(emptyList())
+                onResult(emptyList(), error)
             }
 
             override fun onReadyForSpeech(params: Bundle?) = Unit
@@ -79,6 +80,20 @@ class Listener(private val context: Context) {
             override fun onEvent(eventType: Int, params: Bundle?) = Unit
         })
         r.startListening(intent)
+    }
+
+    companion object {
+        /** Hebrew explanation of a SpeechRecognizer error code, or null when it just means silence. */
+        fun describe(error: Int): String? = when (error) {
+            SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> null
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "אין הרשאה למיקרופון (קוד 9)"
+            SpeechRecognizer.ERROR_AUDIO -> "המיקרופון לא זמין (קוד 3)"
+            SpeechRecognizer.ERROR_CLIENT -> "שגיאה פנימית בזיהוי הדיבור (קוד 5)"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "זיהוי הדיבור תפוס (קוד 8)"
+            SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "אין חיבור לרשת (קוד $error)"
+            SpeechRecognizer.ERROR_SERVER -> "שגיאת שרת בזיהוי הדיבור (קוד 4)"
+            else -> "שגיאה בזיהוי הדיבור (קוד $error)"
+        }
     }
 
     fun cancel() {

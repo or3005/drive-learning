@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 /**
  * Presents the lesson to Android Auto as a media player. Play and pause control the lesson,
  * the steering wheel's next and previous buttons skip forward and go back, and the "track"
- * title shows what is happening now. The playlist is always three items (back, now, skip) so
- * Android Auto always shows the skip buttons.
+ * title shows what is happening now. Next and previous (steering wheel or screen) move about 15
+ * seconds forward or back. The playlist is always three items so both buttons always show.
  */
 @UnstableApi
 class LessonPlayer(
@@ -74,9 +74,9 @@ class LessonPlayer(
             .setPlaybackState(Player.STATE_READY)
             .setPlaylist(
                 listOf(
-                    item("back", "⏮ אחורה", subtitle),
+                    item("back", "⏪ 15 שניות אחורה", subtitle),
                     item("now", title, subtitle),
-                    item("skip", "⏭ דלג", subtitle),
+                    item("skip", "⏩ 15 שניות קדימה", subtitle),
                 ),
             )
             .setCurrentMediaItemIndex(1)
@@ -110,8 +110,9 @@ class LessonPlayer(
 
     override fun handleSeek(mediaItemIndex: Int, positionMs: Long, seekCommand: Int): ListenableFuture<*> {
         when (seekCommand) {
-            Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> learning.onCommand(Command.Forward)
-            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> learning.onCommand(Command.Back)
+            // Steering wheel and screen next/previous: about 15 seconds forward or back.
+            Player.COMMAND_SEEK_TO_NEXT, Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> learning.onCommand(Command.FastForward)
+            Player.COMMAND_SEEK_TO_PREVIOUS, Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> learning.onCommand(Command.Rewind)
             else -> Unit
         }
         return Futures.immediateVoidFuture()
