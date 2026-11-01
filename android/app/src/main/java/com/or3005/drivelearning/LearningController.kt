@@ -2,11 +2,13 @@ package com.or3005.drivelearning
 
 import android.app.Application
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import androidx.core.content.ContextCompat
 import com.or3005.drivelearning.audio.Beeper
 import com.or3005.drivelearning.audio.Listener
 import com.or3005.drivelearning.audio.Speaker
-import com.or3005.drivelearning.car.CarMic
 import com.or3005.drivelearning.content.ContentRepository
 import com.or3005.drivelearning.engine.Command
 import com.or3005.drivelearning.engine.CommandParser
@@ -68,8 +70,19 @@ class LearningController(private val app: Application) {
     private var resumeSentence = 0
     private var listenTries = 0
 
-    /** Set by the car screen while Android Auto is connected. */
-    var carMic: CarMic? = null
+    private val audioManager = app.getSystemService(AudioManager::class.java)
+    private var pausedByFocusLoss = false
+    private val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build(),
+        )
+        .setOnAudioFocusChangeListener { change ->
+            android.os.Handler(android.os.Looper.getMainLooper()).post { onFocusChange(change) }
+        }
+        .build()
 
     init {
         refreshCounts()
@@ -84,6 +97,7 @@ class LearningController(private val app: Application) {
         }
         val e = LessonEngine(loaded.units, store, LocalDate.now())
         engine = e
+        requestFocus()
         startService()
         e.start()
         run()
@@ -100,11 +114,13 @@ class LearningController(private val app: Application) {
     fun resume() {
         val e = engine ?: return start()
         if (e.current is Step.End) return start()
+        requestFocus()
         run()
     }
 
     fun stop() {
         interrupt()
+        abandonFocus()
         engine = null
         stopService()
         _state.update { it.copy(mode = Mode.IDLE, awaiting = null, label = "", prompt = "", options = emptyList()) }
@@ -235,6 +251,7 @@ class LearningController(private val app: Application) {
                 run()
             }
             Step.End -> {
+                abandonFocus()
                 stopService()
                 _state.update { it.copy(mode = Mode.FINISHED, awaiting = null, label = "סוף", prompt = "", options = emptyList()) }
                 refreshCounts()
@@ -245,15 +262,9 @@ class LearningController(private val app: Application) {
     private fun listen(ctx: ListenContext) {
         _state.update { it.copy(mode = Mode.LISTENING, awaiting = ctx.takeIf { c -> c != ListenContext.COMMAND } ?: it.awaiting) }
         Beeper.listen()
-        val mic = carMic
-        val audio = mic?.open()
         // Give the beep a moment so it isn't recorded as speech.
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            listener.listen(
-                long = ctx == ListenContext.EXPLAIN,
-                audio = audio,
-                onEnd = { mic?.close() },
-            ) { results -> heard(results, ctx) }
+            listener.listen(long = ctx == ListenContext.EXPLAIN) { results -> heard(results, ctx) }
         }, 250)
     }
 
@@ -364,6 +375,32 @@ class LearningController(private val app: Application) {
             _state.update {
                 it.copy(completedUnits = progress.completedUnits.count { id -> loaded.units.any { u -> u.id == id } },
                     totalUnits = loaded.units.size, masteredConcepts = progress.concepts.count { c -> c.value.mastered })
+            }
+        }
+    }
+
+    private fun requestFocus() {
+        pausedByFocusLoss = false
+        audioManager?.requestAudioFocus(focusRequest)
+    }
+
+    private fun abandonFocus() {
+        audioManager?.abandonAudioFocusRequest(focusRequest)
+    }
+
+    /** Pause for phone calls and navigation-heavy moments; continue when they end. */
+    private fun onFocusChange(change: Int) {
+        when (change) {
+            AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                val active = _state.value.mode == Mode.SPEAKING || _state.value.mode == Mode.LISTENING
+                if (active) {
+                    pause()
+                    pausedByFocusLoss = change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
+                }
+            }
+            AudioManager.AUDIOFOCUS_GAIN -> if (pausedByFocusLoss) {
+                pausedByFocusLoss = false
+                resume()
             }
         }
     }

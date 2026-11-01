@@ -40,21 +40,19 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-        <!-- Android Auto entry point. Sideloaded apps need Unknown sources in Android Auto developer settings. -->
+        <!-- Android Auto entry point: a media app, so Android Auto lists it when Unknown sources is on. -->
         <service
-            android:name=".car.DriveCarAppService"
-            android:exported="true">
+            android:name=".car.LessonMediaService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
-                <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.IOT" />
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 
         <meta-data
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
-        <meta-data
-            android:name="androidx.car.app.minCarApiLevel"
-            android:value="1" />
     </application>
 </manifest>
