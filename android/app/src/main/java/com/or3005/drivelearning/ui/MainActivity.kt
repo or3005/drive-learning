@@ -122,6 +122,8 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(18), dp(24), dp(18), dp(32))
         }
         root.addView(text("Drive Learning", 26f, bold = true))
+        val version = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: "?"
+        root.addView(text("גרסה $version", 13f, color = GREY))
         progressText = text("", 14f, color = GREY).also { root.addView(it) }
         setupText = text("", 14f, color = Color.parseColor("#B74B4B")).also { root.addView(it) }
 
