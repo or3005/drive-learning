@@ -24,6 +24,8 @@ import com.or3005.drivelearning.engine.Command
 import com.or3005.drivelearning.engine.ListenContext
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -40,6 +42,7 @@ class LessonMediaService : MediaLibraryService() {
     private val scope = MainScope()
     private val learning: LearningController by lazy { (application as DriveLearningApp).controller }
 
+    @OptIn(FlowPreview::class)
     override fun onCreate() {
         super.onCreate()
         val player = LessonPlayer(learning, Looper.getMainLooper())
@@ -49,6 +52,7 @@ class LessonMediaService : MediaLibraryService() {
             learning.state
                 .map { buttonsFor(it) }
                 .distinctUntilChanged()
+                .debounce(400) // only show buttons that stay put long enough to tap
                 .collect { buttons -> librarySession.setCustomLayout(buttons.map { it.toCommandButton() }) }
         }
     }

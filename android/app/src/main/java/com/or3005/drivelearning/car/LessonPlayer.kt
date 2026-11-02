@@ -12,8 +12,10 @@ import com.or3005.drivelearning.LearningController
 import com.or3005.drivelearning.LearningController.Mode
 import com.or3005.drivelearning.engine.Command
 import com.or3005.drivelearning.engine.ListenContext
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 /**
@@ -30,9 +32,8 @@ class LessonPlayer(
 
     private val scope = MainScope()
 
-    init {
-        scope.launch { learning.state.collect { invalidateState() } }
-    }
+    @OptIn(FlowPreview::class)
+    private val updates = scope.launch { learning.state.debounce(250).collect { invalidateState() } }
 
     override fun getState(): State {
         val s = learning.state.value

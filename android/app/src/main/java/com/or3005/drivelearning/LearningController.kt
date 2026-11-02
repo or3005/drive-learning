@@ -81,6 +81,13 @@ class LearningController(private val app: Application) {
     private var listenTries = 0
     private var uploadJob: Job? = null
 
+    /**
+     * True while the speech recognizer is listening. The recognizer takes audio focus itself, and
+     * that must not be mistaken for Waze: pausing would cancel the recognizer, which gives focus
+     * back, which resumes and listens again, in a loop.
+     */
+    private var listening = false
+
     // Audio focus: pause while Waze or a phone call talks, continue when it's done.
     private val audioManager = app.getSystemService(AudioManager::class.java)
     private var pausedByInterruption = false
@@ -308,6 +315,7 @@ class LearningController(private val app: Application) {
     }
 
     private fun listen(ctx: ListenContext) {
+        listening = true
         _state.update { it.copy(mode = Mode.LISTENING, awaiting = ctx.takeIf { c -> c != ListenContext.COMMAND } ?: it.awaiting) }
         Beeper.listen()
         // Give the beep a moment so it isn't recorded as speech.
@@ -317,6 +325,7 @@ class LearningController(private val app: Application) {
     }
 
     private fun heard(results: List<String>, error: Int?, ctx: ListenContext) {
+        listening = false
         val e = engine ?: return
         val problem = error?.let { Listener.describe(it) }
         if (problem != null) {
@@ -419,6 +428,7 @@ class LearningController(private val app: Application) {
 
     private fun interrupt() {
         speaker.stop()
+        listening = false
         listener.cancel()
     }
 
@@ -499,12 +509,13 @@ class LearningController(private val app: Application) {
     }
 
     private fun onFocusChange(change: Int) {
+        if (listening) return // our own speech recognizer, not another app
         val s = _state.value
-        val active = s.mode == Mode.SPEAKING || s.mode == Mode.LISTENING
+        val active = s.mode == Mode.SPEAKING
         when (change) {
             // Waze prompts and phone calls: pause now, continue when they finish.
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (active) {
-                listeningWhenInterrupted = if (s.mode == Mode.LISTENING) s.awaiting ?: ListenContext.COMMAND else null
+                listeningWhenInterrupted = null
                 pause()
                 pausedByInterruption = true
             }
