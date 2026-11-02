@@ -26,8 +26,8 @@ class Speaker(context: Context, private val onReady: (hebrewAvailable: Boolean) 
         private set
     private var englishAvailable = false
 
-    /** Read English terms with an English voice. Off by default: the Hebrew voice usually copes. */
-    var englishVoiceForTerms = false
+    /** Read English terms with an English voice, so Body sounds like body. Hebrew voice only if off. */
+    var englishVoiceForTerms = true
     var rate = 1.0f
     var pronunciation: Pronunciation = Pronunciation.NONE
 
@@ -85,7 +85,10 @@ class Speaker(context: Context, private val onReady: (hebrewAvailable: Boolean) 
         tts.setSpeechRate(rate)
         for (i in from.coerceAtLeast(0) until sentences.size) {
             val pieces = if (englishVoiceForTerms && englishAvailable && hebrewAvailable) {
-                Runs.split(sentences[i])
+                Runs.split(sentences[i]).map { run ->
+                    if (run.latin) run.copy(text = pronunciation.applyEnglishRun(run.text))
+                    else run.copy(text = pronunciation.applyHebrewRun(run.text))
+                }
             } else {
                 listOf(com.or3005.drivelearning.engine.Run(pronunciation.apply(sentences[i]), latin = false))
             }

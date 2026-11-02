@@ -197,6 +197,195 @@
             "sure": true,
             "day": "2026-11-01",
             "time": 1793517627243
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "apply",
+            "choice": 3,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793598534002
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793601945056
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793601992271
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602687224
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602734144
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602784001
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602830893
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602875805
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793602927796,
+            "misconception": "mc-get-with-body"
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793603089224
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793603137932
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793603348640
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793603909992
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793603936406
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793604068646
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793604115476
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-02",
+            "time": 1793604296714,
+            "misconception": "mc-post-retry-safe"
         }
     ],
     "concepts": {
@@ -205,10 +394,37 @@
             "nextReview": "2026-11-05"
         },
         "request-journey": {
-            "nextReview": "2026-11-01"
+            "box": 2,
+            "nextReview": "2026-11-04",
+            "mastered": true
+        },
+        "http-anatomy": {
+            "box": 3,
+            "nextReview": "2026-11-06"
+        },
+        "http-methods": {
+            "nextReview": "2026-11-02"
         }
     },
     "completedUnits": [
-        "u01-backend-role"
+        "u01-backend-role",
+        "u02-request-journey",
+        "u03-http-anatomy"
+    ],
+    "explainAnswers": [
+        {
+            "questionId": "q9",
+            "unitId": "u02-request-journey",
+            "transcript": "אז ככה קודם כל הבקשה נשלחת דרך dns שבודק את הדומיין ויודע למפות איזה אייפי לאיזה דומיין אחרי שיש לנו את החלק של ה-dnc והכל תקין אנחנו ממשיכים לפתוח פורט פתוח לגמרי בעזרת tcp כאשר יש לי שלוש לחיצות ידיים שולח מקבל אק ואז חוזר עם מקnlegement ויש לנו בעצם חלון פתוח בין שני האנשים שרוצים לדבר שני המחשבים בנוסף יש לנו את ה-tls שהוא אחראי על כל החלק של ההצפנה כלומר שדברים יוכלו להיות מוצפנים ברשת ולא יהיה שום דרך לעלות עליהם בנוסף יש לנו מה שנקרא time to live שהוא אחראי",
+            "day": "2026-11-02",
+            "time": 1793602086597
+        },
+        {
+            "questionId": "q9",
+            "unitId": "u03-http-anatomy",
+            "transcript": "אוקיי אז בקשת http מורכבת מארבעה חלקים שונים החלק הראשון זה ההדר של מה אנחנו משתמשים באיזה שיטה בדרך כלל זה איזה אפליקיישן ג'ייסון או משהו אחרי זה יש לך את המיתוד מה אנחנו רוצים אנחנו רוצים גט אנחנו רוצים פוסט אנחנו רוצים פות מה מה בעצם מה הבקשה עצמה אחרי זה יש לנו באדי שזה דברים שקשורים לבקשה עצמה נגיד אני רוצה לפלטר אורדרינג ואחרי זה יש לנו את מה שאנחנו מחזירים שזה באיזה פורמט אנחנו נגיד ג'ייסון אפליקיישן ג'ייסון שזה נורא נורא חשוב כי ככה אנחנו יכולים להחזיר את האובייקט עצמו",
+            "day": "2026-11-02",
+            "time": 1793603227819
+        }
     ]
 }

@@ -11,6 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 COURSES = ROOT / "content" / "courses"
+# A correct option longer than this times the longest distractor is a giveaway.
+OPTION_LENGTH_RATIO = 1.2
 LEVELS = ["recognize", "why", "apply", "explain"]
 STATUSES = {"planned", "draft", "ready"}
 WORDS_PER_MINUTE = 140  # rough speaking rate for Hebrew TTS
@@ -20,7 +22,8 @@ WORD = r"[A-Za-z][A-Za-z0-9#+]*(?:[.\-'][A-Za-z0-9#+]+)*"
 LATIN_TERM = re.compile(WORD + r"(?:\s+(?=[A-Z])" + WORD + r")*")
 # Words the learner already knows well; everything else in Latin script should be in `terms`
 KNOWN_WORDS = {"react", "javascript", "typescript", "c#", "asp.net", ".net", "node", "node.js",
-               "google", "nestjs", "express", "fastify", "net"}
+               "google", "nestjs", "express", "fastify", "net", "chrome", "asp.net core", "task",
+               "task.whenall"}
 
 
 class Report:
@@ -156,8 +159,8 @@ def check_unit(path, listed, concept_ids, rep, earlier_terms):
 
     ex = unit.get("explanations", {})
     main = ex.get("main", [])
-    if not 4 <= len(main) <= 6:
-        rep.err(where, f"explanations.main should have 4-6 segments, has {len(main)}")
+    if not 4 <= len(main) <= 8:
+        rep.err(where, f"explanations.main should have 4-8 segments, has {len(main)}")
     words = 0
     seg_ids = set()
     for kind in ("main", "simple", "deep"):
@@ -269,6 +272,11 @@ def check_unit(path, listed, concept_ids, rep, earlier_terms):
                 rep.err(qw, f"wrong option {i} needs a misconception or feedback")
             else:
                 check_text(f"{qw} option {i} feedback", o.get("feedback"), rep)
+        # The correct answer must not give itself away by being the long, careful one.
+        right = [len(o.get("text", "")) for o in opts if o.get("correct")]
+        wrong = [len(o.get("text", "")) for o in opts if not o.get("correct")]
+        if right and wrong and right[0] > OPTION_LENGTH_RATIO * max(wrong):
+            rep.warn(qw, f"correct option is much longer than the others ({right[0]} vs {max(wrong)} chars)")
     for lvl in LEVELS:
         if lvl not in levels_seen:
             rep.err(where, f"no {lvl} question")

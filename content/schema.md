@@ -16,6 +16,31 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
   an everyday analogy over an abstract statement. One main idea per segment.
 - **Bridge from .NET where it helps.** The learner works daily with ASP.NET and React/TypeScript.
 - No ASCII double quotes inside strings (use ״ or rephrase) to keep the JSON hand-editable.
+- **Pronunciation.** Write English terms in English (Body, Token), never in Hebrew letters, so the
+  English voice reads them. Hebrew words that a voice may read with the wrong vowels (לפרק, מורכב,
+  משנה) go into `content/pronunciation.json` under `hebrew` with niqqud, instead of adding niqqud
+  in the unit text. A new English abbreviation that should be read letter by letter, or a symbol
+  like C#, goes under `english`.
+- **Depth.** A unit is about 20 minutes of listening: 6–8 main segments. At least two segments walk
+  through a concrete example out loud: a real scenario, what the code does step by step in words,
+  what goes wrong in the naive version and how a better version fixes it. Good practice (naming,
+  layering, error handling, testing) is taught inside these examples, not as a list of rules.
+
+## Writing multiple-choice options
+
+The learner answers by ear while driving, so the options must not give the answer away:
+
+- **Same shape, same length.** Every option is one sentence of similar length (the validator warns
+  when the correct one is more than 20% longer than the longest wrong one). If the correct option
+  has a reason, every wrong option has a reason too.
+- **Plausible wrong options.** Each wrong option is something a junior developer could really
+  believe: a half-truth with the wrong conclusion, a real technique applied in the wrong place, or
+  the misconception phrased the way people actually say it. No joke options, no ״it doesn't
+  matter״, no options that are obviously from a different topic.
+- **Gradual difficulty.** `recognize` questions may have one clearly-wrong option. `why` and
+  `apply` questions have wrong options that are partly true, so choosing needs the actual reason.
+- The feedback of a partly-true option says first what is true in it, then why it's still not the
+  answer.
 
 ## `course.json`
 
@@ -54,7 +79,7 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
   "title": "…",
   "estimatedMinutes": 15,
   "explanations": {
-    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson, 4–6 segments
+    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson, 4–8 segments (new units: 6–8)
     "simple": [ { "id": "simple-1", "text": "…" } ],           // same ideas through an analogy
     "deep":   [ { "id": "deep-1", "text": "…" } ]              // for when the basics are solid
   },
@@ -112,7 +137,7 @@ The learner can always go back. Voice commands, available at any point in a driv
 | ״תעמיק״ | Plays the `deep` version |
 | ״מה זה …״ | Reads the term's definition from `terms` (this unit, then earlier units) |
 | ״רמז״ | Reads the question's `hint` |
-| ״תחזור על השאלה״ | Repeats the question and its options |
+| ״תחזור על השאלה״ | Repeats the question and its options (also: ⏮ on the steering wheel during a question, or the ↺ button on the car screen) |
 | ״עצור״ / ״המשך״ | Pause / resume |
 | ״חזרה על יחידה …״ | Replays a finished unit from the start (review mode) |
 | ״סיכום״ | Plays the `recap` of the current or last unit |

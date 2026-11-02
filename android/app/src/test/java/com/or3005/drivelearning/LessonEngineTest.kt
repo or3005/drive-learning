@@ -56,7 +56,7 @@ class LessonEngineTest {
 
     @Test
     fun firstDrivePlaysUnitOneThenAsksFirstQuestion() {
-        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7))
+        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7), askConfidence = true)
         val first = engine.start()
         assertTrue(first is Step.Say)
         assertEquals("u01-backend-role", first.unitId)
@@ -68,7 +68,7 @@ class LessonEngineTest {
     @Test
     fun correctAndSureRecordsAttemptAndMovesUpABox() {
         val store = MemoryProgressStore()
-        val engine = LessonEngine(units(), store, today, random = Random(7))
+        val engine = LessonEngine(units(), store, today, random = Random(7), askConfidence = true)
         engine.start()
         val ask = engine.untilQuestion() as Step.Ask
         assertTrue(engine.answer(ask.saidCorrect()))
@@ -83,7 +83,7 @@ class LessonEngineTest {
 
     @Test
     fun wrongAnswerPlaysRemedialOffersReplayThenAsksAnotherQuestion() {
-        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7))
+        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7), askConfidence = true)
         engine.start()
         val ask = engine.untilQuestion() as Step.Ask
         val wrongIndex = ask.question.options.indexOfFirst { it.misconception != null }
@@ -108,7 +108,7 @@ class LessonEngineTest {
 
     @Test
     fun followUpQuestionIsNotAskedTwice() {
-        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7))
+        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7), askConfidence = true)
         engine.start()
         val seen = mutableListOf<String>()
         var step = engine.untilQuestion()
@@ -134,7 +134,7 @@ class LessonEngineTest {
     @Test
     fun finishingAUnitMarksItCompleteAndNextDriveStartsWithReview() {
         val store = MemoryProgressStore()
-        val engine = LessonEngine(units(), store, today, random = Random(7))
+        val engine = LessonEngine(units(), store, today, random = Random(7), askConfidence = true)
         engine.start()
         var guard = 0
         while (engine.current.unitId == "u01-backend-role" || engine.current.unitId == null) {
@@ -150,7 +150,7 @@ class LessonEngineTest {
         }
         assertTrue("u01 should be complete", "u01-backend-role" in store.load().completedUnits)
 
-        val tomorrow = LessonEngine(units(), store, today.plusDays(1), random = Random(7))
+        val tomorrow = LessonEngine(units(), store, today.plusDays(1), random = Random(7), askConfidence = true)
         val opening = tomorrow.start() as Step.Say
         assertTrue("next drive opens with a review", opening.text.startsWith("לפני שממשיכים"))
         assertTrue(tomorrow.advance() is Step.Ask)
@@ -159,7 +159,7 @@ class LessonEngineTest {
     @Test
     fun optionsAreShuffledAndTheRightAnswerIsStillRecognized() {
         val store = MemoryProgressStore()
-        val engine = LessonEngine(units(), store, today, random = Random(3))
+        val engine = LessonEngine(units(), store, today, random = Random(3), askConfidence = true)
         engine.start()
         val positions = mutableSetOf<Int>()
         var step = engine.untilQuestion()
@@ -183,7 +183,7 @@ class LessonEngineTest {
     @Test
     fun halfFinishedUnitContinuesWithTheQuestionsThatAreLeft() {
         val store = MemoryProgressStore()
-        val first = LessonEngine(units(), store, today, random = Random(7))
+        val first = LessonEngine(units(), store, today, random = Random(7), askConfidence = true)
         first.start()
         // Answer unit 1's first two questions, then stop the drive.
         repeat(2) {
@@ -192,7 +192,7 @@ class LessonEngineTest {
             first.confidence(true)
             first.advance()
         }
-        val next = LessonEngine(units(), store, today.plusDays(1), random = Random(7))
+        val next = LessonEngine(units(), store, today.plusDays(1), random = Random(7), askConfidence = true)
         val opening = next.start() as Step.Say
         assertTrue(opening.text.startsWith("ממשיכים מאיפה שעצרנו"))
         assertEquals("תזכורת", (next.advance() as Step.Say).label)
@@ -201,8 +201,19 @@ class LessonEngineTest {
     }
 
     @Test
+    fun withoutConfidenceAnAnswerGoesStraightToFeedback() {
+        val store = MemoryProgressStore()
+        val engine = LessonEngine(units(), store, today, random = Random(7))
+        engine.start()
+        val ask = engine.untilQuestion() as Step.Ask
+        assertTrue(engine.answer(ask.saidCorrect()))
+        assertEquals(ask.question.explanation, (engine.current as Step.Say).text)
+        assertTrue(store.load().attempts.single().sure)
+    }
+
+    @Test
     fun backPlaysPreviousSegmentThenCurrent() {
-        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7))
+        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7), askConfidence = true)
         engine.start()
         engine.advance() // segment 0
         val second = engine.advance() as Step.Say // segment 1
@@ -214,7 +225,7 @@ class LessonEngineTest {
 
     @Test
     fun termsAreFoundFromEarlierUnits() {
-        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7))
+        val engine = LessonEngine(units(), MemoryProgressStore(), today, random = Random(7), askConfidence = true)
         engine.start()
         assertEquals("Middleware", engine.findTerm("middleware")?.term)
         assertEquals("Client", engine.findTerm("לקוח")?.term)

@@ -55,6 +55,8 @@ class LessonEngine(
     private val today: LocalDate,
     private val now: () -> Long = { System.currentTimeMillis() },
     private val random: Random = Random.Default,
+    /** Ask ״בטוח או לא בטוח?״ after each answer. Off: one tap less while driving; answers count as sure. */
+    private val askConfidence: Boolean = false,
 ) {
     var progress: ProgressState = store.load()
         private set
@@ -106,6 +108,7 @@ class LessonEngine(
         if (q.isExplain || choice !in 1..q.options.size) return false
         queue.addFirst(Step.AskConfidence(ask.unitId, q, ask.order[choice - 1] + 1, ask.order))
         advance()
+        if (!askConfidence) confidence(sure = true)
         return true
     }
 

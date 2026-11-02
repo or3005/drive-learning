@@ -43,9 +43,18 @@ class ProgressUploader(private val context: Context) {
             val code = conn.responseCode
             val error = if (code >= 400) conn.errorStream?.bufferedReader()?.use { it.readText() } else null
             conn.disconnect()
-            check(code in 200..299) { "GitHub החזיר $code ${error?.take(120).orEmpty()}" }
+            check(code in 200..299) { explain(code, error) }
             prefs.edit().putString(KEY_LAST, stamp()).apply()
         }
+    }
+
+    /** What a failed upload means, in words the learner can act on. */
+    private fun explain(code: Int, body: String?): String = when (code) {
+        401 -> "הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש."
+        403 -> "לטוקן אין הרשאת כתיבה (403). ב-Permissions צריך Contents: Read and write."
+        404 -> "לטוקן אין גישה ל-repo (404). ב-Repository access צריך לבחור Only select repositories ואת drive-learning."
+        409, 422 -> "הקובץ השתנה בינתיים ($code). ננסה שוב בשליחה הבאה."
+        else -> "GitHub החזיר $code ${body?.take(100).orEmpty()}"
     }
 
     private fun currentSha(): String? {

@@ -53,9 +53,10 @@ class LearningController(private val app: Application) {
         val completedUnits: Int = 0,
         val totalUnits: Int = 0,
         val masteredConcepts: Int = 0,
-        val englishVoiceForTerms: Boolean = false,
+        val englishVoiceForTerms: Boolean = true,
         val uploadConfigured: Boolean = false,
         val lastUpload: String = "",
+        val uploadError: String = "",
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -88,6 +89,11 @@ class LearningController(private val app: Application) {
      */
     private var listening = false
 
+    /** A long explain-back answer is collected over several recognizer sessions. */
+    private val explainBuffer = StringBuilder()
+    private var explainRounds = 0
+    private val prefs = app.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+
     // Audio focus: pause while Waze or a phone call talks, continue when it's done.
     private val audioManager = app.getSystemService(AudioManager::class.java)
     private var pausedByInterruption = false
@@ -107,6 +113,9 @@ class LearningController(private val app: Application) {
 
     init {
         speaker.pronunciation = repo.loadPronunciation()
+        val englishVoice = prefs.getBoolean(KEY_ENGLISH_VOICE, true)
+        speaker.englishVoiceForTerms = englishVoice
+        _state.update { it.copy(englishVoiceForTerms = englishVoice) }
         refreshCounts()
         refreshUploadState()
     }
@@ -220,6 +229,7 @@ class LearningController(private val app: Application) {
 
     fun setEnglishVoiceForTerms(enabled: Boolean) {
         speaker.englishVoiceForTerms = enabled
+        prefs.edit().putBoolean(KEY_ENGLISH_VOICE, enabled).apply()
         _state.update { it.copy(englishVoiceForTerms = enabled) }
     }
 
@@ -251,8 +261,11 @@ class LearningController(private val app: Application) {
         }
         uploadJob = scope.launch {
             uploader.upload(progressFile)
-                .onSuccess { if (report) message("ההתקדמות נשלחה.") }
-                .onFailure { if (report) message("השליחה נכשלה: ${it.message}") }
+                .onSuccess {
+                    _state.update { s -> s.copy(uploadError = "") }
+                    if (report) message("ההתקדמות נשלחה.")
+                }
+                .onFailure { uploadFailed(it, report) }
             refreshUploadState()
         }
     }
@@ -280,8 +293,12 @@ class LearningController(private val app: Application) {
             is Step.Ask -> {
                 show(step, Mode.SPEAKING)
                 val q = step.question
+                if (q.isExplain) {
+                    explainBuffer.clear()
+                    explainRounds = 0
+                }
                 val text = if (q.isExplain) {
-                    "${q.prompt} אחרי הצפצוף, דבר בחופשיות. כשתסיים, פשוט תשתוק כמה שניות."
+                    "${q.prompt} אחרי הצפצוף, דבר בחופשיות, גם עם הפסקות. כשתסיים, תגיד סיימתי."
                 } else {
                     buildString {
                         append(q.prompt).append(' ')
@@ -314,14 +331,69 @@ class LearningController(private val app: Application) {
         }
     }
 
-    private fun listen(ctx: ListenContext) {
+    private fun listen(ctx: ListenContext, beep: Boolean = true) {
         listening = true
         _state.update { it.copy(mode = Mode.LISTENING, awaiting = ctx.takeIf { c -> c != ListenContext.COMMAND } ?: it.awaiting) }
-        Beeper.listen()
+        if (beep) Beeper.listen()
         // Give the beep a moment so it isn't recorded as speech.
         main.postDelayed({
-            listener.listen(long = ctx == ListenContext.EXPLAIN) { results, error -> heard(results, error, ctx) }
-        }, 250)
+            listener.listen(
+                long = ctx == ListenContext.EXPLAIN,
+                minimumMillis = when (ctx) {
+                    ListenContext.ANSWER -> 6_000L
+                    ListenContext.CONFIDENCE, ListenContext.YES_NO -> 5_000L
+                    ListenContext.EXPLAIN -> 10_000L
+                    ListenContext.COMMAND -> null
+                },
+                accept = { partial -> acceptsEarly(partial, ctx) },
+            ) { results, error -> heard(results, error, ctx) }
+        }, if (beep) 250L else 0L)
+    }
+
+    /** A partial transcript that already settles the answer, so there's no need to wait for silence. */
+    private fun acceptsEarly(partial: String, ctx: ListenContext): Boolean = when (ctx) {
+        ListenContext.ANSWER -> CommandParser.parse(partial, ctx) is Command.Answer
+        ListenContext.YES_NO -> CommandParser.parse(partial, ctx) is Command.YesNo
+        ListenContext.CONFIDENCE -> CommandParser.parse(partial, ctx) is Command.Sure
+        ListenContext.EXPLAIN -> DONE_WORDS.any { partial.contains(it) }
+        ListenContext.COMMAND -> false
+    }
+
+    /**
+     * Collects an explain-back answer across recognizer sessions: the recognizer stops at every
+     * pause, so keep listening until the learner says סיימתי or stays quiet.
+     */
+    private fun heardExplain(e: LessonEngine, results: List<String>, error: Int?) {
+        val text = results.firstOrNull().orEmpty().trim()
+        if (explainBuffer.isEmpty() && text.isNotEmpty()) {
+            // A navigation command instead of an answer, like רמז or תחזור על השאלה.
+            val cmd = CommandParser.parse(text, ListenContext.EXPLAIN)
+            if (cmd != null && cmd !is Command.Explain) {
+                onCommand(cmd)
+                return
+            }
+        }
+        val done = DONE_WORDS.firstOrNull { text.contains(it) }
+        val piece = if (done != null) text.substringBefore(done).trim() else text
+        if (piece.isNotEmpty()) explainBuffer.append(piece).append(' ')
+        explainRounds++
+        // Silence before saying anything gets one more chance: maybe they're still thinking.
+        val silence = text.isEmpty() && (explainBuffer.isNotEmpty() || explainRounds >= 2)
+        val problem = error?.let { Listener.describe(it) } != null
+        if (done != null || silence || problem || explainRounds >= MAX_EXPLAIN_ROUNDS) {
+            val transcript = explainBuffer.toString().trim()
+            explainBuffer.clear()
+            explainRounds = 0
+            val reason = done ?: when {
+                silence -> "silence"
+                problem -> "error $error"
+                else -> "limit"
+            }
+            e.logDiagnostic("explain: ${transcript.length} chars, ended by $reason")
+            onCommand(Command.Explain(transcript))
+        } else {
+            listen(ListenContext.EXPLAIN, beep = false)
+        }
     }
 
     private fun heard(results: List<String>, error: Int?, ctx: ListenContext) {
@@ -334,12 +406,14 @@ class LearningController(private val app: Application) {
         }
         _state.update { it.copy(heard = results.firstOrNull().orEmpty()) }
         if (ctx == ListenContext.EXPLAIN) {
-            val text = results.firstOrNull().orEmpty()
-            val cmd = CommandParser.parse(text, ctx) ?: Command.Explain("")
-            onCommand(cmd)
+            heardExplain(e, results, error)
             return
         }
         val command = results.firstNotNullOfOrNull { CommandParser.parse(it, ctx) }
+        e.logDiagnostic(
+            "listen $ctx: " + if (results.isEmpty()) "nothing (code $error)"
+            else "'${results.first()}' -> ${command?.javaClass?.simpleName ?: "not understood"}",
+        )
         if (command != null) {
             onCommand(command)
             return
@@ -474,8 +548,17 @@ class LearningController(private val app: Application) {
         uploadJob = scope.launch {
             delay(30_000)
             uploader.upload(progressFile)
+                .onSuccess { _state.update { s -> s.copy(uploadError = "") } }
+                .onFailure { uploadFailed(it, report = false) }
             refreshUploadState()
         }
+    }
+
+    private fun uploadFailed(error: Throwable, report: Boolean) {
+        val text = error.message ?: error.javaClass.simpleName
+        _state.update { it.copy(uploadError = text) }
+        engine?.logDiagnostic("upload: $text")
+        if (report) message("השליחה נכשלה: $text")
     }
 
     private fun refreshCounts() {
@@ -549,5 +632,8 @@ class LearningController(private val app: Application) {
     companion object {
         /** About 15 seconds of Hebrew speech. */
         private const val SEEK_WORDS = 32
+        private const val MAX_EXPLAIN_ROUNDS = 12
+        private val DONE_WORDS = listOf("סיימתי", "סיימנו", "זהו זה", "זה הכל", "זה הכול")
+        private const val KEY_ENGLISH_VOICE = "english_voice"
     }
 }

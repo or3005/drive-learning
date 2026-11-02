@@ -12,6 +12,10 @@ data class PronunciationData(
     val hebrew: Map<String, String> = emptyMap(),
     /** Letter names, used to spell acronyms that aren't in [terms]. */
     val letters: Map<String, String> = emptyMap(),
+    /** For the English voice: how to write a term so it is said right, e.g. C# as C sharp. */
+    val english: Map<String, String> = emptyMap(),
+    /** Hebrew prefix letters before an English term (ה-React), vocalized so they are said as a syllable. */
+    val prefixes: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -40,6 +44,14 @@ class Pronunciation(data: PronunciationData) {
     private val letters = data.letters
     private val acronym = Regex("(?<![A-Za-z])[A-Z]{2,6}(?![A-Za-z])")
     private val hebrewPrefixHyphen = Regex("(?<![\\u0590-\\u05FF])([והבכלמש]{1,3})-(?=[\\u0590-\\u05FF])")
+    private val trailingPrefix = Regex("(?<![\\u0590-\\u05FF])([והבכלמש]{1,3})-\\s*$")
+    private val prefixes = data.prefixes
+    private val englishMap = data.english.mapKeys { it.key.lowercase() }
+    private val englishRegex: Regex? = data.english.keys
+        .sortedByDescending { it.length }
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString("|") { Regex.escape(it) }
+        ?.let { Regex("(?<![A-Za-z0-9])(?:$it)(?![A-Za-z0-9])", RegexOption.IGNORE_CASE) }
 
     fun apply(text: String): String {
         var out = text
@@ -51,6 +63,18 @@ class Pronunciation(data: PronunciationData) {
         out = hebrewPrefixHyphen.replace(out, "$1")
         return out
     }
+
+    /** A Hebrew piece read by the Hebrew voice when English terms go to the English voice. */
+    fun applyHebrewRun(text: String): String {
+        var out = text
+        hebrewRegex?.let { r -> out = r.replace(out) { m -> hebrewMap[m.value] ?: m.value } }
+        out = trailingPrefix.replace(out) { m -> prefixes[m.groupValues[1]] ?: m.groupValues[1] }
+        return out
+    }
+
+    /** An English piece read by the English voice. */
+    fun applyEnglishRun(text: String): String =
+        englishRegex?.replace(text) { m -> englishMap[m.value.lowercase()] ?: m.value } ?: text
 
     companion object {
         val NONE = Pronunciation(PronunciationData())

@@ -24,12 +24,18 @@ class Listener(private val context: Context) {
 
     /**
      * Listens once. [long] allows a longer answer with pauses (explain-back questions).
+     * [minimumMillis] keeps the recognizer open at least that long, so there is time to think.
+     * [accept] is checked on every partial transcript: when it returns true, listening stops
+     * right away and that transcript is the result (a short answer like "שתיים" needs no waiting).
      * [onResult] gets the recognizer's candidate transcripts, and the error code if it failed
-     * (null on success). Silence comes back as an empty list with an error code.
+     * (null on success). Silence comes back as an empty list with an error code. If the
+     * recognizer fails after hearing something, the last partial transcript is returned instead.
      */
     fun listen(
         long: Boolean,
+        minimumMillis: Long? = null,
         audio: ParcelFileDescriptor? = null,
+        accept: (String) -> Boolean = { false },
         onEnd: () -> Unit = {},
         onResult: (results: List<String>, error: Int?) -> Unit,
     ) {
@@ -38,12 +44,15 @@ class Listener(private val context: Context) {
         this.onEnd = onEnd
         val r = SpeechRecognizer.createSpeechRecognizer(context)
         recognizer = r
+        var lastPartial = ""
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "he-IL")
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            minimumMillis?.let { putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, it) }
             if (long) {
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3500L)
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
@@ -68,7 +77,8 @@ class Listener(private val context: Context) {
             override fun onError(error: Int) {
                 if (id != session) return
                 finish()
-                onResult(emptyList(), error)
+                if (lastPartial.isNotBlank()) onResult(listOf(lastPartial), null)
+                else onResult(emptyList(), error)
             }
 
             override fun onReadyForSpeech(params: Bundle?) = Unit
@@ -76,7 +86,16 @@ class Listener(private val context: Context) {
             override fun onRmsChanged(rmsdB: Float) = Unit
             override fun onBufferReceived(buffer: ByteArray?) = Unit
             override fun onEndOfSpeech() = Unit
-            override fun onPartialResults(partialResults: Bundle?) = Unit
+            override fun onPartialResults(partialResults: Bundle?) {
+                if (id != session) return
+                val text = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.firstOrNull { it.isNotBlank() } ?: return
+                lastPartial = text
+                if (accept(text)) {
+                    cancel()
+                    onResult(listOf(text), null)
+                }
+            }
             override fun onEvent(eventType: Int, params: Bundle?) = Unit
         })
         r.startListening(intent)

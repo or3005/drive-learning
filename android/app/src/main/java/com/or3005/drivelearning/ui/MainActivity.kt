@@ -142,6 +142,7 @@ class MainActivity : ComponentActivity() {
         setupText.visibility = if (setup.isEmpty()) View.GONE else View.VISIBLE
         englishSwitch.isChecked = s.englishVoiceForTerms
         uploadText.text = when {
+            s.uploadError.isNotBlank() -> "⚠️ השליחה ל-GitHub נכשלה: ${s.uploadError}"
             !s.uploadConfigured -> "שליחה אוטומטית ל-GitHub: כבויה (אין טוקן)"
             s.lastUpload.isBlank() -> "שליחה אוטומטית ל-GitHub: פעילה, עוד לא נשלח"
             else -> "שליחה אוטומטית ל-GitHub: פעילה · נשלח לאחרונה ${s.lastUpload}"
