@@ -4,7 +4,9 @@ import com.or3005.drivelearning.content.ContentJson
 import com.or3005.drivelearning.content.Course
 import com.or3005.drivelearning.content.LearningUnit
 import com.or3005.drivelearning.engine.LessonEngine
+import com.or3005.drivelearning.engine.ConceptProgress
 import com.or3005.drivelearning.engine.MemoryProgressStore
+import com.or3005.drivelearning.engine.ProgressState
 import com.or3005.drivelearning.engine.Scheduler
 import com.or3005.drivelearning.engine.Step
 import org.junit.Assert.assertEquals
@@ -229,6 +231,101 @@ class LessonEngineTest {
         engine.start()
         assertEquals("Middleware", engine.findTerm("middleware")?.term)
         assertEquals("Client", engine.findTerm("לקוח")?.term)
+    }
+
+    private val chapterOne = listOf(
+        "u01-backend-role", "u02-request-journey", "u03-http-anatomy", "r1-review-foundations",
+        "u04-http-methods", "u05-status-codes", "u06-statelessness", "r2-review-http",
+    )
+
+    /** Answers everything right until [stop] is true, returning the steps that were seen. */
+    private fun LessonEngine.answerRightUntil(stop: (Step) -> Boolean): List<Step> {
+        val seen = mutableListOf<Step>()
+        var guard = 0
+        while (!stop(current) && current !is Step.End && guard++ < 600) {
+            val step = current
+            seen += step
+            when (step) {
+                is Step.Ask -> if (step.question.isExplain) explain("תשובה") else answer(step.saidCorrect())
+                is Step.AskConfidence -> confidence(true)
+                is Step.AskReplay -> replayAnswer(false)
+                else -> advance()
+            }
+        }
+        return seen
+    }
+
+    @Test
+    fun reviewUnitTeachesFillInsThenAsksAboutEachCoveredUnitAndSummarizes() {
+        val done = setOf("u01-backend-role", "u02-request-journey", "u03-http-anatomy")
+        val store = MemoryProgressStore(ProgressState(completedUnits = done, schedulerVersion = Scheduler.VERSION))
+        val engine = LessonEngine(units(), store, today, random = Random(5))
+        val opening = engine.start() as Step.Say
+        assertEquals("r1-review-foundations", opening.unitId)
+        assertTrue(engine.unitName(opening.unitId).startsWith("חזרה"))
+        val seen = engine.answerRightUntil { it.unitId == "u04-http-methods" }
+        val checks = seen.filterIsInstance<Step.Ask>().filter { it.question.isCheck }.map { it.question.id }
+        assertEquals(listOf("c-proxy", "c-cache"), checks.distinct())
+        val asked = seen.filterIsInstance<Step.Ask>().filter { !it.question.isCheck }
+        done.forEach { unit -> assertTrue("questions on $unit", asked.count { it.unitId == unit } >= 4) }
+        assertTrue("one short explain part per covered unit", asked.count { it.question.isExplain } == 3)
+        val summary = seen.filterIsInstance<Step.Say>().single { it.label == "סיכום החזרה" }
+        assertTrue(summary.text.contains("אתה כבר זוכר טוב"))
+        assertTrue("r1-review-foundations" in store.load().completedUnits)
+    }
+
+    @Test
+    fun formatTwoLessonWarmsUpThenChecksAfterEverySegment() {
+        val store = MemoryProgressStore(ProgressState(completedUnits = chapterOne.toSet(), schedulerVersion = Scheduler.VERSION))
+        val engine = LessonEngine(units(), store, today, random = Random(5))
+        engine.start()
+        val seen = engine.answerRightUntil { it.unitId == "u08-event-loop" }
+        val labels = seen.filterIsInstance<Step.Say>().map { it.label }
+        assertTrue("warm-up before the lesson", labels.contains("חימום"))
+        val u07 = units().single { it.id == "u07-node-runtime" }
+        val checks = seen.filterIsInstance<Step.Ask>().filter { it.question.isCheck && it.unitId == u07.id }
+        assertEquals(u07.explanations.main.size, checks.size)
+        // Each check comes right after its segment.
+        u07.explanations.main.forEach { seg ->
+            val i = seen.indexOfFirst { it is Step.Say && it.unitId == u07.id && it.label == seg.title }
+            val next = seen[i + 1] as Step.Ask
+            assertEquals(seg.check?.id, next.question.id)
+        }
+        assertTrue("retell after the lesson", labels.contains("במילים אחרות"))
+        val retell = labels.indexOf("במילים אחרות")
+        val firstMain = seen.indexOfFirst { it is Step.Ask && it.unitId == u07.id && it.question.id == "q1" }
+        assertTrue("retell comes before the final questions", seen.indexOfFirst { it is Step.Say && it.label == "במילים אחרות" } < firstMain && retell >= 0)
+    }
+
+    @Test
+    fun wrongCheckOffersTheSegmentAgainAndAsksTheSameCheck() {
+        val store = MemoryProgressStore(ProgressState(completedUnits = chapterOne.toSet(), schedulerVersion = Scheduler.VERSION))
+        val engine = LessonEngine(units(), store, today, random = Random(5))
+        engine.start()
+        engine.answerRightUntil { it is Step.Ask && it.question.isCheck }
+        val check = engine.current as Step.Ask
+        engine.answer(check.saidWrong())
+        while (engine.current is Step.Say) engine.advance()
+        assertTrue(engine.current is Step.AskReplay)
+        engine.replayAnswer(true)
+        val replayed = engine.current as Step.Say
+        assertEquals(check.question.segments.single(), units().single { it.id == check.unitId }
+            .explanations.main[replayed.segmentIndex!!].id)
+        while (engine.current is Step.Say) engine.advance()
+        assertEquals(check.question.id, (engine.current as Step.Ask).question.id)
+        // Checks don't move the concept's box.
+        assertEquals(null, store.load().concepts["node-runtime"])
+    }
+
+    @Test
+    fun aConceptMovesUpAtMostOneBoxADay() {
+        var cp = ConceptProgress()
+        repeat(5) { cp = Scheduler.update(cp, correct = true, sure = true, today = today) }
+        assertEquals(1, cp.box)
+        cp = Scheduler.update(cp, correct = true, sure = true, today = today.plusDays(1))
+        assertEquals(2, cp.box)
+        cp = Scheduler.update(cp, correct = false, sure = true, today = today.plusDays(1))
+        assertEquals(0, cp.box)
     }
 
     @Test

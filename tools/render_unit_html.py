@@ -101,48 +101,80 @@ def esc(s):
     return html.escape(s, quote=True)
 
 
-def unit_parts(unit, add):
+def question_card(q, label, mcs, seg_title, add):
+    add("<div class='card q'>")
+    add(f"<span class='lvl'>{label}</span>")
+    add(f"<div class='prompt'>{esc(q['prompt'])}</div>")
+    for i, o in enumerate(q.get("options", []), 1):
+        correct = "1" if o.get("correct") else "0"
+        add(f"<button class='opt' data-correct='{correct}'><span class='n'>{i}.</span>{esc(o['text'])}</button>")
+        if o.get("correct"):
+            add(f"<div class='fb'>{esc(q.get('explanation', ''))}</div>")
+        elif o.get("misconception"):
+            add(f"<div class='fb'>{esc(mcs.get(o['misconception'], {}).get('remedial', ''))}</div>")
+        else:
+            add(f"<div class='fb'>{esc(o.get('feedback', ''))}</div>")
+    if q.get("rubric"):
+        add(f"<details><summary>מה תשובה טובה צריכה להזכיר (לפחות {q['minPoints']})</summary><ul class='rubric'>")
+        add("".join(f"<li>{esc(p)}</li>" for p in q["rubric"]))
+        add("</ul></details>")
+    if q.get("hint"):
+        add(f"<details><summary>רמז</summary><p>{esc(q['hint'])}</p></details>")
+    taught = " · ".join(esc(seg_title.get(s, s)) for s in q.get("segments", []))
+    if taught:
+        add(f"<p class='meta'>אם טועים, אפשר לשמוע שוב: {taught}</p>")
+    add("</div>")
+
+
+def unit_parts(unit, add, all_units):
     """Append the HTML for one unit. All element ids are prefixed with the unit number."""
     uid = unit["id"].split("-")[0]
-    mcs = {m["id"]: m for m in unit["misconceptions"]}
-    seg_title = {s["id"]: s["title"] for s in unit["explanations"]["main"]}
+    mcs = {m["id"]: m for m in unit.get("misconceptions", [])}
+    main = unit.get("explanations", {}).get("main", [])
+    seg_title = {s["id"]: s["title"] for s in main}
+    review = unit.get("type") == "review"
 
     def jump(label, name):
         return f"<a href='#{uid}' class='jump' data-target='{uid}-{name}'>{label}</a>"
 
     add(f"<section class='unit' id='{uid}'>")
-    add(f"<header><h1>{esc(unit['title'])}</h1>")
-    add(f"<div class='meta'>כ-{unit['estimatedMinutes']} דקות · {len(unit['questions'])} שאלות</div></header>")
-    add("<nav>" + jump("ההסבר", "lesson") + jump("שאלות", "questions") + jump("מילון מונחים", "terms")
-        + jump("טעויות נפוצות", "mistakes") + jump("גרסאות נוספות", "variants") + "</nav>")
+    add(f"<header><h1>{'חזרה: ' if review else ''}{esc(unit['title'])}</h1>")
+    checks = sum(1 for s in main if s.get("check"))
+    add(f"<div class='meta'>כ-{unit['estimatedMinutes']} דקות · {len(unit.get('questions', []))} שאלות · {checks} בדיקות קצרות בתוך השיעור</div></header>")
+    if not review:
+        add("<nav>" + jump("ההסבר", "lesson") + jump("שאלות", "questions") + jump("מילון מונחים", "terms")
+            + jump("טעויות נפוצות", "mistakes") + jump("גרסאות נוספות", "variants") + "</nav>")
 
     add(f"<h2 id='{uid}-lesson'>ההסבר</h2>")
-    for seg in unit["explanations"]["main"]:
+    for seg in main:
         add(f"<div class='card'><h3>{esc(seg['title'])}</h3><p>{esc(seg['text'])}</p></div>")
+        if seg.get("check"):
+            question_card(seg["check"], "בדיקה קצרה", mcs, seg_title, add)
+    if review:
+        by_id = {u["id"]: u for u in all_units}
+        for ref in unit.get("fillIns", []):
+            src = by_id.get(ref["unit"], {})
+            seg = next((s for s in src.get("explanations", {}).get("main", []) if s["id"] == ref["segment"]), None)
+            if seg:
+                add(f"<div class='card'><h3>השלמה: {esc(seg['title'])}</h3><p class='meta'>מתוך {esc(src['title'])}</p><p>{esc(seg['text'])}</p></div>")
+        names = " · ".join(esc(by_id[c]["title"]) for c in unit.get("covers", []) if c in by_id)
+        add(f"<div class='card'><p class='meta'>אחרי ההשלמות: לכל יחידה תזכורת, שלוש שאלות קצרות, שתי שאלות מהיחידה (קודם אלה שטעית בהן), ושאלת הסבר קצרה. בסוף, סיכום של מה לחזק.</p><p>{names}</p></div>")
+        add(f"<h2>סיכום</h2><div class='card'><p>{esc(unit.get('recap', ''))}</p></div>")
+        add("</section>")
+        return
+    if unit.get("retell"):
+        add(f"<h2>במילים אחרות</h2><div class='card'><p class='meta'>מושמע אחרי השיעור, לפני השאלות</p><p>{esc(unit['retell'])}</p></div>")
 
     add(f"<h2 id='{uid}-questions'>שאלות</h2>")
     add("<p class='meta'>לחיצה על תשובה מראה מה האפליקציה תגיד אם תבחר בה.</p>")
     for n, q in enumerate(unit["questions"], 1):
-        add("<div class='card q'>")
-        add(f"<span class='lvl'>{n} · {LEVEL_LABEL[q['level']]}</span>")
-        add(f"<div class='prompt'>{esc(q['prompt'])}</div>")
-        for i, o in enumerate(q.get("options", []), 1):
-            correct = "1" if o.get("correct") else "0"
-            add(f"<button class='opt' data-correct='{correct}'><span class='n'>{i}.</span>{esc(o['text'])}</button>")
-            if o.get("correct"):
-                add(f"<div class='fb'>{esc(q['explanation'])}</div>")
-            elif o.get("misconception"):
-                add(f"<div class='fb'>{esc(mcs[o['misconception']]['remedial'])}</div>")
-            else:
-                add(f"<div class='fb'>{esc(o['feedback'])}</div>")
-        if q.get("rubric"):
-            add(f"<details><summary>מה תשובה טובה צריכה להזכיר (לפחות {q['minPoints']})</summary><ul class='rubric'>")
-            add("".join(f"<li>{esc(p)}</li>" for p in q["rubric"]))
-            add("</ul></details>")
-        add(f"<details><summary>רמז</summary><p>{esc(q['hint'])}</p></details>")
-        taught = " · ".join(esc(seg_title[s]) for s in q.get("segments", []))
-        add(f"<p class='meta'>אם טועים, אפשר לשמוע שוב: {taught}</p>")
-        add("</div>")
+        question_card(q, f"{n} · {LEVEL_LABEL[q['level']]}", mcs, seg_title, add)
+    if unit.get("reminder") or unit.get("reviewQuestions"):
+        add("<h2>לחזרות בהמשך</h2>")
+        if unit.get("reminder"):
+            add(f"<div class='card'><h3>תזכורת</h3><p>{esc(unit['reminder'])}</p></div>")
+        for q in unit.get("reviewQuestions", []):
+            question_card(q, "שאלת חזרה", mcs, seg_title, add)
 
     add(f"<h2 id='{uid}-terms'>מילון מונחים</h2>")
     add("<p class='meta'>ברכב אפשר לשאול ״מה זה …?״ ולשמוע את ההגדרה. מונחים מיחידות קודמות זמינים גם הם.</p>")
@@ -151,13 +183,13 @@ def unit_parts(unit, add):
         add(f"<dt dir='ltr'>{esc(t['term'])}</dt><dd>{esc(t['definition'])}</dd>")
     add("</dl></div>")
     add(f"<h2 id='{uid}-mistakes'>טעויות נפוצות</h2>")
-    for m in unit["misconceptions"]:
+    for m in unit.get("misconceptions", []):
         add(f"<div class='card'><p class='belief'>{esc(m['belief'])}</p>"
             f"<details><summary>ההסבר שמושמע</summary><p>{esc(m['remedial'])}</p></details></div>")
 
     add(f"<h2 id='{uid}-variants'>גרסאות נוספות</h2>")
-    simple = " ".join(esc(s["text"]) for s in unit["explanations"]["simple"])
-    deep = " ".join(esc(s["text"]) for s in unit["explanations"]["deep"])
+    simple = " ".join(esc(s["text"]) for s in unit["explanations"].get("simple", []))
+    deep = " ".join(esc(s["text"]) for s in unit["explanations"].get("deep", []))
     add(f"<div class='card'><h3>גרסה פשוטה</h3><p class='meta'>מושמעת כשקשה</p><p>{simple}</p></div>")
     add(f"<div class='card'><h3>העמקה</h3><p class='meta'>מושמעת כשהבסיס יושב</p><p>{deep}</p></div>")
     add(f"<h2>סיכום</h2><div class='card'><p>{esc(unit['recap'])}</p></div>")
@@ -182,7 +214,7 @@ def render(course_dir: Path) -> Path:
         add(f"<a href='#{uid}'><span class='num'>{n}.</span>{esc(u['title'])}</a>")
     add("</div>")
     for u in units:
-        unit_parts(u, add)
+        unit_parts(u, add, units)
     add("<h2 id='replay'>חזרה ברכב</h2><div class='card'><p class='meta'>אפשר להגיד בכל רגע בנסיעה:</p><dl class='terms'>")
     for say, does in REPLAY:
         add(f"<dt>״{esc(say)}״</dt><dd>{esc(does)}</dd>")

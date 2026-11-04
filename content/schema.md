@@ -21,7 +21,7 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
   משנה) go into `content/pronunciation.json` under `hebrew` with niqqud, instead of adding niqqud
   in the unit text. A new English abbreviation that should be read letter by letter, or a symbol
   like C#, goes under `english`.
-- **Depth.** A unit is about 20 minutes of listening: 6–8 main segments. At least two segments walk
+- **Depth.** A lesson has at least 15 minutes of main explanation (format 2): 6–10 main segments. At least two segments walk
   through a concrete example out loud: a real scenario, what the code does step by step in words,
   what goes wrong in the naive version and how a better version fixes it. Good practice (naming,
   layering, error handling, testing) is taught inside these examples, not as a list of rules.
@@ -67,7 +67,12 @@ The learner answers by ear while driving, so the options must not give the answe
 ```
 
 - `units` is the default teaching order. Every unit's concepts must have all prerequisites taught
-  in an earlier unit.
+  in an earlier unit. Review units (`r…`, `"concepts": []`) sit in the order after every two or
+  three lessons.
+- `substantiveTerms`: concepts with real substance (Redis, Reverse Proxy, Cache...). A unit may use
+  one, in its explanation or in a question, only after a unit has taught it: the teaching unit lists
+  it in `teaches` with the segment that teaches it. The validator enforces this. Never explain
+  something through a concept the learner hasn't learned; teach it first, with a check question.
 - `status`: `planned` (no file yet) → `draft` (file exists, not reviewed) → `ready` (reviewed).
 
 ## Unit file `units/<unit-id>.json`
@@ -79,7 +84,7 @@ The learner answers by ear while driving, so the options must not give the answe
   "title": "…",
   "estimatedMinutes": 15,
   "explanations": {
-    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson, 4–8 segments (new units: 6–8)
+    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson; format 2: 6–10 segments, at least 15 minutes, each with a "check"
     "simple": [ { "id": "simple-1", "text": "…" } ],           // same ideas through an analogy
     "deep":   [ { "id": "deep-1", "text": "…" } ]              // for when the basics are solid
   },
@@ -124,6 +129,49 @@ Rules:
   (Gemini after the drive, Claude at night).
 - Questions are listed in ladder order: recognize → why → apply → explain.
 
+### Format 2 lessons (every new unit)
+
+New units set `"format": 2`, and the validator enforces:
+
+- **At least 15 minutes of main explanation** (about 2100 words at 140 words a minute), in 6–10
+  segments, with at least two worked examples told out loud.
+- **A `check` question on every segment**: one short multiple-choice question (`"level": "check"`)
+  asked right after the segment. A wrong answer plays the remedial, offers the segment again, and
+  asks the same check once more. Checks don't move Leitner boxes.
+- **`retell`**: the whole unit told again in a different way (a new analogy), about 2 minutes,
+  played after the lesson and before the final questions.
+- **`reminder`**: two or three sentences that bring the unit back, read before warm-up and review
+  questions on it.
+- **`reviewQuestions`**: at least 3 short multiple-choice questions (recognize, why or apply) kept for
+  later: warm-ups before new lessons and review units pick from them, weakest concepts first.
+- **The explain-back is split into at least 3 short parts** (`q9`, `q10`, `q11`), each with its own
+  narrow prompt (״חלק ראשון מתוך שלושה...״), a rubric of about 3 points and `minPoints` 2. Short
+  answers are easier to say while driving and are recorded reliably.
+- `teaches`: `{ "Term": "segment-id" }` for every substantive term the unit introduces.
+
+### Review units
+
+```jsonc
+{
+  "id": "r1-review-foundations", "type": "review", "concepts": [],
+  "title": "…", "estimatedMinutes": 25,
+  "covers": ["u01-…", "u02-…", "u03-…"],          // earlier lessons to go back over
+  "fillIns": [{ "unit": "u02-…", "segment": "s4-proxy" }], // segments added after the learner heard the unit
+  "explanations": { "main": [ { "id": "s1", "title": "…", "text": "…" } ] }, // short intro
+  "recap": "…"
+}
+```
+
+The app plays the intro, the fill-in segments with their checks, then for each covered lesson its
+`reminder`, three review questions, two of its questions (the ones answered wrong first), and one
+explain part. It ends with a summary of what is solid and what to strengthen; wrong answers send
+those concepts back to box 0, so they return on the next drives with a reminder first.
+
+### Warm-up before a lesson
+
+Before a new lesson the app asks three short questions on earlier concepts, weakest first (lowest
+box, recent mistakes). A weak concept gets its `reminder` read before the question.
+
 ## Replay and navigation (implemented by the app)
 
 The learner can always go back. Voice commands, available at any point in a drive:
@@ -148,7 +196,9 @@ new question on the same concept. Finished units stay available for replay from 
 
 ## Mastery rules (implemented by the app, listed here so generators know the target)
 
-- After every answer the app asks ״בטוח או לא בטוח?״. Correct + unsure counts as weak.
+- The confidence question (״בטוח או לא בטוח?״) is off by default; every answer counts as sure.
+- A concept's Leitner box goes up at most once a day, however many answers are right that day.
+  A wrong answer sends it back to box 0.
 - Wrong answer → play the misconception's `remedial`, then ask a different question on the same
   concept from another angle; repeat that concept again ~20 minutes later in the same drive.
 - A concept is **mastered** after correct + sure answers on 3 occasions, on at least 2 different
