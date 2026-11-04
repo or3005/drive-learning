@@ -16,6 +16,11 @@ data class PronunciationData(
     val english: Map<String, String> = emptyMap(),
     /** Hebrew prefix letters before an English term (ה-React), vocalized so they are said as a syllable. */
     val prefixes: Map<String, String> = emptyMap(),
+    /**
+     * Hebrew words that also need niqqud with a prefix in front: שרת covers השרת, בשרת, מהשרת...
+     * The prefix is vocalized from [prefixes]. An exact entry in [hebrew] wins over a stem.
+     */
+    val stems: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -46,6 +51,18 @@ class Pronunciation(data: PronunciationData) {
     private val hebrewPrefixHyphen = Regex("(?<![\\u0590-\\u05FF])([והבכלמש]{1,3})-(?=[\\u0590-\\u05FF])")
     private val trailingPrefix = Regex("(?<![\\u0590-\\u05FF])([והבכלמש]{1,3})-\\s*$")
     private val prefixes = data.prefixes
+    private val stems = data.stems
+    private val stemRegex: Regex? = data.stems.keys
+        .sortedByDescending { it.length }
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString("|") { Regex.escape(it) }
+        ?.let { Regex("(?<![\\u0590-\\u05FF])([והבכלמש]{0,3}?)($it)(?![\\u0590-\\u05FF])") }
+
+    private fun vocalizeStems(text: String): String = stemRegex?.replace(text) { m ->
+        val prefix = m.groupValues[1]
+        val stem = stems[m.groupValues[2]] ?: m.groupValues[2]
+        (if (prefix.isEmpty()) "" else prefixes[prefix] ?: prefix) + stem
+    } ?: text
     private val englishMap = data.english.mapKeys { it.key.lowercase() }
     private val englishRegex: Regex? = data.english.keys
         .sortedByDescending { it.length }
@@ -60,6 +77,7 @@ class Pronunciation(data: PronunciationData) {
             out = acronym.replace(out) { m -> m.value.map { c -> letters[c.toString()] ?: c.toString() }.joinToString(" ") }
         }
         hebrewRegex?.let { r -> out = r.replace(out) { m -> hebrewMap[m.value] ?: m.value } }
+        out = vocalizeStems(out)
         out = hebrewPrefixHyphen.replace(out, "$1")
         return out
     }
@@ -68,6 +86,7 @@ class Pronunciation(data: PronunciationData) {
     fun applyHebrewRun(text: String): String {
         var out = text
         hebrewRegex?.let { r -> out = r.replace(out) { m -> hebrewMap[m.value] ?: m.value } }
+        out = vocalizeStems(out)
         out = trailingPrefix.replace(out) { m -> prefixes[m.groupValues[1]] ?: m.groupValues[1] }
         return out
     }

@@ -92,6 +92,10 @@ class LearningController(private val app: Application) {
     /** A long explain-back answer is collected over several recognizer sessions. */
     private val explainBuffer = StringBuilder()
     private var explainRounds = 0
+    private var explainErrors = 0
+    private var explainSilences = 0
+    /** A dropped recognizer connection gets one quiet retry before it counts as a failure. */
+    private var transientRetried = false
     private val prefs = app.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
     // Audio focus: pause while Waze or a phone call talks, continue when it's done.
@@ -246,11 +250,26 @@ class LearningController(private val app: Application) {
         }
     }
 
-    fun setGithubToken(token: String) {
+    /** Saves the token if it looks like a GitHub token, and tries an upload right away. Returns whether it was saved. */
+    fun setGithubToken(raw: String): Boolean {
+        val token = raw.trim()
+        val problem = when {
+            token.isEmpty() -> "השדה ריק. העתק את הטוקן מ-GitHub, ואז לחץ הדבק ושמור."
+            !(token.startsWith("github_pat_") || token.startsWith("ghp_")) ->
+                "זה לא נראה כמו טוקן של GitHub. טוקן מתחיל ב-github_pat_ ."
+            token.length < 40 || token.any { it.isWhitespace() } ->
+                "הטוקן נראה חתוך או עם רווחים. העתק אותו שוב, בשלמותו."
+            else -> null
+        }
+        if (problem != null) {
+            message(problem)
+            return false
+        }
         uploader.token = token
         refreshUploadState()
-        message(if (token.isBlank()) "הטוקן נמחק." else "הטוקן נשמר. שולח התקדמות…")
-        if (token.isNotBlank()) uploadNow(report = true)
+        message("הטוקן נשמר (${token.take(15)}…). שולח התקדמות…")
+        uploadNow(report = true)
+        return true
     }
 
     fun uploadNow(report: Boolean = false) {
@@ -293,14 +312,18 @@ class LearningController(private val app: Application) {
             is Step.Ask -> {
                 show(step, Mode.SPEAKING)
                 val q = step.question
+                transientRetried = false
                 if (q.isExplain) {
                     explainBuffer.clear()
                     explainRounds = 0
+                    explainErrors = 0
+                    explainSilences = 0
                 }
                 val text = if (q.isExplain) {
                     "${q.prompt} אחרי הצפצוף, דבר בחופשיות, גם עם הפסקות. כשתסיים, תגיד סיימתי."
                 } else {
                     buildString {
+                        if (q.isCheck) append("שאלה קצרה לפני שממשיכים. ")
                         append(q.prompt).append(' ')
                         step.displayedOptions.forEachIndexed { i, o -> append("תשובה ${HebrewNumbers.word(i + 1)}: $o ") }
                         append("מה התשובה?")
@@ -318,7 +341,7 @@ class LearningController(private val app: Application) {
                     listen(ListenContext.YES_NO)
                 }
             }
-            is Step.UnitDone -> {
+            is Step.UnitDone, is Step.Plan -> {
                 e.advance()
                 run()
             }
@@ -347,7 +370,7 @@ class LearningController(private val app: Application) {
                 },
                 accept = { partial -> acceptsEarly(partial, ctx) },
             ) { results, error -> heard(results, error, ctx) }
-        }, if (beep) 250L else 0L)
+        }, if (beep) 250L else 350L) // without a beep: let the previous recognizer close first
     }
 
     /** A partial transcript that already settles the answer, so there's no need to wait for silence. */
@@ -377,16 +400,23 @@ class LearningController(private val app: Application) {
         val piece = if (done != null) text.substringBefore(done).trim() else text
         if (piece.isNotEmpty()) explainBuffer.append(piece).append(' ')
         explainRounds++
-        // Silence before saying anything gets one more chance: maybe they're still thinking.
-        val silence = text.isEmpty() && (explainBuffer.isNotEmpty() || explainRounds >= 2)
-        val problem = error?.let { Listener.describe(it) } != null
-        if (done != null || silence || problem || explainRounds >= MAX_EXPLAIN_ROUNDS) {
+        // A dropped connection to the recognizer is not the end of the answer: start listening again.
+        val transient = error != null && error in TRANSIENT_ERRORS && text.isEmpty()
+        explainErrors = if (transient) explainErrors + 1 else 0
+        explainSilences = if (text.isEmpty() && !transient) explainSilences + 1 else 0
+        // Two quiet rounds in a row end the answer (or one, if nothing was said yet and it's the second try).
+        val silence = explainSilences >= 2 || (explainSilences >= 1 && explainBuffer.isEmpty() && explainRounds >= 2)
+        val problem = !transient && error?.let { Listener.describe(it) } != null
+        val gaveUp = explainErrors > MAX_TRANSIENT_RETRIES
+        if (done != null || silence || problem || gaveUp || explainRounds >= MAX_EXPLAIN_ROUNDS) {
             val transcript = explainBuffer.toString().trim()
             explainBuffer.clear()
             explainRounds = 0
+            explainErrors = 0
+            explainSilences = 0
             val reason = done ?: when {
                 silence -> "silence"
-                problem -> "error $error"
+                problem || gaveUp -> "error $error"
                 else -> "limit"
             }
             e.logDiagnostic("explain: ${transcript.length} chars, ended by $reason")
@@ -422,6 +452,11 @@ class LearningController(private val app: Application) {
             // Nothing understood: carry on where we stopped.
             (e.current as? Step.Say)?.let { resumeAt(it, resumeSentence) }
             run()
+            return
+        }
+        if (problem != null && error in TRANSIENT_ERRORS && !transientRetried) {
+            transientRetried = true
+            listen(ctx)
             return
         }
         if (problem != null) {
@@ -516,13 +551,17 @@ class LearningController(private val app: Application) {
     private fun show(step: Step, mode: Mode) {
         val e = engine ?: return
         val unit = e.unit(step.unitId)
-        val unitTitle = unit?.let { "יחידה ${e.unitNumber(it.id)}: ${it.title}" } ?: ""
+        val unitTitle = unit?.let { e.unitName(it.id) } ?: ""
         _state.update { s ->
             when (step) {
                 is Step.Say -> s.copy(mode = mode, unitTitle = unitTitle, label = step.label, prompt = "",
                     options = emptyList(), awaiting = null)
                 is Step.Ask -> s.copy(mode = mode, unitTitle = unitTitle,
-                    label = if (step.question.isExplain) "הסבר במילים שלך" else "שאלה",
+                    label = when {
+                        step.question.isExplain -> "הסבר במילים שלך"
+                        step.question.isCheck -> "בדיקה קצרה"
+                        else -> "שאלה"
+                    },
                     prompt = step.question.prompt, options = step.displayedOptions,
                     awaiting = if (step.question.isExplain) ListenContext.EXPLAIN else ListenContext.ANSWER)
                 is Step.AskConfidence -> s.copy(mode = mode, unitTitle = unitTitle, label = "כמה אתה בטוח?",
@@ -633,6 +672,9 @@ class LearningController(private val app: Application) {
         /** About 15 seconds of Hebrew speech. */
         private const val SEEK_WORDS = 32
         private const val MAX_EXPLAIN_ROUNDS = 12
+        private const val MAX_TRANSIENT_RETRIES = 3
+        /** Recognizer errors that usually pass on a second try: network hiccups, busy or disconnected service. */
+        private val TRANSIENT_ERRORS = setOf(1, 2, 4, 5, 8, 10, 11)
         private val DONE_WORDS = listOf("סיימתי", "סיימנו", "זהו זה", "זה הכל", "זה הכול")
         private const val KEY_ENGLISH_VOICE = "english_voice"
     }

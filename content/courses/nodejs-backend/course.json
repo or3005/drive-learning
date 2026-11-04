@@ -1,10 +1,10 @@
 {
   "id": "nodejs-backend",
-  "title": "Node.js ועבודה בבקאנד",
+  "title": "Node.js ועבודה ב-Backend",
   "language": "he",
   "audience": "מפתח ג׳וניור שעובד עם React ו-TypeScript בצד הלקוח ועם ASP.NET בצד השרת",
   "modules": [
-    { "id": "m1", "title": "יסודות הבקאנד" },
+    { "id": "m1", "title": "יסודות ה-Backend" },
     { "id": "m2", "title": "סביבת הריצה של Node.js" },
     { "id": "m3", "title": "בניית שרת HTTP" },
     { "id": "m4", "title": "תכנון API" },
@@ -13,10 +13,10 @@
     { "id": "m7", "title": "זהות ואבטחה" },
     { "id": "m8", "title": "ביצועים וסקייל" },
     { "id": "m9", "title": "תקשורת בזמן אמת" },
-    { "id": "m10", "title": "פרודקשן" }
+    { "id": "m10", "title": "Production" }
   ],
   "concepts": [
-    { "id": "backend-role", "module": "m1", "title": "מה בקאנד עושה ולמה הוא קיים",
+    { "id": "backend-role", "module": "m1", "title": "מה Backend עושה ולמה הוא קיים",
       "summary": "השרת הוא הצד שהמשתמש לא שולט בו, ולכן כל מה שצריך להיות אמין קורה בו",
       "prerequisites": [], "dotnetBridge": "ה-React הוא הלקוח וה-ASP.NET הוא השרת, בדיוק כמו בעבודה" },
     { "id": "request-journey", "module": "m1", "title": "המסע של בקשה: DNS, TCP ו-TLS",
@@ -170,7 +170,7 @@
       "prerequisites": ["socketio-ws", "horizontal-scaling"] },
 
     { "id": "observability", "module": "m10", "title": "לוגים, מטריקות ו-Tracing",
-      "summary": "איך יודעים מה קורה בשרת בפרודקשן, ולמה לוגים מובנים",
+      "summary": "איך יודעים מה קורה בשרת ב-Production, ולמה לוגים מובנים",
       "prerequisites": ["middleware"] },
     { "id": "testing", "module": "m10", "title": "אסטרטגיית בדיקות לשרת",
       "summary": "Unit, Integration ו-End to End, ומה שווה לבדוק בכל רמה",

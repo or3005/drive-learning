@@ -86,6 +86,18 @@ class MainActivity : ComponentActivity() {
         runCatching { ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java)) }
     }
 
+    /** Reads the token straight from the clipboard, so a paste that didn't land in the field can't lose it. */
+    private fun pasteToken() {
+        val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+        val text = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString().orEmpty()
+        tokenField.setText(text.trim())
+        saveToken(text)
+    }
+
+    private fun saveToken(text: String) {
+        if (controller.setGithubToken(text)) tokenField.setText("")
+    }
+
     private fun shareProgress() {
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -227,16 +239,17 @@ class MainActivity : ComponentActivity() {
         root.addView(text("התקדמות", 18f, bold = true), top(28))
         uploadText = text("", 13f, color = GREY).also { root.addView(it) }
         tokenField = EditText(this).apply {
-            hint = "טוקן של GitHub (Fine-grained)"
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            hint = "הדבק כאן טוקן של GitHub (מתחיל ב-github_pat_)"
+            // Visible, so it's easy to see that the whole token was pasted.
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             isSingleLine = true
         }
         root.addView(tokenField, top(4))
         root.addView(horizontal(
-            button("💾 שמור טוקן") {
-                controller.setGithubToken(tokenField.text.toString())
-                tokenField.setText("")
-            },
+            button("📋 הדבק ושמור") { pasteToken() },
+            button("💾 שמור") { saveToken(tokenField.text.toString()) },
+        ))
+        root.addView(horizontal(
             button("⬆ שלח עכשיו") { controller.uploadNow(report = true) },
             button("📤 שתף") { shareProgress() },
         ))

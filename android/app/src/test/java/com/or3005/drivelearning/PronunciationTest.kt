@@ -13,14 +13,14 @@ class PronunciationTest {
 
     @Test
     fun englishTermsBecomeHebrewSpelling() {
-        assertEquals("אפליקציית ריאקט היא לקוח.", p.apply("אפליקציית React היא לקוח."))
+        assertEquals("אפליקציית ריאקט היא לָקוֹחַ.", p.apply("אפליקציית React היא לקוח."))
         assertEquals("איי פי איי הוא חוזה.", p.apply("API הוא חוזה."))
-        assertEquals("נוֹוד ג'יי אס רץ על השרת.", p.apply("Node.js רץ על השרת."))
+        assertEquals("נוֹוד ג'יי אס רץ על הַשָׁרָת.", p.apply("Node.js רץ על השרת."))
     }
 
     @Test
     fun hebrewPrefixWithHyphenIsJoined() {
-        assertEquals("הריאקט הוא הלקוח.", p.apply("ה-React הוא הלקוח."))
+        assertEquals("הריאקט הוא הַלָקוֹחַ.", p.apply("ה-React הוא הלקוח."))
     }
 
     @Test
@@ -28,6 +28,18 @@ class PronunciationTest {
         assertEquals("ריוורס פרוקסי מטפל בזה.", p.apply("Reverse Proxy מטפל בזה."))
         assertEquals("מידלוור", p.apply("middleware"))
         assertTrue(p.apply("Stateless").startsWith("סטייטלס"))
+    }
+
+    @Test
+    fun stemsGetNiqqudWithTheirPrefixes() {
+        assertEquals("שָׁרָת", p.applyHebrewRun("שרת"))
+        assertEquals("הַשָׁרָת מקבל בַּקָּשָׁה", p.applyHebrewRun("השרת מקבל בקשה"))
+        assertEquals("תשובה מֵהַשָׁרָת", p.applyHebrewRun("תשובה מהשרת"))
+        assertEquals("רץ בַּשָּׁרָת", p.applyHebrewRun("רץ בשרת"))
+        // Words that only contain the letters of a stem are left alone
+        assertEquals("בשרשרת של עשרת", p.applyHebrewRun("בשרשרת של עשרת"))
+        // Already vocalized text is not touched again
+        assertEquals("יכול לְשָׁרֵת", p.applyHebrewRun("יכול לְשָׁרֵת"))
     }
 
     @Test
