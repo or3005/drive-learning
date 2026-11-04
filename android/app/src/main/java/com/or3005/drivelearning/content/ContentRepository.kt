@@ -18,6 +18,19 @@ class ContentRepository(private val context: Context) {
 
     private val syncedRoot = File(context.filesDir, "content")
 
+    init {
+        // Content downloaded by an older version of the app would hide the newer content bundled in
+        // this APK, so a new install starts from the bundled content again.
+        val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val version = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode
+        }.getOrDefault(0L)
+        if (prefs.getLong(KEY_CONTENT_APP_VERSION, -1L) != version) {
+            syncedRoot.deleteRecursively()
+            prefs.edit().putLong(KEY_CONTENT_APP_VERSION, version).apply()
+        }
+    }
+
     fun load(courseId: String = DEFAULT_COURSE): Loaded {
         val course = ContentJson.decodeFromString<Course>(read("courses/$courseId/course.json"))
         val units = course.units
@@ -78,6 +91,7 @@ class ContentRepository(private val context: Context) {
 
     companion object {
         const val DEFAULT_COURSE = "nodejs-backend"
+        private const val KEY_CONTENT_APP_VERSION = "content_app_version"
         const val RAW_BASE = "https://raw.githubusercontent.com/or3005/drive-learning/main"
     }
 }

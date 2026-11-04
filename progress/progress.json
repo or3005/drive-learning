@@ -386,6 +386,281 @@
             "day": "2026-11-02",
             "time": 1793604296714,
             "misconception": "mc-post-retry-safe"
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793772612382
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793772843709
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793772902854
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793772958007
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793773068967
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793773155922
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793773217294
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793773388725
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793773963936
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774005257
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774062515
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774110051
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774153729
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774234617
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774409290
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774467266
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793774688381
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775200232
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775245885
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775466133
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775607411
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775667254
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775712247
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775763107
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-04",
+            "time": 1793775811242
         }
     ],
     "concepts": {
@@ -394,8 +669,8 @@
             "nextReview": "2026-11-05"
         },
         "request-journey": {
-            "box": 2,
-            "nextReview": "2026-11-04",
+            "box": 3,
+            "nextReview": "2026-11-08",
             "mastered": true
         },
         "http-anatomy": {
@@ -403,13 +678,26 @@
             "nextReview": "2026-11-06"
         },
         "http-methods": {
-            "nextReview": "2026-11-02"
+            "box": 2,
+            "nextReview": "2026-11-06",
+            "mastered": true
+        },
+        "status-codes": {
+            "box": 3,
+            "nextReview": "2026-11-08"
+        },
+        "statelessness": {
+            "box": 6,
+            "nextReview": "2026-12-06"
         }
     },
     "completedUnits": [
         "u01-backend-role",
         "u02-request-journey",
-        "u03-http-anatomy"
+        "u03-http-anatomy",
+        "u04-http-methods",
+        "u05-status-codes",
+        "u06-statelessness"
     ],
     "explainAnswers": [
         {
@@ -425,6 +713,61 @@
             "transcript": "אוקיי אז בקשת http מורכבת מארבעה חלקים שונים החלק הראשון זה ההדר של מה אנחנו משתמשים באיזה שיטה בדרך כלל זה איזה אפליקיישן ג'ייסון או משהו אחרי זה יש לך את המיתוד מה אנחנו רוצים אנחנו רוצים גט אנחנו רוצים פוסט אנחנו רוצים פות מה מה בעצם מה הבקשה עצמה אחרי זה יש לנו באדי שזה דברים שקשורים לבקשה עצמה נגיד אני רוצה לפלטר אורדרינג ואחרי זה יש לנו את מה שאנחנו מחזירים שזה באיזה פורמט אנחנו נגיד ג'ייסון אפליקיישן ג'ייסון שזה נורא נורא חשוב כי ככה אנחנו יכולים להחזיר את האובייקט עצמו",
             "day": "2026-11-02",
             "time": 1793603227819
+        },
+        {
+            "questionId": "q9",
+            "unitId": "u04-http-methods",
+            "transcript": "אייטם פוינט זה רעיון של איך אנחנו איך איך דברים כמו פוסט פות וכל אלה קוראים כלומר אם עכשיו אני יכול לבצע אותם שוב והם לא משנים לי שום דבר בדטביס נגיד עכשיו אם יש כישלון בדלית אז לא קרה שום דבר בדטביס אז אני יכול למחוק אותו שוב ונגיד get הוא גם הייתם פוטנט כי הוא לא משנה שום דבר בדטה בייס פות גם יכול להיות אייטם פוטנט כי כשאני מבצע נגיד פעולה של עדכון שם ואז אחרי זה אני רוצה לעדכן את זה שוב בגלל שקרה איזה משהו אני לוחץ שוב לא יקרה כלום ולא יהיה את השינוי הלא נחוץ היחיד שהוא לא באמת אייטם פונה מבין כולם הוא",
+            "day": "2026-11-04",
+            "time": 1793773307186
+        },
+        {
+            "questionId": "q9",
+            "unitId": "u05-status-codes",
+            "transcript": "אוקיי אז יש לנו את הקודים של ה-200 כאשר 200 זה דברים שעברו בהצלחה יש 201 203 עם הבדי בלי הבאדי אלה פשוט אומרים לקליינט שיש לנו הכל 300 אלה דברים שהם פחות שכיחים וזה יותר עדכון על העברת דברים למקומות אחרים יש 300 31 זה יותר קשור למודיפיי או אפדייט עכשיו יש לנו את החלק של הבגים או הטעויות כל המספרים של 400 למשל 400 זה בעיות כאשר הקליינט שולח בקשה שהיא לא הגיונית או לא נכונה או משהו שכבר קיים למשל",
+            "day": "2026-11-04",
+            "time": 1793774556747
+        },
+        {
+            "questionId": "q9",
+            "unitId": "u06-statelessness",
+            "transcript": "‏http הוא סטייטלס כלומר הוא לא שומר שום מידע על על היוזר ששולח לו לקליינט אלא יודע תמיד לעבוד עם בקשות חדשות ואין לו מערך של היסטוריה או משהו כזה הוא יודע לעבוד לפי טוקנים ולפי קוקיז ואז ככה הוא יודע לזהות סטייטלס כלומר לא שומר שום מידע והמידע נשמר אך ורק בדטביס או טוקנים וכאלה בבראוזרים כמו קוקיז ככה זה נותן לנו אפשרות לעבוד בצורה הרבה יותר גדולה ורחבה וככה אנחנו יכולים לתת לכל מיני שרתים אחרים בקשות אחרות וככה באמת האי",
+            "day": "2026-11-04",
+            "time": 1793775905659
         }
+    ],
+    "diagnostics": [
+        "2026-11-02: microphone: אין חיבור לרשת (קוד 2)",
+        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-04: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-04: listen ANSWER: 'תשובה שלוש' -> Answer",
+        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
+        "2026-11-04: explain: 510 chars, ended by silence",
+        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה אחת' -> Answer",
+        "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-04: listen YES_NO: 'כן' -> YesNo",
+        "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
+        "2026-11-04: explain: 397 chars, ended by silence",
+        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה שתיים' -> Answer",
+        "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-04: listen ANSWER: 'תשובה שלוש' -> Answer",
+        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
+        "2026-11-04: explain: 424 chars, ended by silence"
     ]
 }

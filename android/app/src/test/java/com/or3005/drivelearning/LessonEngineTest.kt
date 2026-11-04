@@ -329,6 +329,21 @@ class LessonEngineTest {
     }
 
     @Test
+    fun theLearnersRealProgressGoesToBothReviewsThenUnitSeven() {
+        val file = File("../../progress/progress.json")
+        val state = com.or3005.drivelearning.engine.FileProgressStore(file).load()
+        val store = MemoryProgressStore(state)
+        val engine = LessonEngine(units(), store, LocalDate.of(2026, 11, 4), random = Random(1))
+        // Old boxes are rebuilt: eight right answers on one day are one step up, not eight.
+        assertEquals(Scheduler.VERSION, engine.progress.schedulerVersion)
+        assertTrue((engine.progress.concepts["statelessness"]?.box ?: 0) <= 1)
+        engine.start()
+        val seen = engine.answerRightUntil { it.unitId == "u08-event-loop" }
+        val openings = seen.filterIsInstance<Step.Say>().filter { it.label == "פתיחה" }.map { it.unitId }
+        assertEquals(listOf("r1-review-foundations", "r2-review-http", "u07-node-runtime"), openings)
+    }
+
+    @Test
     fun masteryNeedsThreeGoodAnswersOnTwoDaysIncludingApply() {
         val a = { day: String, level: String ->
             com.or3005.drivelearning.engine.Attempt("q", "u", "c", level, 1, true, true, day, 0L)
