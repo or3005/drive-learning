@@ -264,13 +264,19 @@ class LearningController(private val app: Application) {
      * screen copies the code and opens the page. When it's approved, uploads start working on their own.
      */
     fun loginToGithub(onCode: (code: String, url: String) -> Unit) {
-        val clientId = repo.loadConfig().githubClientId
-        if (clientId.isBlank()) {
-            message("ההתחברות עוד לא מוגדרת: חסר Client ID. אפשר בינתיים לשתף את ההתקדמות.")
-            return
-        }
         loginJob?.cancel()
         loginJob = scope.launch {
+            // The client id comes with the content; fetch it if this phone doesn't have it yet.
+            var clientId = repo.loadConfig().githubClientId
+            if (clientId.isBlank()) {
+                message("מביא הגדרות…")
+                repo.sync()
+                clientId = repo.loadConfig().githubClientId
+            }
+            if (clientId.isBlank()) {
+                message("ההתחברות עוד לא מוגדרת: חסר Client ID. אפשר בינתיים לשתף את ההתקדמות.")
+                return@launch
+            }
             val login = GitHubLogin(clientId)
             val code = login.requestCode().getOrElse {
                 message("ההתחברות נכשלה: ${it.message}")
