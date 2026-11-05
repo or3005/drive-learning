@@ -115,7 +115,7 @@ data class Option(
 data class AppConfig(
     /** Client id of the GitHub OAuth app used to sign in with a code (device flow). Public, not a secret. */
     val githubClientId: String = "",
-    /** Gemini model for live help. Empty: the app picks the newest stable Pro (or Flash) model the key can use. */
+    /** Gemini model for live help. Empty: the app picks the best Pro (or Flash) model the credential can use. */
     val geminiModel: String = "",
     /** Use Pro models while the month's estimated spend is below [geminiProCapUsd]; then Flash. */
     val geminiUsePro: Boolean = true,
@@ -124,6 +124,8 @@ data class AppConfig(
     val geminiHardCapUsd: Double = 9.0,
     /** Dollars per million tokens by model family: [input, output]. Empty: the app's built-in prices. */
     val geminiPrices: Map<String, List<Double>> = emptyMap(),
+    /** Vertex AI model names to try, best first, by tier ("pro", "flash"). Empty: the app's built-in list. */
+    val geminiVertexModels: Map<String, List<String>> = emptyMap(),
 )
 
 /** content/courses/index.json: the courses the learner can choose from. */

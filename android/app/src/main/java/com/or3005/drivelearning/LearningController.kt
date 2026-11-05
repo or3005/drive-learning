@@ -64,6 +64,7 @@ class LearningController(private val app: Application) {
         val geminiModel: String = "",
         val geminiSpent: Double = 0.0,
         val geminiCap: Double = 0.0,
+        val geminiVia: String = "",
     )
 
     /** A course on the picker: its progress so far. */
@@ -342,20 +343,28 @@ class LearningController(private val app: Application) {
 
     // ---- live help from Gemini ------------------------------------------------------------------------
 
-    /** Saves the learner's own Gemini API key (kept on the phone only) and checks it. */
+    /**
+     * Saves the learner's own Gemini credential (kept on the phone only) and checks it: a Vertex AI
+     * service account file (the way the AI Pro monthly credit pays), or an AI Studio API key.
+     */
     fun setGeminiKey(raw: String): Boolean {
-        val key = raw.trim()
-        if (key.length < 20 || key.any { it.isWhitespace() }) {
-            message("זה לא נראה כמו מפתח של Gemini. מעתיקים אותו מ-Google AI Studio, ולוחצים שוב.")
+        gemini.saveCredential(raw)?.let { problem ->
+            message("$problem בוחרים את קובץ ה-JSON של Vertex, או מעתיקים מפתח מ-Google AI Studio, ומנסים שוב.")
             return false
         }
-        gemini.key = key
         refreshGemini()
-        message("בודק את המפתח…")
+        val vertex = gemini.usesVertex
+        message(if (vertex) "בודק את החיבור ל-Vertex AI…" else "בודק את המפתח…")
         scope.launch {
             gemini.check(repo.loadConfig().geminiModel)
-                .onSuccess { m -> message("Gemini מחובר ($m). בנסיעה תקבל משוב מיד על ההסברים, ותשובות לשאלות. העלות נספרת, ועוצרים לפני ה-10 דולר של הקרדיט.") }
-                .onFailure { message("המפתח נשמר, אבל הבדיקה נכשלה: ${it.message}") }
+                .onSuccess { m ->
+                    message(
+                        "Gemini מחובר ($m). בנסיעה תקבל משוב מיד על ההסברים, ותשובות לשאלות. " +
+                            "העלות נספרת, ועוצרים לפני ה-10 דולר של הקרדיט." +
+                            if (vertex) " אפשר למחוק עכשיו את קובץ ה-JSON מההורדות: הוא שמור באפליקציה." else "",
+                    )
+                }
+                .onFailure { message("נשמר, אבל הבדיקה נכשלה: ${it.message}") }
             refreshGemini()
         }
         return true
@@ -368,10 +377,12 @@ class LearningController(private val app: Application) {
             hardCap = config.geminiHardCapUsd,
             usePro = config.geminiUsePro,
             prices = GeminiTutor.DEFAULT_PRICES + config.geminiPrices,
+            vertexModels = GeminiTutor.DEFAULT_VERTEX_MODELS + config.geminiVertexModels.filterValues { it.isNotEmpty() },
         )
         _state.update {
             it.copy(geminiConfigured = gemini.configured, geminiModel = gemini.model,
-                geminiSpent = gemini.spentThisMonth, geminiCap = gemini.limits.hardCap)
+                geminiSpent = gemini.spentThisMonth, geminiCap = gemini.limits.hardCap,
+                geminiVia = if (gemini.usesVertex) "Vertex AI · ${gemini.project}" else if (gemini.configured) "AI Studio" else "")
         }
     }
 

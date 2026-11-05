@@ -3,5 +3,17 @@
   "geminiModel": "",
   "geminiUsePro": true,
   "geminiProCapUsd": 7.0,
-  "geminiHardCapUsd": 9.0
+  "geminiHardCapUsd": 9.0,
+  "geminiVertexModels": {
+    "pro": [
+      "gemini-3.1-pro-preview",
+      "gemini-3-pro-preview"
+    ],
+    "flash": [
+      "gemini-3.8-flash",
+      "gemini-3.7-flash",
+      "gemini-3.5-flash",
+      "gemini-3-flash-preview"
+    ]
+  }
 }

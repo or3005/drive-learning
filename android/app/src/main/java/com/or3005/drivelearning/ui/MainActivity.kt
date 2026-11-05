@@ -90,6 +90,15 @@ class MainActivity : ComponentActivity() {
         runCatching { ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java)) }
     }
 
+    /** The Vertex service account file goes from the phone's files straight to the app's storage. */
+    private val pickVertexFile = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@registerForActivityResult
+        val text = runCatching {
+            contentResolver.openInputStream(uri)?.use { it.readBytes().takeIf { b -> b.size < 64_000 }?.decodeToString() }
+        }.getOrNull().orEmpty()
+        controller.setGeminiKey(text)
+    }
+
     /** The Gemini key goes from the clipboard straight to the phone's storage, never to the chat or the repo. */
     private fun pasteGeminiKey() {
         val clipboard = getSystemService(android.content.ClipboardManager::class.java)
@@ -195,8 +204,9 @@ class MainActivity : ComponentActivity() {
         val spent = String.format(java.util.Locale.US, "%.2f", s.geminiSpent)
         val cap = String.format(java.util.Locale.US, "%.0f", s.geminiCap)
         geminiText.text = when {
-            !s.geminiConfigured -> "כבוי. עם מפתח מ-Google AI Studio תקבל משוב מיד על ההסברים שלך, ותשובות כשתגיד: יש לי שאלה."
-            else -> "פעיל" + (if (s.geminiModel.isBlank()) "" else " · ${s.geminiModel}") +
+            !s.geminiConfigured -> "כבוי. עם Gemini תקבל משוב מיד על ההסברים שלך, ותשובות כשתגיד: יש לי שאלה. " +
+                "עם AI Pro: קובץ JSON של Vertex AI (הקרדיט החודשי משלם). בלי: מפתח חינמי מ-AI Studio."
+            else -> "פעיל · ${s.geminiVia}" + (if (s.geminiModel.isBlank()) "" else " · ${s.geminiModel}") +
                 "\nהחודש: בערך $spent דולר מתוך תקרה של $cap (הקרדיט החודשי הוא 10)"
         }
         uploadText.text = when {
@@ -308,7 +318,8 @@ class MainActivity : ComponentActivity() {
         root.addView(text("עזרה חיה מ-Gemini (לא חובה)", 18f, bold = true), top(28))
         geminiText = text("", 13f, color = GREY).also { root.addView(it) }
         root.addView(horizontal(
-            button("📋 הדבק מפתח Gemini") { pasteGeminiKey() },
+            button("📄 קובץ JSON של Vertex") { pickVertexFile.launch(arrayOf("*/*")) },
+            button("📋 הדבק מפתח AI Studio") { pasteGeminiKey() },
         ))
         root.addView(
             text(
