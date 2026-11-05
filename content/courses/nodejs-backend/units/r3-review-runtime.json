@@ -1,0 +1,23 @@
+{
+  "id": "r3-review-runtime",
+  "type": "review",
+  "concepts": [],
+  "title": "יחידות 7 עד 9: Node.js, ה-Event Loop, ו-Microtasks",
+  "estimatedMinutes": 25,
+  "covers": [
+    "u07-node-runtime",
+    "u08-event-loop",
+    "u09-microtasks"
+  ],
+  "fillIns": [],
+  "explanations": {
+    "main": [
+      {
+        "id": "s1",
+        "title": "חזרה על הלב של Node",
+        "text": "יחידת חזרה על שלוש היחידות הראשונות של הפרק השני: מה זה Node.js, איך ה-Event Loop עובד, ומה רץ קודם, Microtasks או Macrotasks. אלה שלוש היחידות שמסבירות למה Thread אחד מספיק לאלפי בקשות, ומה בדיוק יכול לתקוע אותו. לכל יחידה תשמע תזכורת קצרה, כמה שאלות, ושאלה קצרה להסביר במילים שלך. בסוף, סיכום של מה יושב טוב ומה צריך חיזוק. אחרי החזרה הזו נמשיך לחסימה של ה-Event Loop בחישובים כבדים, ולדרכים לטפל בה."
+      }
+    ]
+  },
+  "recap": "סיימנו את החזרה על הלב של Node: V8 ו-libuv, Thread אחד, Event Loop, ושני התורים של Macrotasks ו-Microtasks. עם הבסיס הזה, היחידה הבאה תראה איך מתמודדים עם חישוב כבד בלי לתקוע את כל השרת."
+}

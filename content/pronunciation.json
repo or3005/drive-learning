@@ -184,7 +184,20 @@
     "Sessions": "סֶשֶׁנְס",
     "Tokens": "טוֹקֶנְס",
     "Domains": "דּוֹמֵיינְס",
-    "Frameworks": "פְרֵיימְווֹרְקְס"
+    "Frameworks": "פְרֵיימְווֹרְקְס",
+    "Microtask Starvation": "מַיְקְרוֹטַאסְק סְטַארְבֵיישֶׁן",
+    "Microtask Queue": "מַיְקְרוֹטַאסְק קְיוּ",
+    "Microtasks": "מַיְקְרוֹטַאסְקְס",
+    "Microtask": "מַיְקְרוֹטַאסְק",
+    "Macrotasks": "מַאקְרוֹטַאסְקְס",
+    "Macrotask": "מַאקְרוֹטַאסְק",
+    "setTimeout": "סֶט טַיְים אַאוּט",
+    "setImmediate": "סֶט אִימִידְיֶאט",
+    "process.nextTick": "פְּרוֹסֶס נֶקְסְט טִיק",
+    "nextTick": "נֶקְסְט טִיק",
+    "queueMicrotask": "קְיוּ מַיְקְרוֹטַאסְק",
+    "then": "דֶ'ן",
+    "async": "אֵיסִינְק"
   },
   "hebrew": {
     "לפרק": "לְפָרֵק",
@@ -319,7 +332,13 @@
     "ללקוח": "לַלָּקוֹחַ",
     "במסד": "בַּמַּסַּד",
     "למסד": "לַמַּסַּד",
-    "בלוג": "בַּלּוֹג"
+    "בלוג": "בַּלּוֹג",
+    "מרוקן": "מְרוֹקֵן",
+    "מרוקנים": "מְרוֹקְנִים",
+    "ריקון": "רִיקּוּן",
+    "פתק": "פֶּתֶק",
+    "פתקים": "פְּתָקִים",
+    "הפתקים": "הַפְּתָקִים"
   },
   "letters": {
     "A": "איי",
@@ -378,7 +397,18 @@
     "hashSync": "hash sync",
     "Promise.all": "promise dot all",
     "Promise.allSettled": "promise dot all settled",
-    "Task.WhenAll": "task dot when all"
+    "Task.WhenAll": "task dot when all",
+    "Microtask Starvation": "micro task starvation",
+    "Microtask Queue": "micro task queue",
+    "Microtasks": "micro tasks",
+    "Microtask": "micro task",
+    "Macrotasks": "macro tasks",
+    "Macrotask": "macro task",
+    "setTimeout": "set timeout",
+    "setImmediate": "set immediate",
+    "process.nextTick": "process dot next tick",
+    "nextTick": "next tick",
+    "queueMicrotask": "queue micro task"
   },
   "prefixes": {
     "ה": "הַ",
