@@ -53,6 +53,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var englishSwitch: Switch
     private lateinit var tokenField: EditText
     private lateinit var uploadText: TextView
+    private lateinit var geminiText: TextView
     private val optionButtons = mutableListOf<Button>()
     private lateinit var coursesBox: LinearLayout
     private var shownCourses: List<LearningController.CourseChoice> = emptyList()
@@ -87,6 +88,13 @@ class MainActivity : ComponentActivity() {
             android.content.pm.PackageManager.PERMISSION_GRANTED
         if (!granted || PlaybackService.running) return
         runCatching { ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java)) }
+    }
+
+    /** The Gemini key goes from the clipboard straight to the phone's storage, never to the chat or the repo. */
+    private fun pasteGeminiKey() {
+        val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+        val text = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString().orEmpty()
+        controller.setGeminiKey(text)
     }
 
     /** One-time sign-in: copies the code and opens GitHub's page for it. */
@@ -184,6 +192,11 @@ class MainActivity : ComponentActivity() {
         setupText.text = setup.joinToString("\n")
         setupText.visibility = if (setup.isEmpty()) View.GONE else View.VISIBLE
         englishSwitch.isChecked = s.englishVoiceForTerms
+        geminiText.text = when {
+            !s.geminiConfigured -> "כבוי. עם מפתח חינמי מ-Google AI Studio תקבל משוב מיד על ההסברים שלך, ותשובות כשתגיד: יש לי שאלה."
+            s.geminiModel.isBlank() -> "פעיל"
+            else -> "פעיל · ${s.geminiModel}"
+        }
         uploadText.text = when {
             s.uploadError.isNotBlank() -> "⚠️ השליחה ל-GitHub נכשלה: ${s.uploadError}"
             !s.uploadConfigured -> "שליחה אוטומטית ל-GitHub: כבויה (אין טוקן)"
@@ -289,6 +302,11 @@ class MainActivity : ComponentActivity() {
         root.addView(horizontal(
             button("⬆ שלח עכשיו") { controller.uploadNow(report = true) },
             button("📤 שתף") { shareProgress() },
+        ))
+        root.addView(text("עזרה חיה מ-Gemini (לא חובה)", 18f, bold = true), top(28))
+        geminiText = text("", 13f, color = GREY).also { root.addView(it) }
+        root.addView(horizontal(
+            button("📋 הדבק מפתח Gemini") { pasteGeminiKey() },
         ))
         root.addView(
             text(

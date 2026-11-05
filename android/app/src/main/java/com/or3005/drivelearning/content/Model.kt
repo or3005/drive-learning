@@ -115,6 +115,8 @@ data class Option(
 data class AppConfig(
     /** Client id of the GitHub OAuth app used to sign in with a code (device flow). Public, not a secret. */
     val githubClientId: String = "",
+    /** Gemini model for live help. Empty: the app picks the newest stable Flash model the key can use. */
+    val geminiModel: String = "",
 )
 
 /** content/courses/index.json: the courses the learner can choose from. */

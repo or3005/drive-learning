@@ -60,6 +60,8 @@ class LearningController(private val app: Application) {
         val courseId: String = "",
         val courseTitle: String = "",
         val courses: List<CourseChoice> = emptyList(),
+        val geminiConfigured: Boolean = false,
+        val geminiModel: String = "",
     )
 
     /** A course on the picker: its progress so far. */
@@ -86,6 +88,7 @@ class LearningController(private val app: Application) {
         return file
     }
     private val uploader = ProgressUploader(app)
+    private val gemini = GeminiTutor(app)
     private val listener = Listener(app)
     private val speaker = Speaker(app) { hebrew ->
         _state.update { it.copy(voiceReady = true, hebrewVoice = hebrew, recognizerReady = listener.available) }
@@ -139,6 +142,7 @@ class LearningController(private val app: Application) {
         _state.update { it.copy(englishVoiceForTerms = englishVoice) }
         refreshCounts()
         refreshUploadState()
+        refreshGemini()
         // New units, pronunciation fixes and settings arrive without a new APK.
         scope.launch {
             repo.sync().onSuccess {
@@ -228,6 +232,11 @@ class LearningController(private val app: Application) {
             is Command.Sure -> if (e.confidence(command.sure)) uploadSoon() else return retryListen()
             is Command.YesNo -> if (!e.replayAnswer(command.yes)) return retryListen()
             is Command.Explain -> {
+                val ask = e.current as? Step.Ask
+                if (gemini.configured && ask != null && ask.question.isExplain && command.transcript.isNotBlank()) {
+                    gradeLive(e, ask, command.transcript)
+                    return
+                }
                 e.explain(command.transcript)
                 uploadSoon()
             }
@@ -254,6 +263,10 @@ class LearningController(private val app: Application) {
             is Command.LiveQuestion -> {
                 e.saveLiveQuestion(command.text)
                 uploadSoon()
+                if (gemini.configured && command.text.isNotBlank()) {
+                    answerLive(e, command.text, interruptedSay, at)
+                    return
+                }
                 insert(
                     e,
                     listOf(Step.Say("שמרתי את השאלה. אענה עליה בנסיעה הבאה.", e.current.unitId, label = "שאלה")),
@@ -321,6 +334,65 @@ class LearningController(private val app: Application) {
                     uploadNow(report = true)
                 }
                 .onFailure { message("ההתחברות לא הושלמה: ${it.message}") }
+        }
+    }
+
+    // ---- live help from Gemini ------------------------------------------------------------------------
+
+    /** Saves the learner's own Gemini API key (kept on the phone only) and checks it. */
+    fun setGeminiKey(raw: String): Boolean {
+        val key = raw.trim()
+        if (key.length < 20 || key.any { it.isWhitespace() }) {
+            message("זה לא נראה כמו מפתח של Gemini. מעתיקים אותו מ-Google AI Studio, ולוחצים שוב.")
+            return false
+        }
+        gemini.key = key
+        refreshGemini()
+        message("בודק את המפתח…")
+        scope.launch {
+            gemini.check(repo.loadConfig().geminiModel)
+                .onSuccess { m -> message("Gemini מחובר ($m). בנסיעה תקבל משוב מיד על ההסברים, ותשובות לשאלות.") }
+                .onFailure { message("המפתח נשמר, אבל הבדיקה נכשלה: ${it.message}") }
+            refreshGemini()
+        }
+        return true
+    }
+
+    private fun refreshGemini() {
+        _state.update { it.copy(geminiConfigured = gemini.configured, geminiModel = gemini.model) }
+    }
+
+    /** Grades an explain-back answer with Gemini and plays the feedback now. Falls back to grading after the drive. */
+    private fun gradeLive(e: LessonEngine, ask: Step.Ask, transcript: String) {
+        _state.update { it.copy(mode = Mode.SPEAKING, awaiting = null, label = "בודק את ההסבר") }
+        speaker.speak("רגע, בודק את ההסבר שלך.") {}
+        scope.launch {
+            val q = ask.question
+            val result = gemini.gradeExplain(q.prompt, q.rubric, e.lessonTextFor(ask.unitId, q), transcript, repo.loadConfig().geminiModel)
+            if (engine !== e || e.current !== ask) return@launch // the learner moved on meanwhile
+            result.onFailure { e.logDiagnostic("gemini: ${it.message}") }
+            val grade = result.getOrNull()
+            e.explain(transcript, grade?.feedback, grade?.covered)
+            uploadSoon()
+            run()
+        }
+    }
+
+    /** Answers a question asked out loud, then the lesson continues where it stopped. */
+    private fun answerLive(e: LessonEngine, question: String, interrupted: Step.Say?, at: Int) {
+        val context = e.liveContext()
+        _state.update { it.copy(mode = Mode.SPEAKING, label = "השאלה שלך") }
+        speaker.speak("שאלה טובה, רגע.") {}
+        scope.launch {
+            val result = gemini.answer(question, context, repo.loadConfig().geminiModel)
+            if (engine !== e) return@launch
+            val text = result.getOrElse {
+                e.logDiagnostic("gemini: ${it.message}")
+                "לא הצלחתי לענות עכשיו. שמרתי את השאלה, ואענה עליה אחרי הנסיעה."
+            }
+            if (result.isSuccess) e.saveLiveAnswer(question, text)
+            insert(e, listOf(Step.Say(text, e.current.unitId, label = "תשובה לשאלה שלך")), interrupted, at, resume = true)
+            run()
         }
     }
 

@@ -26,7 +26,15 @@ data class ExplainAnswer(
     val transcript: String,
     val day: String,
     val time: Long,
+    /** Feedback given live (Gemini), if any. Then the after-drive run doesn't grade it again. */
+    val feedback: String? = null,
+    /** Rubric points (0-based) the live grading found in the answer. */
+    val covered: List<Int>? = null,
+    val passed: Boolean? = null,
 )
+
+@Serializable
+data class LiveAnswer(val question: String, val answer: String, val unitId: String?, val day: String, val time: Long)
 
 @Serializable
 data class LiveQuestion(val text: String, val unitId: String?, val day: String, val time: Long)
@@ -56,6 +64,8 @@ data class ProgressState(
     val reviewBlocksDone: Set<String> = emptySet(),
     /** Feedback items (from feedback.json) already played. */
     val heardFeedback: Set<String> = emptySet(),
+    /** Questions asked out loud and answered live by Gemini. */
+    val liveAnswers: List<LiveAnswer> = emptyList(),
 )
 
 interface ProgressStore {

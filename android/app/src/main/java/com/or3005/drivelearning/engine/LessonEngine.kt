@@ -203,27 +203,57 @@ class LessonEngine(
         return true
     }
 
-    /** A spoken explain-back answer. Graded later (Gemini after the drive, Claude at night). */
-    fun explain(transcript: String): Boolean {
+    /**
+     * A spoken explain-back answer. With [feedback] (graded live by Gemini) the feedback is played
+     * now; otherwise the answer is graded after the drive and the feedback comes on the next drive.
+     */
+    fun explain(transcript: String, feedback: String? = null, covered: List<Int>? = null): Boolean {
         val ask = current as? Step.Ask ?: return false
         val q = ask.question
         if (!q.isExplain) return false
+        val passed = covered?.let { it.size >= q.minPoints.coerceAtLeast(1) }
         if (transcript.isNotBlank()) {
             progress = progress.copy(
                 explainAnswers = progress.explainAnswers +
-                    ExplainAnswer(q.id, ask.unitId, transcript, today.toString(), now()),
+                    ExplainAnswer(q.id, ask.unitId, transcript, today.toString(), now(), feedback, covered, passed),
             )
             store.save(progress)
         }
-        val intro = if (transcript.isBlank()) {
-            "לא שמעתי הסבר, אז נעבור על הנקודות ביחד."
+        if (transcript.isNotBlank() && !feedback.isNullOrBlank()) {
+            queue.addFirst(Step.Say(feedback, ask.unitId, label = "משוב על ההסבר שלך"))
         } else {
-            "שמרתי את ההסבר שלך. הוא ייבדק בהפסקה, ותקבל עליו משוב בנסיעה הבאה."
+            val intro = if (transcript.isBlank()) {
+                "לא שמעתי הסבר, אז נעבור על הנקודות ביחד."
+            } else {
+                "שמרתי את ההסבר שלך. הוא ייבדק אחרי הנסיעה, ותקבל עליו משוב בנסיעה הבאה."
+            }
+            val points = q.rubric.joinToString(". ")
+            queue.addFirst(Step.Say("$intro אלה הנקודות שהיה חשוב להזכיר: $points.", ask.unitId, label = "נקודות חשובות"))
         }
-        val points = q.rubric.joinToString(". ")
-        queue.addFirst(Step.Say("$intro אלה הנקודות שהיה חשוב להזכיר: $points.", ask.unitId, label = "נקודות חשובות"))
         advance()
         return true
+    }
+
+    /** The lesson text a question is about, for live grading. */
+    fun lessonTextFor(unitId: String, q: Question): String {
+        val unit = unitById[unitId] ?: return ""
+        val segs = unit.explanations.main.filter { it.id in q.segments }.ifEmpty { unit.explanations.main }
+        return segs.joinToString("\n") { it.text }
+    }
+
+    /** What the learner is learning now, for answering a question asked out loud. */
+    fun liveContext(): String {
+        val unit = unit(current.unitId) ?: return ""
+        val say = current as? Step.Say
+        val segment = say?.segmentIndex?.let { unit.explanations.main.getOrNull(it)?.text }.orEmpty()
+        return listOf("Unit: ${unit.title}", "Summary: ${unit.recap}", segment).filter { it.isNotBlank() }.joinToString("\n")
+    }
+
+    fun saveLiveAnswer(question: String, answer: String) {
+        progress = progress.copy(
+            liveAnswers = progress.liveAnswers + LiveAnswer(question, answer, current.unitId, today.toString(), now()),
+        )
+        store.save(progress)
     }
 
     fun saveLiveQuestion(text: String) {
