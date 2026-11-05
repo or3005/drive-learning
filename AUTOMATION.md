@@ -25,6 +25,11 @@ Android code.
 
 ## Each run
 
+0. **First, check if there is anything to do:** `python3 tools/needs_run.py`. If it prints `NOTHING`,
+   stop right there: don't read anything else, don't commit, and finish with one line saying there were
+   no changes. It prints `RUN` with reasons when a course has new answers from a drive, explain-back
+   answers without feedback, or fewer than 3 lessons ready ahead.
+
 1. `git pull`. For each course in `content/courses/index.json`, read `progress/<course>.json` (skip
    courses without one) and its entry in `progress/processed.json`.
 
@@ -53,7 +58,8 @@ Android code.
 5. `python3 tools/validate.py` must end with 0 errors; fix warnings where reasonable. Then
    `python3 tools/render_unit_html.py`.
 
-6. If anything changed: update `progress/processed.json`, commit with a short English message
+6. If anything changed: update `progress/processed.json` (`feedbackUntil`, and `lastAttemptTime` set to
+   the newest attempt `time` in that course's progress), commit with a short English message
    (`content: feedback for 2 answers, unit u09`), and push to `main`. If the push is rejected because the
    app uploaded progress meanwhile, `git pull --rebase` and push again. If nothing changed, don't commit.
 
