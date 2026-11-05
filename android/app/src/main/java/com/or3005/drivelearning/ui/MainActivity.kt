@@ -315,9 +315,15 @@ class MainActivity : ComponentActivity() {
             button("⬆ שלח עכשיו") { controller.uploadNow(report = true) },
             button("📤 שתף") { shareProgress() },
         ))
-        root.addView(text("עזרה חיה מ-Gemini (לא חובה)", 18f, bold = true), top(28))
-        geminiText = text("", 13f, color = GREY).also { root.addView(it) }
-        root.addView(horizontal(
+        // Live help from Gemini: hidden while GeminiTutor.LIVE_HELP is off. The section stays ready.
+        val geminiSection = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = if (com.or3005.drivelearning.GeminiTutor.LIVE_HELP) View.VISIBLE else View.GONE
+        }
+        root.addView(geminiSection)
+        geminiSection.addView(text("עזרה חיה מ-Gemini (לא חובה)", 18f, bold = true), top(28))
+        geminiText = text("", 13f, color = GREY).also { geminiSection.addView(it) }
+        geminiSection.addView(horizontal(
             button("📄 קובץ JSON של Vertex") { pickVertexFile.launch(arrayOf("*/*")) },
             button("📋 הדבק מפתח AI Studio") { pasteGeminiKey() },
         ))

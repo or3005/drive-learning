@@ -419,6 +419,13 @@ class GeminiTutor(context: Context) {
             .replace(Regex("\\s+"), " ").trim()
 
     companion object {
+        /**
+         * Live help is switched off for now (the learner's choice, 2026-11-05): no calls to Gemini, and its
+         * section is hidden from the screen. All the code stays here, compiled and ready. To bring it
+         * back, set this to true and release a new build.
+         */
+        const val LIVE_HELP = false
+
         private const val KEY_API = "gemini_key"
         private const val KEY_SA = "gemini_vertex_sa"
         private const val KEY_MODEL = "gemini_model_"

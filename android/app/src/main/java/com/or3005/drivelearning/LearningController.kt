@@ -92,6 +92,9 @@ class LearningController(private val app: Application) {
     }
     private val uploader = ProgressUploader(app)
     private val gemini = GeminiTutor(app)
+
+    /** Live help from Gemini: only when switched on in the code ([GeminiTutor.LIVE_HELP]) and set up on the phone. */
+    private val liveHelp: Boolean get() = GeminiTutor.LIVE_HELP && gemini.configured
     private val listener = Listener(app)
     private val speaker = Speaker(app) { hebrew ->
         _state.update { it.copy(voiceReady = true, hebrewVoice = hebrew, recognizerReady = listener.available) }
@@ -237,7 +240,7 @@ class LearningController(private val app: Application) {
             is Command.YesNo -> if (!e.replayAnswer(command.yes)) return retryListen()
             is Command.Explain -> {
                 val ask = e.current as? Step.Ask
-                if (gemini.configured && ask != null && ask.question.isExplain && command.transcript.isNotBlank()) {
+                if (liveHelp && ask != null && ask.question.isExplain && command.transcript.isNotBlank()) {
                     gradeLive(e, ask, command.transcript)
                     return
                 }
@@ -267,7 +270,7 @@ class LearningController(private val app: Application) {
             is Command.LiveQuestion -> {
                 e.saveLiveQuestion(command.text)
                 uploadSoon()
-                if (gemini.configured && command.text.isNotBlank()) {
+                if (liveHelp && command.text.isNotBlank()) {
                     answerLive(e, command.text, interruptedSay, at)
                     return
                 }
