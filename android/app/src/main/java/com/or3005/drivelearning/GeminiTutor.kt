@@ -10,9 +10,14 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Live help from Gemini during the drive, with the learner's own free API key (Google AI Studio,
- * no billing): grades an explain-back answer right away, and answers a question asked out loud.
- * The key stays on the phone. Without a key, or without network, the app works as before.
+ * Live help from Gemini during the drive: grades an explain-back answer right away, and answers a
+ * question asked out loud. The key stays on the phone. Without a key, or without network, the app
+ * works as before.
+ *
+ * With a Google AI Pro subscription the key comes from a Cloud project whose monthly Developer
+ * Program credit ($10) pays for the API. To never pay beyond it, every call's real token use is
+ * priced and added up per month: Pro models until [Limits.proCap], then Flash until
+ * [Limits.hardCap], then live help stops until next month.
  */
 class GeminiTutor(context: Context) {
 
@@ -20,18 +25,42 @@ class GeminiTutor(context: Context) {
 
     var key: String
         get() = prefs.getString(KEY_API, "").orEmpty()
-        set(value) = prefs.edit().putString(KEY_API, value.trim()).remove(KEY_MODEL).apply()
+        set(value) = prefs.edit().putString(KEY_API, value.trim())
+            .remove(KEY_MODEL + "pro").remove(KEY_MODEL + "flash").remove(KEY_LAST_MODEL).apply()
 
     val configured: Boolean get() = key.isNotBlank()
 
-    /** The model in use, picked from the models this key can use (or set in app-config.json). */
-    val model: String get() = prefs.getString(KEY_MODEL, "").orEmpty()
+    /** The model used last, picked from the models this key can use (or set in app-config.json). */
+    val model: String get() = prefs.getString(KEY_LAST_MODEL, "").orEmpty()
+
+    /** Monthly spending limits in dollars, and token prices per million (input, output) by model family. */
+    data class Limits(
+        val proCap: Double = 7.0,
+        val hardCap: Double = 9.0,
+        val usePro: Boolean = true,
+        val prices: Map<String, List<Double>> = DEFAULT_PRICES,
+    )
+
+    var limits = Limits()
+
+    /** Estimated dollars spent this month, from the token counts Gemini reports. */
+    val spentThisMonth: Double get() = prefs.getFloat(spentKey(), 0f).toDouble()
 
     data class Grade(val covered: List<Int>, val feedback: String)
 
     /** Checks the key and picks a model. Returns the model name. */
     suspend fun check(preferred: String = ""): Result<String> = withContext(Dispatchers.IO) {
-        runCatching { pickModel(preferred) }
+        runCatching { pickModel(preferred, tier()).also { prefs.edit().putString(KEY_LAST_MODEL, it).apply() } }
+    }
+
+    /** Pro while the month's spending is low, then Flash, then nothing. */
+    private fun tier(): String {
+        val spent = spentThisMonth
+        return when {
+            spent >= limits.hardCap -> error("הגעת לתקרה החודשית של Gemini. העזרה החיה חוזרת בחודש הבא.")
+            limits.usePro && spent < limits.proCap -> "pro"
+            else -> "flash"
+        }
     }
 
     suspend fun gradeExplain(
@@ -87,24 +116,67 @@ class GeminiTutor(context: Context) {
     // ---- API ------------------------------------------------------------------------------------------
 
     private fun generate(text: String, json: Boolean, preferred: String): String {
-        val model = pickModel(preferred)
-        val body = JSONObject()
-            .put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", SYSTEM))))
-            .put("contents", JSONArray().put(JSONObject().put("role", "user").put("parts", JSONArray().put(JSONObject().put("text", text)))))
-            .put(
-                "generationConfig",
-                JSONObject().put("temperature", 0.4).apply { if (json) put("responseMimeType", "application/json") },
-            )
-        val response = request("POST", "$BASE/models/${model.removePrefix("models/")}:generateContent", body.toString())
-        val parts = JSONObject(response).getJSONArray("candidates").getJSONObject(0)
+        val tier = tier()
+        val model = pickModel(preferred, tier)
+        prefs.edit().putString(KEY_LAST_MODEL, model).apply()
+        fun body(thinking: Boolean): String {
+            val config = JSONObject().put("temperature", 0.4)
+            if (json) config.put("responseMimeType", "application/json")
+            // Keep thinking short: thinking tokens are billed as output.
+            if (thinking) {
+                config.put(
+                    "thinkingConfig",
+                    if (version(model) >= 3) JSONObject().put("thinkingLevel", "low") else JSONObject().put("thinkingBudget", 1024),
+                )
+            }
+            return JSONObject()
+                .put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", SYSTEM))))
+                .put("contents", JSONArray().put(JSONObject().put("role", "user").put("parts", JSONArray().put(JSONObject().put("text", text)))))
+                .put("generationConfig", config)
+                .toString()
+        }
+        val url = "$BASE/models/${model.removePrefix("models/")}:generateContent"
+        val response = try {
+            request("POST", url, body(thinking = true))
+        } catch (e: BadRequest) {
+            request("POST", url, body(thinking = false)) // a model that doesn't take this thinking setting
+        }
+        val root = JSONObject(response)
+        record(model, root.optJSONObject("usageMetadata"))
+        val parts = root.getJSONArray("candidates").getJSONObject(0)
             .getJSONObject("content").getJSONArray("parts")
-        return (0 until parts.length()).joinToString("") { parts.getJSONObject(it).optString("text") }
+        return (0 until parts.length())
+            .map { parts.getJSONObject(it) }
+            .filter { !it.optBoolean("thought") }
+            .joinToString("") { it.optString("text") }
     }
 
-    /** A Flash model this key can use: the one set in app-config, the one picked before, or the newest stable Flash. */
-    private fun pickModel(preferred: String): String {
+    /** Adds this call's cost to the month, at the model family's price (thinking counts as output). */
+    private fun record(model: String, usage: JSONObject?) {
+        usage ?: return
+        val input = usage.optLong("promptTokenCount")
+        val output = usage.optLong("candidatesTokenCount") + usage.optLong("thoughtsTokenCount")
+        val family = when {
+            "flash-lite" in model -> "flash-lite"
+            "flash" in model -> "flash"
+            else -> "pro"
+        }
+        val price = limits.prices[family] ?: DEFAULT_PRICES.getValue("pro")
+        val cost = input / 1e6 * price[0] + output / 1e6 * price[1]
+        prefs.edit().putFloat(spentKey(), (spentThisMonth + cost).toFloat()).apply()
+    }
+
+    private fun spentKey() = "gemini_spent_" + java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.US).format(java.util.Date())
+
+    private class BadRequest(message: String) : Exception(message)
+
+    /**
+     * A model of the wanted tier that this key can use: the one set in app-config, the one picked
+     * before, or the newest stable one ("pro" or "flash").
+     */
+    private fun pickModel(preferred: String, tier: String): String {
         if (preferred.isNotBlank()) return preferred
-        model.takeIf { it.isNotBlank() }?.let { return it }
+        prefs.getString(KEY_MODEL + tier, null)?.takeIf { it.isNotBlank() }?.let { return it }
         val list = JSONObject(request("GET", "$BASE/models?pageSize=200", null)).optJSONArray("models") ?: JSONArray()
         val names = (0 until list.length()).map { list.getJSONObject(it) }
             .filter { m ->
@@ -112,14 +184,17 @@ class GeminiTutor(context: Context) {
                 methods != null && (0 until methods.length()).any { methods.getString(it) == "generateContent" }
             }
             .map { it.getString("name").removePrefix("models/") }
-            .filter { n -> "flash" in n && listOf("tts", "image", "live", "audio", "embedding", "thinking").none { it in n } }
+            .filter { n -> n.startsWith("gemini") && listOf("tts", "image", "live", "audio", "embedding", "vision").none { it in n } }
+            .filter { n -> if (tier == "pro") "pro" in n else "flash" in n }
         val ranked = names.sortedWith(
-            compareBy<String> { "preview" in it || "exp" in it }  // stable first
-                .thenBy { "lite" in it }                         // then full Flash over Flash-Lite
-                .thenByDescending { version(it) },               // then the newest
+            compareBy<String> { "exp" in it }                    // experimental last
+                .thenBy { "lite" in it }                         // full model over Lite
+                .thenByDescending { version(it) }                // the newest
+                .thenBy { "preview" in it },                     // stable over preview of the same version
         )
-        val chosen = ranked.firstOrNull() ?: error("לא נמצא מודל Flash זמין למפתח הזה.")
-        prefs.edit().putString(KEY_MODEL, chosen).apply()
+        val chosen = ranked.firstOrNull()
+            ?: if (tier == "pro") return pickModel(preferred, "flash") else error("לא נמצא מודל Gemini זמין למפתח הזה.")
+        prefs.edit().putString(KEY_MODEL + tier, chosen).apply()
         return chosen
     }
 
@@ -140,6 +215,7 @@ class GeminiTutor(context: Context) {
             }
             val code = conn.responseCode
             val text = (if (code in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (code == 400 && "thinking" in text.lowercase()) throw BadRequest(text)
             check(code in 200..299) { explain(code, text) }
             return text
         } finally {
@@ -150,10 +226,11 @@ class GeminiTutor(context: Context) {
     private fun explain(code: Int, body: String): String = when (code) {
         400, 401, 403 -> if ("API_KEY" in body || "API key" in body) "מפתח ה-Gemini לא תקין." else "Gemini סירב לבקשה ($code)."
         404 -> {
-            prefs.edit().remove(KEY_MODEL).apply() // the model may have been retired: pick again next time
+            // The model may have been retired: pick again next time.
+            prefs.edit().remove(KEY_MODEL + "pro").remove(KEY_MODEL + "flash").apply()
             "המודל לא נמצא (404)."
         }
-        429 -> "נגמרה המכסה החינמית של Gemini לבינתיים (429)."
+        429 -> "Gemini עמוס או שהמכסה נגמרה לבינתיים (429)."
         else -> "Gemini החזיר $code."
     }
 
@@ -164,7 +241,14 @@ class GeminiTutor(context: Context) {
 
     companion object {
         private const val KEY_API = "gemini_key"
-        private const val KEY_MODEL = "gemini_model"
+        private const val KEY_MODEL = "gemini_model_"
+        private const val KEY_LAST_MODEL = "gemini_last_model"
+        /** Dollars per million tokens, input and output; on the high side, so the estimate never runs short. */
+        val DEFAULT_PRICES = mapOf(
+            "pro" to listOf(2.5, 15.0),
+            "flash" to listOf(1.5, 9.0),
+            "flash-lite" to listOf(0.3, 2.5),
+        )
         private const val BASE = "https://generativelanguage.googleapis.com/v1beta"
         private const val TIMEOUT_MS = 30_000L
         private const val SYSTEM =

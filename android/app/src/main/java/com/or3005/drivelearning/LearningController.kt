@@ -62,6 +62,8 @@ class LearningController(private val app: Application) {
         val courses: List<CourseChoice> = emptyList(),
         val geminiConfigured: Boolean = false,
         val geminiModel: String = "",
+        val geminiSpent: Double = 0.0,
+        val geminiCap: Double = 0.0,
     )
 
     /** A course on the picker: its progress so far. */
@@ -148,6 +150,7 @@ class LearningController(private val app: Application) {
             repo.sync().onSuccess {
                 speaker.pronunciation = repo.loadPronunciation()
                 refreshCounts()
+                refreshGemini()
             }
         }
     }
@@ -351,7 +354,7 @@ class LearningController(private val app: Application) {
         message("בודק את המפתח…")
         scope.launch {
             gemini.check(repo.loadConfig().geminiModel)
-                .onSuccess { m -> message("Gemini מחובר ($m). בנסיעה תקבל משוב מיד על ההסברים, ותשובות לשאלות.") }
+                .onSuccess { m -> message("Gemini מחובר ($m). בנסיעה תקבל משוב מיד על ההסברים, ותשובות לשאלות. העלות נספרת, ועוצרים לפני ה-10 דולר של הקרדיט.") }
                 .onFailure { message("המפתח נשמר, אבל הבדיקה נכשלה: ${it.message}") }
             refreshGemini()
         }
@@ -359,7 +362,17 @@ class LearningController(private val app: Application) {
     }
 
     private fun refreshGemini() {
-        _state.update { it.copy(geminiConfigured = gemini.configured, geminiModel = gemini.model) }
+        val config = repo.loadConfig()
+        gemini.limits = GeminiTutor.Limits(
+            proCap = config.geminiProCapUsd,
+            hardCap = config.geminiHardCapUsd,
+            usePro = config.geminiUsePro,
+            prices = GeminiTutor.DEFAULT_PRICES + config.geminiPrices,
+        )
+        _state.update {
+            it.copy(geminiConfigured = gemini.configured, geminiModel = gemini.model,
+                geminiSpent = gemini.spentThisMonth, geminiCap = gemini.limits.hardCap)
+        }
     }
 
     /** Grades an explain-back answer with Gemini and plays the feedback now. Falls back to grading after the drive. */
@@ -372,6 +385,7 @@ class LearningController(private val app: Application) {
             if (engine !== e || e.current !== ask) return@launch // the learner moved on meanwhile
             result.onFailure { e.logDiagnostic("gemini: ${it.message}") }
             val grade = result.getOrNull()
+            refreshGemini()
             e.explain(transcript, grade?.feedback, grade?.covered)
             uploadSoon()
             run()
@@ -391,6 +405,7 @@ class LearningController(private val app: Application) {
                 "לא הצלחתי לענות עכשיו. שמרתי את השאלה, ואענה עליה אחרי הנסיעה."
             }
             if (result.isSuccess) e.saveLiveAnswer(question, text)
+            refreshGemini()
             insert(e, listOf(Step.Say(text, e.current.unitId, label = "תשובה לשאלה שלך")), interrupted, at, resume = true)
             run()
         }

@@ -192,10 +192,12 @@ class MainActivity : ComponentActivity() {
         setupText.text = setup.joinToString("\n")
         setupText.visibility = if (setup.isEmpty()) View.GONE else View.VISIBLE
         englishSwitch.isChecked = s.englishVoiceForTerms
+        val spent = String.format(java.util.Locale.US, "%.2f", s.geminiSpent)
+        val cap = String.format(java.util.Locale.US, "%.0f", s.geminiCap)
         geminiText.text = when {
-            !s.geminiConfigured -> "כבוי. עם מפתח חינמי מ-Google AI Studio תקבל משוב מיד על ההסברים שלך, ותשובות כשתגיד: יש לי שאלה."
-            s.geminiModel.isBlank() -> "פעיל"
-            else -> "פעיל · ${s.geminiModel}"
+            !s.geminiConfigured -> "כבוי. עם מפתח מ-Google AI Studio תקבל משוב מיד על ההסברים שלך, ותשובות כשתגיד: יש לי שאלה."
+            else -> "פעיל" + (if (s.geminiModel.isBlank()) "" else " · ${s.geminiModel}") +
+                "\nהחודש: בערך $spent דולר מתוך תקרה של $cap (הקרדיט החודשי הוא 10)"
         }
         uploadText.text = when {
             s.uploadError.isNotBlank() -> "⚠️ השליחה ל-GitHub נכשלה: ${s.uploadError}"

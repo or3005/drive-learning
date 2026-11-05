@@ -1,4 +1,7 @@
 {
   "githubClientId": "Ov23lihvA1ru6SQ13aY6",
-  "geminiModel": ""
+  "geminiModel": "",
+  "geminiUsePro": true,
+  "geminiProCapUsd": 7.0,
+  "geminiHardCapUsd": 9.0
 }
