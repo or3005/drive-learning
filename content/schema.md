@@ -42,6 +42,25 @@ The learner answers by ear while driving, so the options must not give the answe
 - The feedback of a partly-true option says first what is true in it, then why it's still not the
   answer.
 
+## Courses: `content/courses/index.json`
+
+```json
+{ "courses": [ { "id": "nodejs-backend", "title": "Node.js ו-Backend", "status": "active" } ] }
+```
+
+Every folder in `content/courses/` is listed here, and only those. The app shows the courses on its
+main screen and in the car, and the learner picks one for the coming drive. Each course keeps its own
+progress, uploaded to `progress/<course>.json`. `status: hidden` keeps a course out of the picker.
+
+## Feedback: `content/courses/<course>/feedback.json`
+
+```json
+{ "items": [ { "id": "fb-…", "unitId": "u02-…", "questionId": "q10", "text": "…" } ] }
+```
+
+Written after drives (see `AUTOMATION.md`): spoken feedback on explain-back answers. The app plays
+items it hasn't played yet at the start of the next drive in that course.
+
 ## `course.json`
 
 ```jsonc

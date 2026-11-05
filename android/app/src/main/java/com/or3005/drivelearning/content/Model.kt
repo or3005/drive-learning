@@ -116,3 +116,23 @@ data class AppConfig(
     /** Client id of the GitHub OAuth app used to sign in with a code (device flow). Public, not a secret. */
     val githubClientId: String = "",
 )
+
+/** content/courses/index.json: the courses the learner can choose from. */
+@Serializable
+data class CourseIndex(val courses: List<CourseEntry> = emptyList())
+
+@Serializable
+data class CourseEntry(val id: String, val title: String, val status: String = "active")
+
+/** content/courses/<id>/feedback.json: feedback on explain-back answers, written after the drive. */
+@Serializable
+data class FeedbackFile(val items: List<FeedbackItem> = emptyList())
+
+@Serializable
+data class FeedbackItem(
+    val id: String,
+    val unitId: String = "",
+    val questionId: String = "",
+    /** Spoken at the start of the next drive in this course. */
+    val text: String,
+)

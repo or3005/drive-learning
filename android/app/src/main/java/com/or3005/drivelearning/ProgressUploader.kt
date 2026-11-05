@@ -13,7 +13,7 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Uploads progress.json to progress/progress.json in the repo, so the after-drive and nightly
+ * Uploads each course's progress file to progress/<course>.json in the repo, so the after-drive
  * runs can read it. Uses a fine-grained GitHub token with Contents read and write on this repo only.
  */
 class ProgressUploader(private val context: Context) {
@@ -28,16 +28,18 @@ class ProgressUploader(private val context: Context) {
 
     val configured: Boolean get() = token.isNotBlank()
 
-    suspend fun upload(progressFile: File): Result<Unit> = withContext(Dispatchers.IO) {
+    /** Uploads [progressFile] to [remotePath] in the repo, for example progress/nodejs-backend.json. */
+    suspend fun upload(progressFile: File, remotePath: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             check(configured) { "אין טוקן של GitHub" }
             check(progressFile.exists()) { "אין עדיין התקדמות לשלוח" }
-            val sha = currentSha()
+            val url = API_BASE + remotePath
+            val sha = currentSha(url)
             val body = JSONObject()
                 .put("message", "progress: " + stamp())
                 .put("content", Base64.encodeToString(progressFile.readBytes(), Base64.NO_WRAP))
                 .apply { if (sha != null) put("sha", sha) }
-            val conn = open("PUT")
+            val conn = open("PUT", url)
             conn.doOutput = true
             conn.outputStream.use { it.write(body.toString().toByteArray()) }
             val code = conn.responseCode
@@ -51,14 +53,14 @@ class ProgressUploader(private val context: Context) {
     /** What a failed upload means, in words the learner can act on. */
     private fun explain(code: Int, body: String?): String = when (code) {
         401 -> "הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש."
-        403 -> "לטוקן אין הרשאת כתיבה (403). ב-Permissions צריך Contents: Read and write."
-        404 -> "לטוקן אין גישה ל-repo (404). ב-Repository access צריך לבחור Only select repositories ואת drive-learning."
+        403 -> "אין הרשאת כתיבה (403). כדאי להתחבר מחדש ל-GitHub."
+        404 -> "אין גישה ל-repo (404). כדאי להתחבר מחדש ל-GitHub."
         409, 422 -> "הקובץ השתנה בינתיים ($code). ננסה שוב בשליחה הבאה."
         else -> "GitHub החזיר $code ${body?.take(100).orEmpty()}"
     }
 
-    private fun currentSha(): String? {
-        val conn = open("GET")
+    private fun currentSha(url: String): String? {
+        val conn = open("GET", url)
         return try {
             if (conn.responseCode == 200) {
                 JSONObject(conn.inputStream.bufferedReader().use { it.readText() }).optString("sha").ifBlank { null }
@@ -70,8 +72,8 @@ class ProgressUploader(private val context: Context) {
         }
     }
 
-    private fun open(method: String): HttpURLConnection =
-        (URL(API_URL).openConnection() as HttpURLConnection).apply {
+    private fun open(method: String, url: String): HttpURLConnection =
+        (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = 15_000
             readTimeout = 30_000
@@ -86,6 +88,6 @@ class ProgressUploader(private val context: Context) {
     companion object {
         private const val KEY_TOKEN = "github_token"
         private const val KEY_LAST = "last_upload"
-        private const val API_URL = "https://api.github.com/repos/or3005/drive-learning/contents/progress/progress.json"
+        private const val API_BASE = "https://api.github.com/repos/or3005/drive-learning/contents/"
     }
 }

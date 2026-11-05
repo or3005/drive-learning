@@ -1,5 +1,6 @@
 package com.or3005.drivelearning.engine
 
+import com.or3005.drivelearning.content.FeedbackItem
 import com.or3005.drivelearning.content.LearningUnit
 import com.or3005.drivelearning.content.Question
 import com.or3005.drivelearning.content.SegmentRef
@@ -44,7 +45,7 @@ sealed interface Step {
      * The engine expands these itself; the player never gets one from [LessonEngine.advance].
      */
     data class Plan(override val unitId: String, val kind: Kind, val covered: String? = null) : Step {
-        enum class Kind { WARM_UP, REVIEW_BLOCK, REVIEW_BLOCK_DONE, REVIEW_SUMMARY }
+        enum class Kind { WARM_UP, REVIEW_BLOCK, REVIEW_BLOCK_DONE, REVIEW_SUMMARY, FEEDBACK_HEARD }
     }
     data object End : Step {
         override val unitId: String? = null
@@ -67,6 +68,8 @@ class LessonEngine(
     private val random: Random = Random.Default,
     /** Ask ״בטוח או לא בטוח?״ after each answer. Off: one tap less while driving; answers count as sure. */
     private val askConfidence: Boolean = false,
+    /** Feedback on explain-back answers, written after earlier drives. Unheard items open the drive. */
+    private val feedback: List<FeedbackItem> = emptyList(),
 ) {
     var progress: ProgressState = store.load().let { loaded ->
         if (loaded.schedulerVersion < Scheduler.VERSION) Scheduler.rebuild(loaded).also { store.save(it) } else loaded
@@ -314,6 +317,14 @@ class LessonEngine(
     // ---- planning -----------------------------------------------------------------------------
 
     private fun planDrive() {
+        val unheard = feedback.filter { it.id !in progress.heardFeedback && it.text.isNotBlank() }
+        if (unheard.isNotEmpty()) {
+            queue += Step.Say("קודם, משוב על ההסברים שנתת בנסיעות הקודמות.", label = "משוב")
+            unheard.forEach { item ->
+                queue += Step.Say(item.text, item.unitId.ifBlank { null }, label = "משוב על ההסבר שלך")
+                queue += Step.Plan("", Step.Plan.Kind.FEEDBACK_HEARD, covered = item.id)
+            }
+        }
         val review = reviewQuestions(max = 4)
         if (review.isNotEmpty()) {
             queue += Step.Say("לפני שממשיכים, חזרה קצרה על דברים מנסיעות קודמות.")
@@ -429,6 +440,11 @@ class LessonEngine(
     private fun expand(plan: Step.Plan): List<Step> = when (plan.kind) {
         Step.Plan.Kind.WARM_UP -> warmUp(plan.unitId)
         Step.Plan.Kind.REVIEW_BLOCK -> reviewBlock(plan.unitId, plan.covered)
+        Step.Plan.Kind.FEEDBACK_HEARD -> {
+            progress = progress.copy(heardFeedback = progress.heardFeedback + plan.covered.orEmpty())
+            store.save(progress)
+            emptyList()
+        }
         Step.Plan.Kind.REVIEW_BLOCK_DONE -> {
             progress = progress.copy(reviewBlocksDone = progress.reviewBlocksDone + "${plan.unitId}/${plan.covered}")
             store.save(progress)

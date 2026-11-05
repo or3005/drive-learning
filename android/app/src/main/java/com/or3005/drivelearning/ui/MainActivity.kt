@@ -54,6 +54,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var tokenField: EditText
     private lateinit var uploadText: TextView
     private val optionButtons = mutableListOf<Button>()
+    private lateinit var coursesBox: LinearLayout
+    private var shownCourses: List<LearningController.CourseChoice> = emptyList()
+    private var shownCourseId = ""
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         startStandbyService()
@@ -122,7 +125,26 @@ class MainActivity : ComponentActivity() {
         permissions.launch(wanted.toTypedArray())
     }
 
+    /** One button per course; the chosen one is marked. Rebuilt only when the list or the choice changes. */
+    private fun renderCourses(s: LearningController.UiState) {
+        if (s.courses == shownCourses && s.courseId == shownCourseId) return
+        shownCourses = s.courses
+        shownCourseId = s.courseId
+        coursesBox.removeAllViews()
+        s.courses.forEach { c ->
+            val chosen = c.id == s.courseId
+            val b = button((if (chosen) "✓ " else "") + "${c.title} · ${c.completed}/${c.total}") {
+                controller.selectCourse(c.id)
+            }
+            b.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+            if (chosen) b.setTextColor(ACCENT)
+            b.setTypeface(b.typeface, if (chosen) Typeface.BOLD else Typeface.NORMAL)
+            coursesBox.addView(b, full())
+        }
+    }
+
     private fun render(s: LearningController.UiState) {
+        renderCourses(s)
         status.text = when (s.mode) {
             Mode.IDLE -> "מוכן להתחיל"
             Mode.SPEAKING -> "משמיע"
@@ -185,7 +207,9 @@ class MainActivity : ComponentActivity() {
         root.addView(text("Drive Learning", 26f, bold = true))
         val version = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: "?"
         root.addView(text("גרסה $version", 13f, color = GREY))
-        progressText = text("", 14f, color = GREY).also { root.addView(it) }
+        root.addView(text("הנושא לנסיעה הקרובה", 15f, bold = true), top(14))
+        coursesBox = vertical().also { root.addView(it, top(4)) }
+        progressText = text("", 14f, color = GREY).also { root.addView(it, top(4)) }
         setupText = text("", 14f, color = Color.parseColor("#B74B4B")).also { root.addView(it) }
 
         status = text("", 16f, color = ACCENT, bold = true).also { root.addView(it, top(16)) }

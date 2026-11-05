@@ -14,7 +14,7 @@ import java.net.URL
  */
 class ContentRepository(private val context: Context) {
 
-    data class Loaded(val course: Course, val units: List<LearningUnit>)
+    data class Loaded(val course: Course, val units: List<LearningUnit>, val feedback: List<FeedbackItem> = emptyList())
 
     private val syncedRoot = File(context.filesDir, "content")
 
@@ -31,6 +31,13 @@ class ContentRepository(private val context: Context) {
         }
     }
 
+    /** The courses to choose from. Falls back to the first course if the index is missing. */
+    fun courses(): List<CourseEntry> =
+        runCatching { ContentJson.decodeFromString<CourseIndex>(read("courses/index.json")).courses }
+            .getOrDefault(emptyList())
+            .filter { it.status != "hidden" }
+            .ifEmpty { listOf(CourseEntry(DEFAULT_COURSE, "Node.js ו-Backend")) }
+
     fun load(courseId: String = DEFAULT_COURSE): Loaded {
         val course = ContentJson.decodeFromString<Course>(read("courses/$courseId/course.json"))
         val units = course.units
@@ -40,7 +47,10 @@ class ContentRepository(private val context: Context) {
                     ContentJson.decodeFromString<LearningUnit>(read("courses/$courseId/units/${ref.id}.json"))
                 }.getOrNull()
             }
-        return Loaded(course, units)
+        val feedback = runCatching {
+            ContentJson.decodeFromString<FeedbackFile>(read("courses/$courseId/feedback.json")).items
+        }.getOrDefault(emptyList())
+        return Loaded(course, units, feedback)
     }
 
     /** Settings that can change without a new APK, like the GitHub sign-in client id. */
@@ -57,19 +67,15 @@ class ContentRepository(private val context: Context) {
         return context.assets.open("content/$path").bufferedReader().use { it.readText() }
     }
 
-    /** Downloads the course map and every written unit. Returns how many units were saved. */
-    suspend fun sync(courseId: String = DEFAULT_COURSE): Result<Int> = withContext(Dispatchers.IO) {
+    /** Downloads every course, its written units and feedback, and the shared files. Returns how many units were saved. */
+    suspend fun sync(): Result<Int> = withContext(Dispatchers.IO) {
         runCatching {
-            val courseText = download("content/courses/$courseId/course.json")
-            val course = ContentJson.decodeFromString<Course>(courseText)
-            val texts = course.units.filter { it.status != "planned" }.associate { ref ->
-                val text = download("content/courses/$courseId/units/${ref.id}.json")
-                ContentJson.decodeFromString<LearningUnit>(text) // fail before writing anything broken
-                ref.id to text
-            }
-            val unitsDir = File(syncedRoot, "courses/$courseId/units").apply { mkdirs() }
-            texts.forEach { (id, text) -> File(unitsDir, "$id.json").writeText(text) }
-            File(syncedRoot, "courses/$courseId/course.json").writeText(courseText)
+            val indexText = runCatching { download("content/courses/index.json") }.getOrNull()
+            val ids = indexText?.let { ContentJson.decodeFromString<CourseIndex>(it).courses.map { c -> c.id } }
+                ?: listOf(DEFAULT_COURSE)
+            var count = 0
+            ids.forEach { courseId -> count += syncCourse(courseId) }
+            indexText?.let { File(syncedRoot, "courses").mkdirs(); File(syncedRoot, "courses/index.json").writeText(it) }
             runCatching {
                 val config = download("content/app-config.json")
                 ContentJson.decodeFromString<AppConfig>(config)
@@ -80,8 +86,27 @@ class ContentRepository(private val context: Context) {
                 Pronunciation.parse(pronunciation) // only save it if it parses
                 File(syncedRoot, "pronunciation.json").writeText(pronunciation)
             }
-            texts.size
+            count
         }
+    }
+
+    private fun syncCourse(courseId: String): Int {
+        val courseText = download("content/courses/$courseId/course.json")
+        val course = ContentJson.decodeFromString<Course>(courseText)
+        val texts = course.units.filter { it.status != "planned" }.associate { ref ->
+            val text = download("content/courses/$courseId/units/${ref.id}.json")
+            ContentJson.decodeFromString<LearningUnit>(text) // fail before writing anything broken
+            ref.id to text
+        }
+        val unitsDir = File(syncedRoot, "courses/$courseId/units").apply { mkdirs() }
+        texts.forEach { (id, text) -> File(unitsDir, "$id.json").writeText(text) }
+        File(syncedRoot, "courses/$courseId/course.json").writeText(courseText)
+        runCatching {
+            val feedback = download("content/courses/$courseId/feedback.json")
+            ContentJson.decodeFromString<FeedbackFile>(feedback)
+            File(syncedRoot, "courses/$courseId/feedback.json").writeText(feedback)
+        }
+        return texts.size
     }
 
     private fun download(path: String): String {

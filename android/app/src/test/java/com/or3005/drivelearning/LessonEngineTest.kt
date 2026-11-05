@@ -330,7 +330,7 @@ class LessonEngineTest {
 
     @Test
     fun theLearnersRealProgressGoesToBothReviewsThenUnitSeven() {
-        val file = File("../../progress/progress.json")
+        val file = File("../../progress/nodejs-backend.json")
         val state = com.or3005.drivelearning.engine.FileProgressStore(file).load()
         val store = MemoryProgressStore(state)
         val engine = LessonEngine(units(), store, LocalDate.of(2026, 11, 6), random = Random(1))
@@ -347,6 +347,23 @@ class LessonEngineTest {
         assertFalse(r1Asks.any { it.question.id == "c-proxy" || it.question.id == "c-cache" })
         val blockUnits = r1.filterIsInstance<Step.Say>().filter { it.label == "תזכורת" }.map { it.unitId }.toSet()
         assertTrue("only the unit 3 block is left: $blockUnits", "u03-http-anatomy" in blockUnits && "u01-backend-role" !in blockUnits)
+    }
+
+    @Test
+    fun unheardFeedbackOpensTheDriveOnce() {
+        val store = MemoryProgressStore(ProgressState(schedulerVersion = Scheduler.VERSION))
+        val items = listOf(
+            com.or3005.drivelearning.content.FeedbackItem("fb-1", "u02-request-journey", "q10", "משוב ראשון."),
+            com.or3005.drivelearning.content.FeedbackItem("fb-2", "u01-backend-role", "q10", "משוב שני."),
+        )
+        val engine = LessonEngine(units(), store, today, random = Random(1), feedback = items)
+        assertEquals("משוב", (engine.start() as Step.Say).label)
+        assertEquals("משוב ראשון.", (engine.advance() as Step.Say).text)
+        assertEquals("משוב שני.", (engine.advance() as Step.Say).text)
+        engine.advance()
+        assertEquals(setOf("fb-1", "fb-2"), store.load().heardFeedback)
+        val next = LessonEngine(units(), store, today.plusDays(1), random = Random(1), feedback = items)
+        assertTrue((next.start() as Step.Say).label != "משוב")
     }
 
     @Test

@@ -54,6 +54,8 @@ data class ProgressState(
     val schedulerVersion: Int = 0,
     /** Review units stopped in the middle: "reviewId/coveredUnitId" for blocks already done. */
     val reviewBlocksDone: Set<String> = emptySet(),
+    /** Feedback items (from feedback.json) already played. */
+    val heardFeedback: Set<String> = emptySet(),
 )
 
 interface ProgressStore {

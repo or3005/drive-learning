@@ -1,0 +1,5 @@
+{
+  "courses": [
+    { "id": "nodejs-backend", "title": "Node.js ו-Backend", "status": "active" }
+  ]
+}

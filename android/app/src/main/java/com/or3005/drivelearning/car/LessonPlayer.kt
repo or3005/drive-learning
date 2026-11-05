@@ -119,12 +119,16 @@ class LessonPlayer(
         return Futures.immediateVoidFuture()
     }
 
-    /** Choosing the start item in Android Auto's browse list. The lesson starts on play. */
+    /** Choosing a course in Android Auto's browse list switches to it. The lesson starts on play. */
     override fun handleSetMediaItems(
         mediaItems: MutableList<MediaItem>,
         startIndex: Int,
         startPositionMs: Long,
-    ): ListenableFuture<*> = Futures.immediateVoidFuture()
+    ): ListenableFuture<*> {
+        val id = mediaItems.getOrNull(startIndex.coerceAtLeast(0))?.mediaId.orEmpty()
+        if (id.startsWith(LessonMediaService.COURSE_PREFIX)) learning.selectCourse(id.removePrefix(LessonMediaService.COURSE_PREFIX))
+        return Futures.immediateVoidFuture()
+    }
 
     override fun handleRelease(): ListenableFuture<*> {
         scope.cancel()

@@ -404,11 +404,48 @@ def check_unit(path, listed, rep, ctx):
     return total
 
 
+def check_index(rep):
+    """content/courses/index.json lists every course folder, and nothing else."""
+    where = "courses/index.json"
+    index = load(COURSES / "index.json", rep)
+    if index is None:
+        return
+    ids = [c.get("id") for c in index.get("courses", [])]
+    folders = {p.name for p in COURSES.iterdir() if p.is_dir()}
+    for i in ids:
+        if i not in folders:
+            rep.err(where, f"course {i} has no folder")
+        check_text(f"{where} {i}.title", next(c for c in index["courses"] if c.get("id") == i).get("title"), rep)
+    for f in folders - set(ids):
+        rep.err(where, f"course folder {f} is not listed")
+    if len(ids) != len(set(ids)):
+        rep.err(where, "duplicate course id")
+
+
+def check_feedback(course_dir, rep):
+    """feedback.json: short spoken feedback on explain-back answers, written after drives."""
+    path = course_dir / "feedback.json"
+    if not path.exists():
+        return
+    data = load(path, rep)
+    if data is None:
+        return
+    seen = set()
+    for item in data.get("items", []):
+        w = f"{course_dir.name}/feedback.json {item.get('id')}"
+        if not item.get("id") or item["id"] in seen:
+            rep.err(w, "every item needs a unique id")
+        seen.add(item.get("id"))
+        check_text(w, item.get("text"), rep)
+
+
 def main():
     rep = Report()
+    check_index(rep)
     dirs = [Path(a) for a in sys.argv[1:]] or sorted(p for p in COURSES.iterdir() if p.is_dir())
     for d in dirs:
         check_course(d.resolve(), rep)
+        check_feedback(d.resolve(), rep)
     for line in rep.warnings + rep.errors:
         print(line)
     print(f"{len(rep.errors)} errors, {len(rep.warnings)} warnings")

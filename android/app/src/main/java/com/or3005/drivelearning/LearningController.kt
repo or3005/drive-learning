@@ -57,7 +57,13 @@ class LearningController(private val app: Application) {
         val uploadConfigured: Boolean = false,
         val lastUpload: String = "",
         val uploadError: String = "",
+        val courseId: String = "",
+        val courseTitle: String = "",
+        val courses: List<CourseChoice> = emptyList(),
     )
+
+    /** A course on the picker: its progress so far. */
+    data class CourseChoice(val id: String, val title: String, val completed: Int, val total: Int)
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
@@ -65,8 +71,20 @@ class LearningController(private val app: Application) {
     private val main = Handler(Looper.getMainLooper())
     private val scope = MainScope()
     private val repo = ContentRepository(app)
-    private val progressFile = File(app.filesDir, "progress.json")
-    private val store = FileProgressStore(progressFile)
+    private val prefs = app.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+
+    /** The course for the coming drive. Each course keeps its own progress file. */
+    private var courseId: String = prefs.getString(KEY_COURSE, null) ?: ContentRepository.DEFAULT_COURSE
+    private var progressFile = progressFileFor(courseId)
+    private var store = FileProgressStore(progressFile)
+
+    private fun progressFileFor(id: String): File {
+        val file = File(app.filesDir, "progress-$id.json")
+        // Before there were several courses, the only progress file was progress.json.
+        val legacy = File(app.filesDir, "progress.json")
+        if (id == ContentRepository.DEFAULT_COURSE && !file.exists() && legacy.exists()) legacy.renameTo(file)
+        return file
+    }
     private val uploader = ProgressUploader(app)
     private val listener = Listener(app)
     private val speaker = Speaker(app) { hebrew ->
@@ -96,7 +114,6 @@ class LearningController(private val app: Application) {
     private var explainSilences = 0
     /** A dropped recognizer connection gets one quiet retry before it counts as a failure. */
     private var transientRetried = false
-    private val prefs = app.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
     // Audio focus: pause while Waze or a phone call talks, continue when it's done.
     private val audioManager = app.getSystemService(AudioManager::class.java)
@@ -133,12 +150,24 @@ class LearningController(private val app: Application) {
 
     // ---- public API used by the phone screen and the car ------------------------------------------
 
+    /** Chooses the course for the coming drive. A drive in another course is stopped first. */
+    fun selectCourse(id: String) {
+        if (id == courseId) return
+        if (repo.courses().none { it.id == id }) return
+        if (engine != null) stop()
+        courseId = id
+        prefs.edit().putString(KEY_COURSE, id).apply()
+        progressFile = progressFileFor(id)
+        store = FileProgressStore(progressFile)
+        refreshCounts()
+    }
+
     fun start() {
-        val loaded = runCatching { repo.load() }.getOrElse {
+        val loaded = runCatching { repo.load(courseId) }.getOrElse {
             message("לא הצלחתי לטעון את התוכן: ${it.message}")
             return
         }
-        val e = LessonEngine(loaded.units, store, LocalDate.now())
+        val e = LessonEngine(loaded.units, store, LocalDate.now(), feedback = loaded.feedback)
         engine = e
         requestFocus()
         startService()
@@ -324,7 +353,7 @@ class LearningController(private val app: Application) {
             return
         }
         uploadJob = scope.launch {
-            uploader.upload(progressFile)
+            uploader.upload(progressFile, "progress/$courseId.json")
                 .onSuccess {
                     _state.update { s -> s.copy(uploadError = "") }
                     if (report) message("ההתקדמות נשלחה.")
@@ -631,7 +660,7 @@ class LearningController(private val app: Application) {
         uploadJob?.cancel()
         uploadJob = scope.launch {
             delay(30_000)
-            uploader.upload(progressFile)
+            uploader.upload(progressFile, "progress/$courseId.json")
                 .onSuccess { _state.update { s -> s.copy(uploadError = "") } }
                 .onFailure { uploadFailed(it, report = false) }
             refreshUploadState()
@@ -652,16 +681,31 @@ class LearningController(private val app: Application) {
                 it.copy(completedUnits = e.progress.completedUnits.size, totalUnits = e.totalUnits,
                     masteredConcepts = e.masteredCount)
             }
+            if (_state.value.courses.isEmpty()) refreshCourses()
             return
         }
         runCatching {
-            val loaded = repo.load()
+            val loaded = repo.load(courseId)
             val progress = store.load()
             _state.update {
                 it.copy(completedUnits = progress.completedUnits.count { id -> loaded.units.any { u -> u.id == id } },
                     totalUnits = loaded.units.size, masteredConcepts = progress.concepts.count { c -> c.value.mastered })
             }
         }
+        refreshCourses()
+    }
+
+    /** The course picker: every course with how far the learner got in it. */
+    private fun refreshCourses() {
+        val choices = repo.courses().map { c ->
+            runCatching {
+                val units = repo.load(c.id).units
+                val done = FileProgressStore(if (c.id == courseId) progressFile else progressFileFor(c.id)).load().completedUnits
+                CourseChoice(c.id, c.title, done.count { id -> units.any { u -> u.id == id } }, units.size)
+            }.getOrDefault(CourseChoice(c.id, c.title, 0, 0))
+        }
+        val title = choices.firstOrNull { it.id == courseId }?.title ?: ""
+        _state.update { it.copy(courses = choices, courseId = courseId, courseTitle = title) }
     }
 
     // ---- audio focus ---------------------------------------------------------------------------------
@@ -722,5 +766,6 @@ class LearningController(private val app: Application) {
         private val TRANSIENT_ERRORS = setOf(1, 2, 4, 5, 8, 10, 11)
         private val DONE_WORDS = listOf("סיימתי", "סיימנו", "זהו זה", "זה הכל", "זה הכול")
         private const val KEY_ENGLISH_VOICE = "english_voice"
+        private const val KEY_COURSE = "current_course"
     }
 }

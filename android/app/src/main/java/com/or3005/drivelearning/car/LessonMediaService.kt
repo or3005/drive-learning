@@ -163,14 +163,19 @@ class LessonMediaService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?,
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> =
-            Futures.immediateFuture(LibraryResult.ofItemList(ImmutableList.of(startItem()), params))
+            Futures.immediateFuture(LibraryResult.ofItemList(ImmutableList.copyOf(courseItems()), params))
 
         override fun onGetItem(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
             mediaId: String,
         ): ListenableFuture<LibraryResult<MediaItem>> =
-            Futures.immediateFuture(LibraryResult.ofItem(if (mediaId == ROOT_ID) rootItem() else startItem(), null))
+            Futures.immediateFuture(
+                LibraryResult.ofItem(
+                    if (mediaId == ROOT_ID) rootItem() else courseItems().firstOrNull { it.mediaId == mediaId } ?: courseItems().first(),
+                    null,
+                ),
+            )
 
         override fun onAddMediaItems(
             mediaSession: MediaSession,
@@ -191,26 +196,33 @@ class LessonMediaService : MediaLibraryService() {
         )
         .build()
 
-    private fun startItem(): MediaItem {
+    /** One playable item per course, the current course first. Choosing one switches to it. */
+    private fun courseItems(): List<MediaItem> {
         val s = learning.state.value
-        return MediaItem.Builder()
-            .setMediaId(START_ID)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle("▶ להמשיך ללמוד")
-                    .setSubtitle("הושלמו ${s.completedUnits} מתוך ${s.totalUnits} יחידות")
-                    .setArtist("Node.js ועבודה בבקאנד")
-                    .setIsBrowsable(false)
-                    .setIsPlayable(true)
-                    .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
-                    .build(),
-            )
-            .build()
+        val courses = s.courses.ifEmpty {
+            listOf(LearningController.CourseChoice(s.courseId, s.courseTitle, s.completedUnits, s.totalUnits))
+        }
+        return courses.sortedByDescending { it.id == s.courseId }.map { c ->
+            val current = c.id == s.courseId
+            MediaItem.Builder()
+                .setMediaId(COURSE_PREFIX + c.id)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(if (current) "▶ להמשיך: ${c.title}" else "▶ ${c.title}")
+                        .setSubtitle("הושלמו ${c.completed} מתוך ${c.total} יחידות")
+                        .setArtist(c.title)
+                        .setIsBrowsable(false)
+                        .setIsPlayable(true)
+                        .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+                        .build(),
+                )
+                .build()
+        }
     }
 
     companion object {
         private const val ROOT_ID = "root"
-        private const val START_ID = "start"
+        const val COURSE_PREFIX = "course:"
         private const val SURE = "sure"
         private const val UNSURE = "unsure"
         private const val YES = "yes"
