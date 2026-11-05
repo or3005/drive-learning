@@ -333,14 +333,20 @@ class LessonEngineTest {
         val file = File("../../progress/progress.json")
         val state = com.or3005.drivelearning.engine.FileProgressStore(file).load()
         val store = MemoryProgressStore(state)
-        val engine = LessonEngine(units(), store, LocalDate.of(2026, 11, 4), random = Random(1))
-        // Old boxes are rebuilt: eight right answers on one day are one step up, not eight.
+        val engine = LessonEngine(units(), store, LocalDate.of(2026, 11, 6), random = Random(1))
         assertEquals(Scheduler.VERSION, engine.progress.schedulerVersion)
         assertTrue((engine.progress.concepts["statelessness"]?.box ?: 0) <= 1)
         engine.start()
         val seen = engine.answerRightUntil { it.unitId == "u08-event-loop" }
-        val openings = seen.filterIsInstance<Step.Say>().filter { it.label == "פתיחה" }.map { it.unitId }
-        assertEquals(listOf("r1-review-foundations", "r2-review-http", "u07-node-runtime"), openings)
+        val openings = seen.filterIsInstance<Step.Say>().filter { it.label == "פתיחה" }
+        assertEquals(listOf("r1-review-foundations", "r2-review-http", "u07-node-runtime"), openings.map { it.unitId })
+        // The first review stopped in the unit 3 block: it continues there, without the fill-ins again.
+        assertTrue(openings.first().text.startsWith("ממשיכים"))
+        val r1 = seen.takeWhile { it.unitId != "r2-review-http" || (it as? Step.Say)?.label != "פתיחה" }
+        val r1Asks = r1.filterIsInstance<Step.Ask>()
+        assertFalse(r1Asks.any { it.question.id == "c-proxy" || it.question.id == "c-cache" })
+        val blockUnits = r1.filterIsInstance<Step.Say>().filter { it.label == "תזכורת" }.map { it.unitId }.toSet()
+        assertTrue("only the unit 3 block is left: $blockUnits", "u03-http-anatomy" in blockUnits && "u01-backend-role" !in blockUnits)
     }
 
     @Test

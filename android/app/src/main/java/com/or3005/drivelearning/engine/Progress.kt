@@ -52,6 +52,8 @@ data class ProgressState(
     val diagnostics: List<String> = emptyList(),
     /** Bumped when the scheduling rules change, so old boxes are rebuilt from the attempts. */
     val schedulerVersion: Int = 0,
+    /** Review units stopped in the middle: "reviewId/coveredUnitId" for blocks already done. */
+    val reviewBlocksDone: Set<String> = emptySet(),
 )
 
 interface ProgressStore {

@@ -122,6 +122,13 @@ class LearningController(private val app: Application) {
         _state.update { it.copy(englishVoiceForTerms = englishVoice) }
         refreshCounts()
         refreshUploadState()
+        // New units, pronunciation fixes and settings arrive without a new APK.
+        scope.launch {
+            repo.sync().onSuccess {
+                speaker.pronunciation = repo.loadPronunciation()
+                refreshCounts()
+            }
+        }
     }
 
     // ---- public API used by the phone screen and the car ------------------------------------------
@@ -250,12 +257,44 @@ class LearningController(private val app: Application) {
         }
     }
 
+    private var loginJob: Job? = null
+
+    /**
+     * One-time GitHub sign-in with a code. [onCode] gets the code and the page to type it in; the
+     * screen copies the code and opens the page. When it's approved, uploads start working on their own.
+     */
+    fun loginToGithub(onCode: (code: String, url: String) -> Unit) {
+        val clientId = repo.loadConfig().githubClientId
+        if (clientId.isBlank()) {
+            message("ההתחברות עוד לא מוגדרת: חסר Client ID. אפשר בינתיים לשתף את ההתקדמות.")
+            return
+        }
+        loginJob?.cancel()
+        loginJob = scope.launch {
+            val login = GitHubLogin(clientId)
+            val code = login.requestCode().getOrElse {
+                message("ההתחברות נכשלה: ${it.message}")
+                return@launch
+            }
+            message("הקוד ${code.userCode} הועתק. הדבק אותו בדף של GitHub ואשר. אחר כך חזור לכאן.")
+            onCode(code.userCode, code.verificationUri)
+            login.waitForToken(code)
+                .onSuccess { token ->
+                    uploader.token = token
+                    refreshUploadState()
+                    message("מחובר ל-GitHub. ההתקדמות תישלח לבד אחרי כל נסיעה. שולח עכשיו…")
+                    uploadNow(report = true)
+                }
+                .onFailure { message("ההתחברות לא הושלמה: ${it.message}") }
+        }
+    }
+
     /** Saves the token if it looks like a GitHub token, and tries an upload right away. Returns whether it was saved. */
     fun setGithubToken(raw: String): Boolean {
         val token = raw.trim()
         val problem = when {
             token.isEmpty() -> "השדה ריק. העתק את הטוקן מ-GitHub, ואז לחץ הדבק ושמור."
-            !(token.startsWith("github_pat_") || token.startsWith("ghp_")) ->
+            !(token.startsWith("github_pat_") || token.startsWith("ghp_") || token.startsWith("gho_")) ->
                 "זה לא נראה כמו טוקן של GitHub. טוקן מתחיל ב-github_pat_ ."
             token.length < 40 || token.any { it.isWhitespace() } ->
                 "הטוקן נראה חתוך או עם רווחים. העתק אותו שוב, בשלמותו."

@@ -2,6 +2,7 @@ package com.or3005.drivelearning.engine
 
 import com.or3005.drivelearning.content.LearningUnit
 import com.or3005.drivelearning.content.Question
+import com.or3005.drivelearning.content.SegmentRef
 import com.or3005.drivelearning.content.Term
 import java.time.LocalDate
 import kotlin.random.Random
@@ -43,7 +44,7 @@ sealed interface Step {
      * The engine expands these itself; the player never gets one from [LessonEngine.advance].
      */
     data class Plan(override val unitId: String, val kind: Kind, val covered: String? = null) : Step {
-        enum class Kind { WARM_UP, REVIEW_BLOCK, REVIEW_SUMMARY }
+        enum class Kind { WARM_UP, REVIEW_BLOCK, REVIEW_BLOCK_DONE, REVIEW_SUMMARY }
     }
     data object End : Step {
         override val unitId: String? = null
@@ -392,20 +393,34 @@ class LessonEngine(
      * strengthen. The questions are chosen when each block is reached, weakest first.
      */
     private fun addReview(unit: LearningUnit) {
-        queue += Step.Say("${unitName(unit.id)}.", unit.id, label = "פתיחה")
-        unit.explanations.main.indices.forEach { addSegment(unit, it) }
-        if (unit.fillIns.isNotEmpty()) {
+        // Stopped in the middle on an earlier drive: skip what was already done.
+        val fillIns = unit.fillIns.filter { !fillInDone(it) }
+        val blocks = unit.covers.filter { !reviewBlockDone(unit, it) }
+        val resuming = fillIns.size < unit.fillIns.size || blocks.size < unit.covers.size
+        if (resuming) {
+            queue += Step.Say(
+                "ממשיכים את ה${unitName(unit.id)}, מאיפה שעצרנו בפעם הקודמת.",
+                unit.id, label = "פתיחה",
+            )
+        } else {
+            queue += Step.Say("${unitName(unit.id)}.", unit.id, label = "פתיחה")
+            unit.explanations.main.indices.forEach { addSegment(unit, it) }
+        }
+        if (fillIns.isNotEmpty()) {
             queue += Step.Say(
                 "לפני השאלות, נשלים כמה מושגים שהשתמשנו בהם ביחידות הקודמות, ולא הסברנו כמו שצריך.",
                 unit.id, label = "השלמה",
             )
-            unit.fillIns.forEach { ref ->
+            fillIns.forEach { ref ->
                 val source = unitById[ref.unit] ?: return@forEach
                 val index = source.explanations.main.indexOfFirst { it.id == ref.segment }
                 if (index >= 0) addSegment(source, index)
             }
         }
-        unit.covers.forEach { queue += Step.Plan(unit.id, Step.Plan.Kind.REVIEW_BLOCK, covered = it) }
+        blocks.forEach {
+            queue += Step.Plan(unit.id, Step.Plan.Kind.REVIEW_BLOCK, covered = it)
+            queue += Step.Plan(unit.id, Step.Plan.Kind.REVIEW_BLOCK_DONE, covered = it)
+        }
         queue += Step.Plan(unit.id, Step.Plan.Kind.REVIEW_SUMMARY)
         if (unit.recap.isNotBlank()) queue += Step.Say(unit.recap, unit.id, label = "סיכום")
         queue += Step.UnitDone(unit.id)
@@ -414,6 +429,11 @@ class LessonEngine(
     private fun expand(plan: Step.Plan): List<Step> = when (plan.kind) {
         Step.Plan.Kind.WARM_UP -> warmUp(plan.unitId)
         Step.Plan.Kind.REVIEW_BLOCK -> reviewBlock(plan.unitId, plan.covered)
+        Step.Plan.Kind.REVIEW_BLOCK_DONE -> {
+            progress = progress.copy(reviewBlocksDone = progress.reviewBlocksDone + "${plan.unitId}/${plan.covered}")
+            store.save(progress)
+            emptyList()
+        }
         Step.Plan.Kind.REVIEW_SUMMARY -> reviewSummary(plan.unitId)
     }
 
@@ -458,6 +478,25 @@ class LessonEngine(
         covered.questions.filter { it.isExplain }.shuffled(random).firstOrNull()?.let { steps += ask(covered.id, it, repeatOk = true) }
         covered.concepts.forEach { reviewedThisDrive += it }
         return steps
+    }
+
+    /** A fill-in segment counts as heard once its check was answered right. */
+    private fun fillInDone(ref: SegmentRef): Boolean {
+        val check = unitById[ref.unit]?.explanations?.main?.firstOrNull { it.id == ref.segment }?.check ?: return false
+        return progress.attempts.any { it.unitId == ref.unit && it.questionId == check.id && it.correct }
+    }
+
+    /**
+     * A covered unit's block is done if it was marked done, or (for drives before blocks were
+     * marked) if its explain part was answered after the review's fill-ins were first heard.
+     */
+    private fun reviewBlockDone(review: LearningUnit, covered: String): Boolean {
+        if ("${review.id}/$covered" in progress.reviewBlocksDone) return true
+        val checkIds = review.fillIns.mapNotNull { ref ->
+            unitById[ref.unit]?.explanations?.main?.firstOrNull { it.id == ref.segment }?.check?.id?.let { ref.unit to it }
+        }.toSet()
+        val started = progress.attempts.filter { (it.unitId to it.questionId) in checkIds }.minOfOrNull { it.time } ?: return false
+        return progress.explainAnswers.any { it.unitId == covered && it.time > started }
     }
 
     /** What went well in this review and what to strengthen. Wrong answers already sent those concepts back to box 0. */

@@ -661,34 +661,310 @@
             "sure": true,
             "day": "2026-11-04",
             "time": 1793775811242
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793858812898
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793858865820
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793858908785
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793858947920
+        },
+        {
+            "questionId": "c-proxy",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859238793
+        },
+        {
+            "questionId": "c-cache",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859435018
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859511655
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "why",
+            "choice": 2,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859558364
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "apply",
+            "choice": 2,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859617606
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859668891
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u01-backend-role",
+            "concept": "backend-role",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859700742
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859860141
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859928882
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793859988485
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860087208
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860186097,
+            "misconception": "mc-https-means-safe-site"
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860266153
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 3,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860470522
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860681045
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860720352
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860762109
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860845938,
+            "misconception": "mc-get-with-body"
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "recognize",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793860936217,
+            "misconception": "mc-json-is-object"
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-05",
+            "time": 1793861034668
         }
     ],
     "concepts": {
         "backend-role": {
-            "box": 3,
-            "nextReview": "2026-11-05"
+            "box": 2,
+            "nextReview": "2026-11-07",
+            "mastered": true,
+            "lastPromoted": "2026-11-05"
         },
         "request-journey": {
-            "box": 3,
-            "nextReview": "2026-11-08",
-            "mastered": true
+            "box": 1,
+            "nextReview": "2026-11-06",
+            "mastered": true,
+            "lastPromoted": "2026-11-05"
         },
         "http-anatomy": {
-            "box": 3,
-            "nextReview": "2026-11-06"
+            "box": 1,
+            "nextReview": "2026-11-06",
+            "mastered": true,
+            "lastPromoted": "2026-11-05"
         },
         "http-methods": {
             "box": 2,
-            "nextReview": "2026-11-06",
-            "mastered": true
+            "nextReview": "2026-11-07",
+            "mastered": true,
+            "lastPromoted": "2026-11-05"
         },
         "status-codes": {
-            "box": 3,
-            "nextReview": "2026-11-08"
+            "box": 2,
+            "nextReview": "2026-11-07",
+            "mastered": true,
+            "lastPromoted": "2026-11-05"
         },
         "statelessness": {
-            "box": 6,
-            "nextReview": "2026-12-06"
+            "box": 1,
+            "nextReview": "2026-11-05",
+            "lastPromoted": "2026-11-04"
         }
     },
     "completedUnits": [
@@ -734,21 +1010,23 @@
             "transcript": "‏http הוא סטייטלס כלומר הוא לא שומר שום מידע על על היוזר ששולח לו לקליינט אלא יודע תמיד לעבוד עם בקשות חדשות ואין לו מערך של היסטוריה או משהו כזה הוא יודע לעבוד לפי טוקנים ולפי קוקיז ואז ככה הוא יודע לזהות סטייטלס כלומר לא שומר שום מידע והמידע נשמר אך ורק בדטביס או טוקנים וכאלה בבראוזרים כמו קוקיז ככה זה נותן לנו אפשרות לעבוד בצורה הרבה יותר גדולה ורחבה וככה אנחנו יכולים לתת לכל מיני שרתים אחרים בקשות אחרות וככה באמת האי",
             "day": "2026-11-04",
             "time": 1793775905659
+        },
+        {
+            "questionId": "q10",
+            "unitId": "u01-backend-role",
+            "transcript": "אוקיי אז חייב להיות ארבע דברים בשרת דבר ראשון זה הרשאות וסודות דבר שני זה חישובים אמינים שאנחנו צריכים לעשות אחרי זה דבר שלישי זה כתובות ודבר רביעי אני לא זוכר",
+            "day": "2026-11-05",
+            "time": 1793859747476
+        },
+        {
+            "questionId": "q10",
+            "unitId": "u02-request-journey",
+            "transcript": "טי אל אס אחראי על הצפנות ולגרום שדברים יגיעו נכון דרך הראוטינג למקום הנכון שלהם בעיקר עצפנות על שעות וכל הדברים האלה",
+            "day": "2026-11-05",
+            "time": 1793860367017
         }
     ],
     "diagnostics": [
-        "2026-11-02: microphone: אין חיבור לרשת (קוד 2)",
-        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-04: listen YES_NO: 'לא' -> YesNo",
-        "2026-11-04: listen ANSWER: 'תשובה שלוש' -> Answer",
-        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
-        "2026-11-04: explain: 510 chars, ended by silence",
-        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
@@ -768,6 +1046,37 @@
         "2026-11-04: listen ANSWER: 'אחד' -> Answer",
         "2026-11-04: listen ANSWER: 'תשובה שלוש' -> Answer",
         "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
-        "2026-11-04: explain: 424 chars, ended by silence"
-    ]
+        "2026-11-04: explain: 424 chars, ended by silence",
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה שתיים' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-05: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-05: explain: 159 chars, ended by סיימתי",
+        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-05: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-05: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-05: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-05: explain: 116 chars, ended by סיימתי",
+        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-05: listen YES_NO: 'כן' -> YesNo",
+        "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-05: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה אחת' -> Answer",
+        "2026-11-05: listen ANSWER: 'תשובה אחד' -> Answer",
+        "2026-11-05: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-05: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer"
+    ],
+    "schedulerVersion": 2
 }

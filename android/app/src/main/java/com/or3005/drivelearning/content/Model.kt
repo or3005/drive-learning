@@ -109,3 +109,10 @@ data class Option(
     val misconception: String? = null,
     val feedback: String? = null,
 )
+
+/** content/app-config.json */
+@Serializable
+data class AppConfig(
+    /** Client id of the GitHub OAuth app used to sign in with a code (device flow). Public, not a secret. */
+    val githubClientId: String = "",
+)

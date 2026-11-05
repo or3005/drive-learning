@@ -43,6 +43,10 @@ class ContentRepository(private val context: Context) {
         return Loaded(course, units)
     }
 
+    /** Settings that can change without a new APK, like the GitHub sign-in client id. */
+    fun loadConfig(): AppConfig =
+        runCatching { ContentJson.decodeFromString<AppConfig>(read("app-config.json")) }.getOrDefault(AppConfig())
+
     /** How the voice should say English terms and tricky Hebrew words. */
     fun loadPronunciation(): Pronunciation =
         runCatching { Pronunciation.parse(read("pronunciation.json")) }.getOrDefault(Pronunciation.NONE)
@@ -66,6 +70,11 @@ class ContentRepository(private val context: Context) {
             val unitsDir = File(syncedRoot, "courses/$courseId/units").apply { mkdirs() }
             texts.forEach { (id, text) -> File(unitsDir, "$id.json").writeText(text) }
             File(syncedRoot, "courses/$courseId/course.json").writeText(courseText)
+            runCatching {
+                val config = download("content/app-config.json")
+                ContentJson.decodeFromString<AppConfig>(config)
+                File(syncedRoot, "app-config.json").writeText(config)
+            }
             runCatching {
                 val pronunciation = download("content/pronunciation.json")
                 Pronunciation.parse(pronunciation) // only save it if it parses

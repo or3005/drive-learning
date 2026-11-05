@@ -86,6 +86,15 @@ class MainActivity : ComponentActivity() {
         runCatching { ContextCompat.startForegroundService(this, Intent(this, PlaybackService::class.java)) }
     }
 
+    /** One-time sign-in: copies the code and opens GitHub's page for it. */
+    private fun loginToGithub() {
+        controller.loginToGithub { code, url ->
+            val clipboard = getSystemService(android.content.ClipboardManager::class.java)
+            clipboard?.setPrimaryClip(android.content.ClipData.newPlainText("GitHub code", code))
+            runCatching { startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+        }
+    }
+
     /** Reads the token straight from the clipboard, so a paste that didn't land in the field can't lose it. */
     private fun pasteToken() {
         val clipboard = getSystemService(android.content.ClipboardManager::class.java)
@@ -245,6 +254,10 @@ class MainActivity : ComponentActivity() {
             isSingleLine = true
         }
         root.addView(tokenField, top(4))
+        root.addView(horizontal(
+            button("🔗 התחברות ל-GitHub") { loginToGithub() },
+        ))
+        root.addView(text("או, אם יש לך טוקן מוכן:", 13f, color = GREY), top(8))
         root.addView(horizontal(
             button("📋 הדבק ושמור") { pasteToken() },
             button("💾 שמור") { saveToken(tokenField.text.toString()) },
