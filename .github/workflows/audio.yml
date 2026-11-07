@@ -1,0 +1,60 @@
+name: Record lessons
+
+# Records the lessons of courses with a "voice" section in course.json, sentence by sentence,
+# and publishes the recordings to the release audio-<course>. Only changed units are recorded.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/courses/**"
+      - "tools/tts_render.py"
+      - "tools/voice_samples.py"
+      - "android/app/src/main/java/com/or3005/drivelearning/engine/LessonEngine.kt"
+      - "android/app/src/main/java/com/or3005/drivelearning/LearningController.kt"
+      - ".github/workflows/audio.yml"
+  schedule:
+    - cron: "17 2 * * *"  # once a day, to finish what rate-limited voices could not record yet
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: "Record the voice samples too"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audio
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the voice client
+        run: pip install --quiet "edge-tts>=7"
+
+      - name: Voice samples
+        if: >-
+          inputs.samples ||
+          (github.event_name == 'push' && contains(join(github.event.commits.*.modified, ','), 'tools/voice_samples.py')) ||
+          (github.event_name == 'push' && contains(join(github.event.commits.*.added, ','), 'tools/voice_samples.py'))
+        run: python3 tools/voice_samples.py --upload
+
+      - name: Record changed units
+        run: python3 tools/tts_render.py --upload
