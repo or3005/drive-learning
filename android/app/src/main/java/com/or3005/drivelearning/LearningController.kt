@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.or3005.drivelearning.audio.Beeper
 import com.or3005.drivelearning.audio.Listener
 import com.or3005.drivelearning.audio.Speaker
+import com.or3005.drivelearning.audio.AudioLibrary
 import com.or3005.drivelearning.content.ContentRepository
 import com.or3005.drivelearning.engine.Command
 import com.or3005.drivelearning.engine.CommandParser
@@ -65,6 +66,8 @@ class LearningController(private val app: Application) {
         val geminiSpent: Double = 0.0,
         val geminiCap: Double = 0.0,
         val geminiVia: String = "",
+        /** Recorded voice for the chosen course: how many of the next lessons are on the phone. Empty: not a recorded course. */
+        val audioStatus: String = "",
     )
 
     /** A course on the picker: its progress so far. */
@@ -101,6 +104,10 @@ class LearningController(private val app: Application) {
     }
 
     private var engine: LessonEngine? = null
+
+    /** Recordings of courses read with a good voice; downloaded ahead of the drive. */
+    private val audio = AudioLibrary(app)
+    private var audioJob: Job? = null
 
     /** Index of the sentence being spoken in the current Say step, for pause, resume and seeking. */
     private var sentence = 0
@@ -149,6 +156,7 @@ class LearningController(private val app: Application) {
         refreshCounts()
         refreshUploadState()
         refreshGemini()
+        applyAudio()
         // New units, pronunciation fixes and settings arrive without a new APK.
         scope.launch {
             repo.sync().onSuccess {
@@ -156,6 +164,8 @@ class LearningController(private val app: Application) {
                 refreshCounts()
                 refreshGemini()
             }
+            applyAudio()
+            syncAudio()
         }
     }
 
@@ -171,6 +181,8 @@ class LearningController(private val app: Application) {
         progressFile = progressFileFor(id)
         store = FileProgressStore(progressFile)
         refreshCounts()
+        applyAudio()
+        syncAudio()
     }
 
     fun start() {
@@ -303,6 +315,51 @@ class LearningController(private val app: Application) {
                     refreshCounts()
                 }
                 .onFailure { message("העדכון נכשל: ${it.message}") }
+            applyAudio()
+            syncAudio()
+        }
+    }
+
+    // ---- recorded voice -----------------------------------------------------------------------------
+
+    private fun courseHasVoice(): Boolean = runCatching { repo.load(courseId).course.voice != null }.getOrDefault(false)
+
+    /** Uses the recordings already on the phone for the chosen course, or the phone's voice for a course without them. */
+    private fun applyAudio() {
+        if (courseHasVoice()) {
+            audio.load(courseId)
+            speaker.recorded = { audio.fileFor(it) }
+        } else {
+            audio.clear()
+            speaker.recorded = null
+            _state.update { it.copy(audioStatus = "") }
+        }
+    }
+
+    /**
+     * Downloads the recordings of the next lessons: the next three not finished (and the lessons a
+     * review among them goes back over), the last two finished, and the app's own phrases.
+     */
+    private fun syncAudio() {
+        if (!courseHasVoice()) return
+        val id = courseId
+        val loaded = runCatching { repo.load(id) }.getOrNull() ?: return
+        val done = runCatching { store.load().completedUnits }.getOrDefault(emptyList()).toSet()
+        val units = loaded.units
+        val next = units.filter { it.id !in done }.take(AUDIO_AHEAD)
+        val wanted = (next.map { it.id } + next.flatMap { it.covers } +
+            units.filter { it.id in done && !it.isReview }.takeLast(2).map { it.id } + "common").distinct()
+        audioJob?.cancel()
+        _state.update { it.copy(audioStatus = "מוריד את ההקלטות של היחידות הבאות…") }
+        audioJob = scope.launch {
+            val status = audio.sync(id, wanted)
+            if (id != courseId) return@launch
+            val text = when {
+                status.ready == 0 && status.error.isNotBlank() -> "ההקלטות עוד לא מוכנות. בינתיים מקריא הקול של הטלפון."
+                status.ready < status.wanted -> "ההקלטות: ${status.ready} מתוך ${status.wanted} מוכנות. השאר בקול של הטלפון."
+                else -> "ההקלטות של היחידות הבאות בטלפון (" + String.format(java.util.Locale.US, "%.0f", status.megabytes) + " MB)."
+            }
+            _state.update { it.copy(audioStatus = text) }
         }
     }
 
@@ -500,7 +557,11 @@ class LearningController(private val app: Application) {
                     buildString {
                         if (q.isCheck) append("שאלה קצרה לפני שממשיכים. ")
                         append(q.prompt).append(' ')
-                        step.displayedOptions.forEachIndexed { i, o -> append("תשובה ${HebrewNumbers.word(i + 1)}: $o ") }
+                        // Each option is its own sentence, so a recorded voice can read it (tools/tts_render.py).
+                        step.displayedOptions.forEachIndexed { i, o ->
+                            val option = o.trim().let { if (it.lastOrNull()?.let { c -> c in ".!?" } == true) it else "$it." }
+                            append("תשובה ${HebrewNumbers.word(i + 1)}. $option ")
+                        }
                         append("מה התשובה?")
                     }
                 }
@@ -861,6 +922,8 @@ class LearningController(private val app: Application) {
     companion object {
         /** About 15 seconds of Hebrew speech. */
         private const val SEEK_WORDS = 32
+        /** Lessons ahead whose recordings are kept on the phone. */
+        private const val AUDIO_AHEAD = 3
         private const val MAX_EXPLAIN_ROUNDS = 12
         private const val MAX_TRANSIENT_RETRIES = 3
         /** Recognizer errors that usually pass on a second try: network hiccups, busy or disconnected service. */

@@ -200,7 +200,7 @@ def check_taught_before_used(where, unit, rep, ctx, main_ids_in_order):
             continue
         taught_at = order.get(teaches.get(low), None)
         for i, seg in enumerate(unit.get("explanations", {}).get("main", [])):
-            if rx.search(seg.get("text", "")) and (taught_at is None or i < taught_at):
+            if rx.search(seg.get("reading", "") + " " + seg.get("text", "")) and (taught_at is None or i < taught_at):
                 rep.err(where, f"segment {seg.get('id')} uses {term} before it is taught")
                 break
         if taught_at is None:
@@ -240,6 +240,11 @@ def check_unit(path, listed, rep, ctx):
                 rep.err(where, f"duplicate segment id {seg.get('id')}")
             seg_ids.add(seg.get("id"))
             n = check_text(f"{where} {kind}/{seg.get('id')}", seg.get("text"), rep)
+            if seg.get("reading") is not None:
+                # A passage from the book, read before the explanation (book courses).
+                n += check_text(f"{where} {kind}/{seg.get('id')}.reading", seg.get("reading"), rep)
+                if seg.get("reading", "").strip()[-1:] not in (".", "!", "?"):
+                    rep.err(f"{where} {kind}/{seg.get('id')}.reading", "must end with . ! or ? so the voice switches cleanly")
             if kind == "main":
                 words += n
     minutes = words / WORDS_PER_MINUTE
@@ -265,7 +270,7 @@ def check_unit(path, listed, rep, ctx):
     covered_words = {w for name in term_names | earlier_terms for w in name.split()}
     undefined = set()
     for seg in main:
-        for m in LATIN_TERM.finditer(seg.get("text", "")):
+        for m in LATIN_TERM.finditer(seg.get("reading", "") + " " + seg.get("text", "")):
             raw = m.group(0).strip(".")
             if raw[0].islower():
                 continue  # terms are capitalized; lowercase words are names (localhost) or code (getOrders)

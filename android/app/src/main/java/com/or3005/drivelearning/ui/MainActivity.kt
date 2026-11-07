@@ -191,7 +191,8 @@ class MainActivity : ComponentActivity() {
             Mode.PAUSED, Mode.WAITING -> "▶ המשך"
             else -> "▶ התחל נסיעה"
         }
-        progressText.text = "הושלמו ${s.completedUnits} מתוך ${s.totalUnits} יחידות · ${s.masteredConcepts} מושגים יושבים"
+        progressText.text = "הושלמו ${s.completedUnits} מתוך ${s.totalUnits} יחידות · ${s.masteredConcepts} מושגים יושבים" +
+            (if (s.audioStatus.isBlank()) "" else "\n🔊 ${s.audioStatus}")
 
         val setup = mutableListOf<String>()
         if (s.voiceReady && !s.hebrewVoice) setup += "⚠️ אין קול עברי. התקן את Google Speech Services והורד עברית, ואז הפעל מחדש."

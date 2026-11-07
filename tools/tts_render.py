@@ -85,21 +85,25 @@ def question_texts(q):
     return out
 
 
+def segment_texts(seg):
+    """A segment is spoken as one text, the book passage and then the explanation (Segment.spoken in
+    the app), so it is split the same way here. Sentences from the passage are read in the reading voice."""
+    text, reading = seg.get("text", ""), (seg.get("reading") or "").strip()
+    if not reading:
+        return [(text, "explain")]
+    passage = {normalize(s) for s in split_sentences(reading)}
+    return [(s, "reading" if normalize(s) in passage else "explain") for s in split_sentences(reading + "\n" + text)]
+
+
 def unit_texts(unit):
     """(text, role) pairs: role 'reading' for book passages, 'explain' for everything else."""
     pairs = []
     ex = unit.get("explanations", {})
-    for seg in ex.get("main", []):
-        if seg.get("reading"):
-            pairs.append((seg["reading"], "reading"))
-        pairs.append((seg.get("text", ""), "explain"))
-        if seg.get("check"):
-            pairs += [(t, "explain") for t in question_texts(seg["check"])]
-    for kind in ("simple", "deep"):
+    for kind in ("main", "simple", "deep"):
         for seg in ex.get(kind, []):
-            if seg.get("reading"):
-                pairs.append((seg["reading"], "reading"))
-            pairs.append((seg.get("text", ""), "explain"))
+            pairs += segment_texts(seg)
+            if seg.get("check"):
+                pairs += [(t, "explain") for t in question_texts(seg["check"])]
     for q in unit.get("questions", []) + unit.get("reviewQuestions", []):
         pairs += [(t, "explain") for t in question_texts(q)]
     for mc in unit.get("misconceptions", []):

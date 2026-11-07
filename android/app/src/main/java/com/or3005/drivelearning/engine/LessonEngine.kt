@@ -238,14 +238,14 @@ class LessonEngine(
     fun lessonTextFor(unitId: String, q: Question): String {
         val unit = unitById[unitId] ?: return ""
         val segs = unit.explanations.main.filter { it.id in q.segments }.ifEmpty { unit.explanations.main }
-        return segs.joinToString("\n") { it.text }
+        return segs.joinToString("\n") { it.spoken }
     }
 
     /** What the learner is learning now, for answering a question asked out loud. */
     fun liveContext(): String {
         val unit = unit(current.unitId) ?: return ""
         val say = current as? Step.Say
-        val segment = say?.segmentIndex?.let { unit.explanations.main.getOrNull(it)?.text }.orEmpty()
+        val segment = say?.segmentIndex?.let { unit.explanations.main.getOrNull(it)?.spoken }.orEmpty()
         return listOf("Unit: ${unit.title}", "Summary: ${unit.recap}", segment).filter { it.isNotBlank() }.joinToString("\n")
     }
 
@@ -295,12 +295,12 @@ class LessonEngine(
 
     fun simplerSteps(): List<Step> {
         val unit = unit(current.unitId) ?: return emptyList()
-        return unit.explanations.simple.map { Step.Say(it.text, unit.id, label = "הסבר אחר") }
+        return unit.explanations.simple.map { Step.Say(it.spoken, unit.id, label = "הסבר אחר") }
     }
 
     fun deeperSteps(): List<Step> {
         val unit = unit(current.unitId) ?: return emptyList()
-        return unit.explanations.deep.map { Step.Say(it.text, unit.id, label = "העמקה") }
+        return unit.explanations.deep.map { Step.Say(it.spoken, unit.id, label = "העמקה") }
     }
 
     fun hintSteps(): List<Step> {
@@ -674,7 +674,7 @@ class LessonEngine(
 
     private fun segmentStep(unit: LearningUnit, index: Int): Step.Say {
         val seg = unit.explanations.main[index]
-        return Step.Say(seg.text, unit.id, segmentIndex = index, label = seg.title)
+        return Step.Say(seg.spoken, unit.id, segmentIndex = index, label = seg.title)
     }
 
     private fun key(unitId: String, q: Question) = "$unitId/${q.id}"

@@ -15,6 +15,18 @@ data class Course(
     val modules: List<Module> = emptyList(),
     val concepts: List<Concept> = emptyList(),
     val units: List<UnitRef> = emptyList(),
+    /** Courses recorded with a good voice (tools/tts_render.py). Without it, the phone's voice reads everything. */
+    val voice: CourseVoice? = null,
+)
+
+/** How a course is recorded. The app only needs to know that it is; the details are for the recording tool. */
+@Serializable
+data class CourseVoice(
+    val engine: String = "edge",
+    val reading: String = "",
+    val explain: String = "",
+    val rate: String = "",
+    val style: String = "",
 )
 
 @Serializable
@@ -74,10 +86,15 @@ data class Explanations(
 data class Segment(
     val id: String,
     val title: String = "",
+    /** A passage from the book this segment explains, read before [text] (book courses). */
+    val reading: String = "",
     val text: String,
     /** A short question right after this segment, to check it was understood before moving on. */
     val check: Question? = null,
-)
+) {
+    /** What is spoken for this segment: the book passage, if any, then the explanation. */
+    val spoken: String get() = if (reading.isBlank()) text else reading.trim() + "\n" + text
+}
 
 @Serializable
 data class Term(val term: String, val definition: String)

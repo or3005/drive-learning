@@ -147,7 +147,8 @@ def unit_parts(unit, add, all_units):
 
     add(f"<h2 id='{uid}-lesson'>ההסבר</h2>")
     for seg in main:
-        add(f"<div class='card'><h3>{esc(seg['title'])}</h3><p>{esc(seg['text'])}</p></div>")
+        reading = f"<blockquote>{esc(seg['reading'])}</blockquote>" if seg.get("reading") else ""
+        add(f"<div class='card'><h3>{esc(seg['title'])}</h3>{reading}<p>{esc(seg['text'])}</p></div>")
         if seg.get("check"):
             question_card(seg["check"], "בדיקה קצרה", mcs, seg_title, add)
     if review:
