@@ -1,0 +1,503 @@
+{
+  "id": "machiavelli-prince",
+  "title": "מקיאוולי והנסיך",
+  "language": "he",
+  "audience": "מפתח ג׳וניור סקרן, בלי רקע בהיסטוריה של איטליה; שומע את הספר עצמו בתרגום לעברית, עם הסברים",
+  "minutesPerUnit": 35,
+  "book": {
+    "title": "הנסיך",
+    "author": "ניקולו מקיאוולי",
+    "source": "source/the-prince-marriott.txt",
+    "translationGuide": "translation.md",
+    "note": "התרגום לעברית נעשה כאן מהתרגום האנגלי של מריוט מ-1908, שנמצא ברשות הציבור, בעזרת מה שידוע על המקור. כל הספר נקרא, בלי השמטות."
+  },
+  "voice": {
+    "engine": "edge",
+    "reading": "he-IL-AvriNeural",
+    "explain": "he-IL-HilaNeural",
+    "rate": "-5%"
+  },
+  "substantiveTerms": [
+    "וירטו",
+    "פורטונה",
+    "שכירי חרב",
+    "צבא עזר",
+    "נסיכות אזרחית",
+    "נסיכות כנסייתית",
+    "נסיכות מעורבת",
+    "מקיאווליזם"
+  ],
+  "modules": [
+    {
+      "id": "m1",
+      "title": "מקיאוולי ועולמו"
+    },
+    {
+      "id": "m2",
+      "title": "סוגי נסיכויות ואיך משיגים אותן, פרקים 1 עד 11"
+    },
+    {
+      "id": "m3",
+      "title": "צבא וכוח, פרקים 12 עד 14"
+    },
+    {
+      "id": "m4",
+      "title": "איך נסיך צריך להתנהג, פרקים 15 עד 19"
+    },
+    {
+      "id": "m5",
+      "title": "לשלוט בפועל, פרקים 20 עד 23"
+    },
+    {
+      "id": "m6",
+      "title": "מזל, איטליה ומה שנשאר ממקיאוולי, פרקים 24 עד 26"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "florence-world",
+      "module": "m1",
+      "title": "פירנצה ואיטליה בזמנו של מקיאוולי",
+      "summary": "איטליה מפוצלת לערים ולמדינות קטנות, וצבאות של צרפת וספרד פולשים אליה ומכריעים את גורלה",
+      "prerequisites": []
+    },
+    {
+      "id": "machiavelli-life",
+      "module": "m1",
+      "title": "חייו של מקיאוולי: מזכיר הרפובליקה, נפילה וגלות",
+      "summary": "ארבע עשרה שנים בלב השלטון בפירנצה, שליחויות לנסיכים ולמלכים, ואז נפילה, עינויים וגלות בכפר",
+      "prerequisites": []
+    },
+    {
+      "id": "why-the-prince",
+      "module": "m1",
+      "title": "למה נכתב הנסיך ולמי",
+      "summary": "ספר קצר ומעשי שנכתב בגלות ב-1513 ונשלח למשפחת מדיצ'י, ובו כל מה שלמד על איך משיגים שלטון ושומרים עליו",
+      "prerequisites": []
+    },
+    {
+      "id": "kinds-of-principalities",
+      "module": "m2",
+      "title": "סוגי נסיכויות: תורשתיות וחדשות",
+      "summary": "כל מדינה היא רפובליקה או נסיכות; נסיכות תורשתית קל לשמור, כי מספיק לא לשבור את המנהגים",
+      "prerequisites": [
+        "why-the-prince"
+      ]
+    },
+    {
+      "id": "mixed-principalities",
+      "module": "m2",
+      "title": "נסיכות מעורבת: לשמור על שטח שנכבש",
+      "summary": "למה שטח חדש מתקומם, ושלוש הדרכים להחזיק בו: לגור בו, לשלוח מושבות, או להחזיק בו צבא יקר",
+      "prerequisites": [
+        "why-the-prince"
+      ]
+    },
+    {
+      "id": "roman-foresight",
+      "module": "m2",
+      "title": "לראות צרות מרחוק: הלקח של הרומאים",
+      "summary": "להיות המגן של השכנים החלשים, להחליש את החזקים, ולטפל בצרה כשהיא עוד קטנה, כמו מחלה בתחילתה",
+      "prerequisites": [
+        "mixed-principalities"
+      ]
+    },
+    {
+      "id": "louis-errors",
+      "module": "m2",
+      "title": "שש הטעויות של לואי השנים עשר",
+      "summary": "איך מלך צרפת כבש את מילאנו ואיבד אותה, והכלל: מי שגורם לאחר להיות חזק, הורס את עצמו",
+      "prerequisites": [
+        "mixed-principalities"
+      ]
+    },
+    {
+      "id": "centralized-vs-feudal",
+      "module": "m2",
+      "title": "ממלכה ריכוזית מול ממלכה של אצילים",
+      "summary": "קשה לכבוש את ממלכת הטורקים וקל לשמור עליה, וקל לכבוש את צרפת וקשה לשמור עליה; פרק 4",
+      "prerequisites": [
+        "louis-errors"
+      ]
+    },
+    {
+      "id": "free-cities",
+      "module": "m2",
+      "title": "ערים שהיו חופשיות",
+      "summary": "עיר שהתרגלה לחירות זוכרת אותה, ולכן צריך להרוס אותה, לגור בה, או להשאיר לה את חוקיה; פרק 5",
+      "prerequisites": [
+        "louis-errors"
+      ]
+    },
+    {
+      "id": "virtu-and-fortuna",
+      "module": "m2",
+      "title": "נסיכים חדשים בכוח היכולת שלהם",
+      "summary": "משה, כורש, רומולוס ותזאוס: ההזדמנות באה מהמזל, וכל השאר מהיכולת; פרק 6",
+      "prerequisites": [
+        "free-cities"
+      ]
+    },
+    {
+      "id": "armed-prophets",
+      "module": "m2",
+      "title": "נביאים חמושים ונביאים לא חמושים",
+      "summary": "מי שמביא סדר חדש צריך להיות מסוגל להכריח, ולכן סבונרולה נפל; פרק 6",
+      "prerequisites": [
+        "free-cities"
+      ]
+    },
+    {
+      "id": "cesare-borgia",
+      "module": "m2",
+      "title": "צ'זארה בורג'ה: עלה בזכות המזל ובנה בכוח היכולת",
+      "summary": "הדוכס ולנטינו, בנו של האפיפיור, והמודל שמקיאוולי מציג לנסיך חדש; פרק 7",
+      "prerequisites": [
+        "armed-prophets"
+      ]
+    },
+    {
+      "id": "well-used-cruelty",
+      "module": "m2",
+      "title": "שלטון שהושג בפשע",
+      "summary": "אגתוקלס ואוליברוטו, ואכזריות שמשתמשים בה טוב או רע; פרק 8",
+      "prerequisites": [
+        "cesare-borgia"
+      ]
+    },
+    {
+      "id": "civil-principality",
+      "module": "m2",
+      "title": "נסיכות אזרחית: בין העם לאצילים",
+      "summary": "נסיך שעולה בזכות העם או בזכות האצילים, ולמה עדיף להישען על העם; פרק 9",
+      "prerequisites": [
+        "cesare-borgia"
+      ]
+    },
+    {
+      "id": "measuring-strength",
+      "module": "m2",
+      "title": "איך מודדים את כוחה של נסיכות",
+      "summary": "מי יכול לעמוד לבד בשדה הקרב, ומי צריך להסתגר בחומות; פרק 10",
+      "prerequisites": [
+        "civil-principality"
+      ]
+    },
+    {
+      "id": "church-states",
+      "module": "m2",
+      "title": "נסיכויות כנסייתיות",
+      "summary": "מדינות של אנשי דת, ואיך האפיפיורים הפכו לכוח פוליטי באיטליה; פרק 11",
+      "prerequisites": [
+        "civil-principality"
+      ]
+    },
+    {
+      "id": "mercenaries",
+      "module": "m3",
+      "title": "סוגי צבאות ושכירי חרב",
+      "summary": "יסודות כל מדינה הם חוקים טובים וצבא טוב, ושכירי חרב הם שהרסו את איטליה; פרק 12",
+      "prerequisites": [
+        "church-states"
+      ]
+    },
+    {
+      "id": "auxiliaries-own-arms",
+      "module": "m3",
+      "title": "צבא עזר, צבא מעורב וצבא משלך",
+      "summary": "צבא שמלך אחר שולח לעזרתך מסוכן עוד יותר; רק צבא משלך שומר עליך; פרק 13",
+      "prerequisites": [
+        "mercenaries"
+      ]
+    },
+    {
+      "id": "prince-and-war",
+      "module": "m3",
+      "title": "הנסיך ואמנות המלחמה",
+      "summary": "המלחמה היא המקצוע היחיד של הנסיך, בשלום ובמלחמה; פרק 14",
+      "prerequisites": [
+        "mercenaries"
+      ]
+    },
+    {
+      "id": "effectual-truth",
+      "module": "m4",
+      "title": "האמת המעשית",
+      "summary": "מקיאוולי מכריז שהוא כותב על העולם כמו שהוא ולא כמו שהיה צריך להיות; פרק 15",
+      "prerequisites": [
+        "prince-and-war"
+      ]
+    },
+    {
+      "id": "liberality",
+      "module": "m4",
+      "title": "נדיבות וקמצנות",
+      "summary": "למה נסיך שמתפרסם בנדיבותו נאלץ בסוף להכביד על העם; פרק 16",
+      "prerequisites": [
+        "prince-and-war"
+      ]
+    },
+    {
+      "id": "loved-or-feared",
+      "module": "m4",
+      "title": "אכזריות ורחמים: אהוב או מפחיד",
+      "summary": "עדיף שיפחדו ממך מאשר שיאהבו אותך, בתנאי שלא ישנאו אותך; פרק 17",
+      "prerequisites": [
+        "liberality"
+      ]
+    },
+    {
+      "id": "fox-and-lion",
+      "module": "m4",
+      "title": "השועל והאריה: האם לשמור הבטחות",
+      "summary": "נסיך צריך לדעת להשתמש גם בחוק וגם בכוח, ולהיראות טוב גם כשהוא לא; פרק 18",
+      "prerequisites": [
+        "loved-or-feared"
+      ]
+    },
+    {
+      "id": "contempt-and-hatred",
+      "module": "m4",
+      "title": "להימנע מבוז ומשנאה",
+      "summary": "מה גורם לשנאה ולבוז, וקשירת קשר נגד הנסיך, עם הקיסרים הרומאים כדוגמה; פרק 19",
+      "prerequisites": [
+        "fox-and-lion"
+      ]
+    },
+    {
+      "id": "fortresses",
+      "module": "m5",
+      "title": "מבצרים, נשק לאזרחים ומפלגות",
+      "summary": "האם לחמש את העם, האם לפלג אותו, והאם מבצרים מועילים; פרק 20",
+      "prerequisites": [
+        "contempt-and-hatred"
+      ]
+    },
+    {
+      "id": "reputation",
+      "module": "m5",
+      "title": "איך נסיך זוכה להערכה",
+      "summary": "מפעלים גדולים, הכרעה ברורה בין צדדים, ועידוד האזרחים; פרק 21",
+      "prerequisites": [
+        "contempt-and-hatred"
+      ]
+    },
+    {
+      "id": "ministers-flatterers",
+      "module": "m5",
+      "title": "שרים, יועצים וחנפנים",
+      "summary": "איך בוחרים שרים ושומרים על נאמנותם, ואיך שומעים אמת בלי לאבד כבוד; פרקים 22 ו-23",
+      "prerequisites": [
+        "reputation"
+      ]
+    },
+    {
+      "id": "italy-lost",
+      "module": "m6",
+      "title": "למה נסיכי איטליה איבדו את מדינותיהם",
+      "summary": "לא המזל אשם אלא העצלות שלהם בזמנים שקטים; פרק 24",
+      "prerequisites": [
+        "ministers-flatterers"
+      ]
+    },
+    {
+      "id": "fortune-river",
+      "module": "m6",
+      "title": "המזל כנהר",
+      "summary": "המזל שולט במחצית ממעשינו, ואת המחצית השנייה הוא משאיר לנו, כמו נהר שאפשר לבנות לו סכרים; פרק 25",
+      "prerequisites": [
+        "ministers-flatterers",
+        "virtu-and-fortuna"
+      ]
+    },
+    {
+      "id": "exhortation",
+      "module": "m6",
+      "title": "הקריאה לשחרר את איטליה",
+      "summary": "הפרק האחרון, הנלהב, שקורא למדיצ'י לאחד את איטליה ולגרש את הזרים; פרק 26",
+      "prerequisites": [
+        "ministers-flatterers"
+      ]
+    },
+    {
+      "id": "machiavelli-legacy",
+      "module": "m6",
+      "title": "מקיאוולי מעבר לנסיך",
+      "summary": "הדיונים על ליוויוס והרפובליקה, איך נולד המושג מקיאווליזם, ואיך קוראים אותו היום",
+      "prerequisites": [
+        "exhortation"
+      ]
+    }
+  ],
+  "units": [
+    {
+      "id": "u01-machiavelli-world",
+      "concepts": [
+        "florence-world",
+        "machiavelli-life",
+        "why-the-prince"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "u02-kinds-and-new-lands",
+      "concepts": [
+        "kinds-of-principalities",
+        "mixed-principalities"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "u03-louis-mistakes",
+      "concepts": [
+        "roman-foresight",
+        "louis-errors"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "r1-review-beginnings",
+      "concepts": [],
+      "status": "planned"
+    },
+    {
+      "id": "u04-darius-and-free-cities",
+      "concepts": [
+        "centralized-vs-feudal",
+        "free-cities"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u05-own-arms-and-virtu",
+      "concepts": [
+        "virtu-and-fortuna",
+        "armed-prophets"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u06-cesare-borgia",
+      "concepts": [
+        "cesare-borgia"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "r2-review-new-princes",
+      "concepts": [],
+      "status": "planned"
+    },
+    {
+      "id": "u07-crime-and-the-people",
+      "concepts": [
+        "well-used-cruelty",
+        "civil-principality"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u08-strength-and-church",
+      "concepts": [
+        "measuring-strength",
+        "church-states"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u09-mercenaries",
+      "concepts": [
+        "mercenaries"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "r3-review-power",
+      "concepts": [],
+      "status": "planned"
+    },
+    {
+      "id": "u10-own-arms-and-war",
+      "concepts": [
+        "auxiliaries-own-arms",
+        "prince-and-war"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u11-effectual-truth-and-generosity",
+      "concepts": [
+        "effectual-truth",
+        "liberality"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u12-loved-or-feared",
+      "concepts": [
+        "loved-or-feared"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "r4-review-conduct",
+      "concepts": [],
+      "status": "planned"
+    },
+    {
+      "id": "u13-fox-and-lion",
+      "concepts": [
+        "fox-and-lion"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u14-contempt-and-hatred",
+      "concepts": [
+        "contempt-and-hatred"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u15-fortresses-and-reputation",
+      "concepts": [
+        "fortresses",
+        "reputation"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "r5-review-image",
+      "concepts": [],
+      "status": "planned"
+    },
+    {
+      "id": "u16-ministers-and-flatterers",
+      "concepts": [
+        "ministers-flatterers"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u17-fortune-and-italy",
+      "concepts": [
+        "italy-lost",
+        "fortune-river",
+        "exhortation"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "u18-legacy",
+      "concepts": [
+        "machiavelli-legacy"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "r6-review-ending",
+      "concepts": [],
+      "status": "planned"
+    }
+  ]
+}

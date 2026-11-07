@@ -1,5 +1,14 @@
 {
   "courses": [
-    { "id": "nodejs-backend", "title": "Node.js ו-Backend", "status": "active" }
+    {
+      "id": "nodejs-backend",
+      "title": "Node.js ו-Backend",
+      "status": "active"
+    },
+    {
+      "id": "machiavelli-prince",
+      "title": "מקיאוולי והנסיך",
+      "status": "active"
+    }
   ]
 }

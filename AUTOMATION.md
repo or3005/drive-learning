@@ -9,7 +9,8 @@ Android code.
 - The learner is a junior developer (React and TypeScript at work, C# and ASP.NET on the backend).
   He learns by ear while driving about 1.5 hours each way, Sunday to Thursday, not every drive.
 - **Language: Hebrew only, with technical terms in English (Latin script).** Never write any other
-  language anywhere: not in content, not in feedback, not in commit messages, not in notes.
+  language anywhere: not in content, not in feedback, not in commit messages, not in notes. A foreign
+  word that a course needs (Italian in the Machiavelli course: וירטו, פורטונה) is written in Hebrew letters.
 - He wants teaching before asking: explanations and worked examples first, questions after.
 - Everything in `content/schema.md` applies, including format 2 for every new lesson.
 
@@ -62,6 +63,22 @@ Android code.
    the newest attempt `time` in that course's progress), commit with a short English message
    (`content: feedback for 2 answers, unit u09`), and push to `main`. If the push is rejected because the
    app uploaded progress meanwhile, `git pull --rebase` and push again. If nothing changed, don't commit.
+
+## Book courses
+
+A course with a `book` section in `course.json` (now: `machiavelli-prince`, The Prince) reads a whole
+book, unit by unit, in Hebrew. When writing its units:
+
+- Translate the unit's chapters from `book.source` (a public-domain English translation), following
+  `book.translationGuide` (`translation.md`): the full text, no cuts and no additions, modern clear
+  Hebrew split into short sentences for the ear, the glossary's words and the spelling of names. Never
+  use an existing Hebrew translation of the book.
+- Each main segment has `reading` (a passage of about 150 to 400 words, ending with . ! or ?) and `text`
+  (the explanation: who the people are, what happened, what the passage says, in plain words, ending with
+  the idea in one sentence), and a `check`. Questions check that he understood the passage and the idea.
+- Long chapters may be split over two units; update `course.json` and `curriculum.md`
+  (`python3 tools/render_curriculum.py content/courses/<course>`).
+- The recordings are made by GitHub Actions after the push (`.github/workflows/audio.yml`): nothing to do.
 
 ## New courses
 

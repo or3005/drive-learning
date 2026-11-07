@@ -20,11 +20,12 @@ def render(course_dir: Path) -> None:
         for c in u["concepts"]:
             unit_of[c] = (n, u)
 
-    total_hours = len(course["units"]) * MINUTES_PER_UNIT / 60
+    per_unit = course.get("minutesPerUnit", MINUTES_PER_UNIT)
+    total_hours = len(course["units"]) * per_unit / 60
     lines = [
         f"# {course['title']}",
         "",
-        f"{len(course['modules'])} פרקים, {len(course['units'])} יחידות של כ-{MINUTES_PER_UNIT} דקות.",
+        f"{len(course['modules'])} פרקים, {len(course['units'])} יחידות של כ-{per_unit} דקות.",
         f"בערך {total_hours:.0f} שעות האזנה, בלי לספור חזרות.",
         "",
         "> הקובץ הזה נוצר אוטומטית מ-`course.json`. לשינויים, ערוך את ה-JSON והרץ `python3 tools/render_curriculum.py`.",

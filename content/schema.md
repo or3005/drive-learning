@@ -93,6 +93,15 @@ items it hasn't played yet at the start of the next drive in that course.
   it in `teaches` with the segment that teaches it. The validator enforces this. Never explain
   something through a concept the learner hasn't learned; teach it first, with a check question.
 - `status`: `planned` (no file yet) → `draft` (file exists, not reviewed) → `ready` (reviewed).
+- `voice` (optional): the course is recorded with a good voice by `tools/tts_render.py` in GitHub
+  Actions, sentence by sentence, and the app plays the recordings instead of the phone's voice.
+  `{ "engine": "edge", "reading": "he-IL-AvriNeural", "explain": "he-IL-HilaNeural", "rate": "-5%" }`.
+  `engine` is `edge` (free, no key), `fish` (Fish Audio S2.1 Free through OpenRouter, needs the
+  `OPENROUTER_API_KEY` secret) or `gemini` (Gemini TTS, needs `GEMINI_API_KEY`). `reading` is the voice
+  for book passages, `explain` for everything else.
+- `book` (optional): a course that reads a book. `source` is the public-domain text it is translated
+  from, `translationGuide` the rules and glossary for the translation (see `AUTOMATION.md`).
+- `minutesPerUnit` (optional): for `curriculum.md`; default 15.
 
 ## Unit file `units/<unit-id>.json`
 
@@ -104,6 +113,7 @@ items it hasn't played yet at the start of the next drive in that course.
   "estimatedMinutes": 15,
   "explanations": {
     "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson; format 2: 6–10 segments, at least 15 minutes, each with a "check"
+                                                                // book courses: also "reading", the passage read (in the reading voice) before "text"
     "simple": [ { "id": "simple-1", "text": "…" } ],           // same ideas through an analogy
     "deep":   [ { "id": "deep-1", "text": "…" } ]              // for when the basics are solid
   },
