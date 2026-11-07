@@ -3,7 +3,7 @@
 
 Runs in GitHub Actions and uploads the MP3 files to the release voice-samples. Edge voices need
 nothing; Fish Audio needs the OPENROUTER_API_KEY secret and Gemini the GEMINI_API_KEY secret
-(both free). An engine without its secret is skipped.
+(both free). An engine without its secret is skipped. Changing this file records them again.
 """
 import asyncio
 import os

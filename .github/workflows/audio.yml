@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -50,11 +50,16 @@ jobs:
         run: pip install --quiet "edge-tts>=7"
 
       - name: Voice samples
-        if: >-
-          inputs.samples ||
-          (github.event_name == 'push' && contains(join(github.event.commits.*.modified, ','), 'tools/voice_samples.py')) ||
-          (github.event_name == 'push' && contains(join(github.event.commits.*.added, ','), 'tools/voice_samples.py'))
-        run: python3 tools/voice_samples.py --upload
+        env:
+          WANTED: ${{ inputs.samples }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          changed=$(git diff --name-only "$BEFORE" HEAD 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+          if [ "$WANTED" = "true" ] || echo "$changed" | grep -q '^tools/voice_samples.py$'; then
+            python3 tools/voice_samples.py --upload
+          else
+            echo "voice samples unchanged"
+          fi
 
       - name: Record changed units
         run: python3 tools/tts_render.py --upload
