@@ -1,0 +1,257 @@
+{
+    "attempts": [
+        {
+            "questionId": "c-machiavellism",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794118276061
+        },
+        {
+            "questionId": "c-italy-1494",
+            "unitId": "u01-machiavelli-world",
+            "concept": "florence-world",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794118625059
+        },
+        {
+            "questionId": "c-florence",
+            "unitId": "u01-machiavelli-world",
+            "concept": "florence-world",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794119043744
+        },
+        {
+            "questionId": "c-career",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794119485782
+        },
+        {
+            "questionId": "c-fall",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794119714908
+        },
+        {
+            "questionId": "c-letter",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794119951397
+        },
+        {
+            "questionId": "c-dedication",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120481058
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120640191
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u01-machiavelli-world",
+            "concept": "florence-world",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120723096
+        },
+        {
+            "questionId": "q4",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120775565
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "apply",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120832413
+        },
+        {
+            "questionId": "q8",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120907988
+        },
+        {
+            "questionId": "q6",
+            "unitId": "u01-machiavelli-world",
+            "concept": "florence-world",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794120962888
+        },
+        {
+            "questionId": "q7",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794121022595
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-08",
+            "time": 1794121502019
+        }
+    ],
+    "concepts": {
+        "machiavelli-life": {
+            "box": 1,
+            "nextReview": "2026-11-09",
+            "lastPromoted": "2026-11-08"
+        },
+        "florence-world": {
+            "box": 1,
+            "nextReview": "2026-11-09",
+            "lastPromoted": "2026-11-08"
+        },
+        "why-the-prince": {
+            "box": 1,
+            "nextReview": "2026-11-09",
+            "lastPromoted": "2026-11-08"
+        }
+    },
+    "completedUnits": [
+        "u01-machiavelli-world"
+    ],
+    "explainAnswers": [
+        {
+            "questionId": "q9",
+            "unitId": "u01-machiavelli-world",
+            "transcript": "בשנים הללו איטליה הייתה מחולקת לחמש מדינות גדולות נאפולי רומא של האפיפיור פירנצה וכל הכלכלה ששם האזור של מילאנו והאזור של ונציה הם לא היו תחת ישות אחת אלא חמש נפרדות שלכל אחד היה את הצבא שלו על ידי שכירי חרב שכל פעם החליפו ידיים לפי מי שמשלם יותר ב-1949 היה מלחמה עם מלך צרפת והוא פשוט הלך והשתלט על כל הערים אחת אחת כי הם לא יכלו לעמוד מולו הם היו חמש מפוצלות ולא מיוחדות עם צבא שהוא לא באמת נאמן למדינה שלו וזהו",
+            "day": "2026-11-08",
+            "time": 1794121112631
+        },
+        {
+            "questionId": "q10",
+            "unitId": "u01-machiavelli-world",
+            "transcript": "אוקיי אז הוא בהתחלה שהוא שהוא גדל הוא לא היה מאיזה משפחה ידועה דבר והוא היה אזרח פשוט ואחרי שמדיצ'י נפלו והיה לך את כל המלחמה עם צרפת לקחו אותו בתור יועץ מיוחד לפירנצה ושמה הוא עזר באמת בכל מיני יחסי חוץ ומלחמה שלום וחוץ הוא היה איזה 14 שנים בתפקיד הזה ולאחר מכן היה מלחמה עם ספרד שספרד כאילו עזרה ביחד לצרפת והם החזירו את מדיצ'י את המשפחה שהייתה בגלות הם החזירו אותם לשלוט בפירנצה ואחרי זה מצאו איזה שהוא שקשר את שמו לגבי כל מיני קונספירציות להפיל את מדיצ'י לכן הם תפסו אותו ועינו אותו והוא היה בכלא והוא שוחרר רק אחרי שלורנסו מדיצ'י הנכד של לורנסו הגדול היה אפיפיור אז הוא חילק כל מיני חנינות לאנשים וביניהם זה המקבילי חוץ מזה אחרי זה הוא פשוט היה אזרח פשוט מן השורה שעבד עם חוטבי העצים ואבא בפונדק והוא כתב את ספרו בערב מתי שהיה לו זמן והוא כל הזמן ככה הוא עשה מבחינת הזמן שלו בערב על ידי זמנו החופשי",
+            "day": "2026-11-08",
+            "time": 1794121282443
+        },
+        {
+            "questionId": "q11",
+            "unitId": "u01-machiavelli-world",
+            "transcript": "הספר נכתב בערבי מתי שלמדיד שהזמן היה לובש בגדי בגדים מפוארים של של חצר מלכות והוא היה כותב את הספר הספר נכתב לפי דברים שקרו ברומא העתיקה הוא הקדיש את הספר למלך לורנסו מדיצ'י בתקווה שהוא יקח אותו ויתן לו עבודה כי לא היה לו עבודה בכלל הוא היה גר בכפר והספר מסביר איך שליט יחיד בין אם הוא מלך נסיך דוחס וכדומה מציע אפשרויות איך להחזיק בשלטון או להרחיב אותו זה בגדול על מה הספר עצמו",
+            "day": "2026-11-08",
+            "time": 1794121389956
+        }
+    ],
+    "diagnostics": [
+        "2026-11-08: listen ANSWER: 'תשובה אחד' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-08: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-08: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-08: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-08: explain: 413 chars, ended by סיימתי",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: explain: 803 chars, ended by סיימתי",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: explain: 378 chars, ended by סיימתי",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: listen ANSWER: 'תשובה שלוש' -> Answer",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש."
+    ],
+    "schedulerVersion": 2
+}
