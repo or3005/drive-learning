@@ -16,7 +16,7 @@ OPTION_LENGTH_RATIO = 1.2
 # Format 2 lessons: at least this many minutes of main explanation.
 MIN_LESSON_MINUTES = 15
 # Format 3 (Nov 2026): a lesson takes about 30 minutes in the car, everything included.
-F3_MIN_EXPLANATION = 10      # reading and explanation, in minutes
+F3_MIN_EXPLANATION = 8       # reading and explanation, in minutes (a short chapter may make a shorter lesson)
 F3_MAX_EXPLANATION = 16
 F3_TARGET_TOTAL = 27         # estimate with questions, retell and warm-up; the drive adds thinking and replays
 F3_MAX_TOTAL = 31
@@ -239,7 +239,7 @@ def check_unit(path, listed, rep, ctx):
 
     ex = unit.get("explanations", {})
     main = ex.get("main", [])
-    if not is_review and not 4 <= len(main) <= 10:
+    if not is_review and unit.get("format", 1) < 3 and not 4 <= len(main) <= 10:
         rep.err(where, f"explanations.main should have 4-10 segments, has {len(main)}")
     words = 0
     seg_ids = set()
@@ -444,9 +444,21 @@ def check_unit(path, listed, rep, ctx):
     return total
 
 
+STOP_WORDS = set("היא הוא הם הן אותה אותו אותם אותן שלו שלה שלהם שלך בלי יותר פחות כדי אבל כמו רק גם עוד כל "
+                 "זה זו זאת אין היה הייתה היו אחד אחת מאוד בין עצמו עצמה עצמם כבר אחרי לפני כאן שם אנשים "
+                 "דבר דברים מישהו משהו כולם תמיד".split())
+
+
 def _words(text):
-    """Hebrew words of 3+ letters, with a one-letter prefix dropped, for comparing wordings."""
-    return {w[1:] if len(w) > 3 and w[0] in "והבכלמש" else w for w in HEB_WORD.findall(text or "")}
+    """Content words (Hebrew, 3+ letters, a one-letter prefix dropped), for comparing wordings."""
+    out = set()
+    for w in HEB_WORD.findall(text or ""):
+        if w in STOP_WORDS:
+            continue
+        w = w[1:] if len(w) > 3 and w[0] in "והבכלמש" else w
+        if w not in STOP_WORDS:
+            out.add(w)
+    return out
 
 
 def check_giveaways(where, unit, rep):

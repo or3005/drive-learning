@@ -51,10 +51,15 @@ Android code.
 4. **Keep three lessons ready.** Count the lessons (not reviews) with status `draft` or `ready` that are
    not in `completedUnits`. If fewer than 3, write the next `planned` units in `course.json` order until
    there are 3, at most 2 new lessons per run. After every 3 lessons, add a review unit (`type: review`)
-   that covers them. Every new lesson is format 2: at least 15 minutes of explanation, a check after
-   every segment, a retell, reminder, review questions, explain-back in 3 short parts, balanced options,
-   and every substantive term taught before it is used. Use his weak spots (wrong attempts, missing rubric
-   points) for examples and bridges. Set the unit's status to `draft` in `course.json`.
+   that covers them. Every new lesson is **format 3** (`content/schema.md`): about 30 minutes in the car,
+   so 10 to 16 minutes of explanation in 3 to 7 segments, a check after every segment, 3 to 5 end
+   questions plus 3 short explain parts, a retell of at most 230 words, reminder and review questions,
+   and every substantive term taught before it is used. **Questions must make him think** (he said
+   they were too easy): new cases rather than lines from the lesson, wrong options that are real
+   temptations, no wording or length clues, and explanations that teach something extra. Read the
+   section on multiple-choice options in `content/schema.md` before writing any question. Use his weak
+   spots (wrong attempts, missing rubric points) for examples and bridges. Set the unit's status to
+   `draft` in `course.json`.
 
 5. `python3 tools/validate.py` must end with 0 errors; fix warnings where reasonable. Then
    `python3 tools/render_unit_html.py`.
@@ -73,7 +78,8 @@ book, unit by unit, in Hebrew. When writing its units:
   `book.translationGuide` (`translation.md`): the full text, no cuts and no additions, modern clear
   Hebrew split into short sentences for the ear, the glossary's words and the spelling of names. Never
   use an existing Hebrew translation of the book.
-- Each main segment has `reading` (a passage of about 150 to 400 words, ending with . ! or ?) and `text`
+- A lesson reads about 800 words of the book (the chapter split in `course.json` is planned for that).
+- Each main segment has `reading` (a passage of about 150 to 300 words, ending with . ! or ?) and `text`
   (the explanation: who the people are, what happened, what the passage says, in plain words, ending with
   the idea in one sentence), and a `check`. Questions check that he understood the passage and the idea.
 - Long chapters may be split over two units; update `course.json` and `curriculum.md`

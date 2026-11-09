@@ -21,14 +21,37 @@ Gemini (post-drive) can generate more of it. `tools/validate.py` enforces everyt
   משנה) go into `content/pronunciation.json` under `hebrew` with niqqud, instead of adding niqqud
   in the unit text. A new English abbreviation that should be read letter by letter, or a symbol
   like C#, goes under `english`.
-- **Depth.** A lesson has at least 15 minutes of main explanation (format 2): 6–10 main segments. At least two segments walk
+- **Depth.** A lesson is about 30 minutes in all (format 3: 10–16 minutes of explanation in 3–7 segments). Segments walk
   through a concrete example out loud: a real scenario, what the code does step by step in words,
   what goes wrong in the naive version and how a better version fixes it. Good practice (naming,
   layering, error handling, testing) is taught inside these examples, not as a list of rules.
 
 ## Writing multiple-choice options
 
-The learner answers by ear while driving, so the options must not give the answer away:
+The learner said the questions were too easy: he found the right answer without thinking. A
+question must make him use the idea, and teach something on the way. Before writing any option, ask:
+could someone who only half-listened pick the right one by its wording, its length, or because the
+others are silly? If yes, rewrite.
+
+- **Ask about a new case.** Most questions put the idea in a situation the lesson didn't describe: a
+  modern scenario, a different historical case, a what-would-he-say, a choice between two plausible
+  reasons. A question that can be answered by recognizing a sentence from the lesson is a weak question.
+- **Every wrong option is a real temptation.** It is one of: the unit's misconception in the words
+  people use; a true statement that doesn't answer this question; cause and effect reversed; the right
+  idea with one important detail wrong; a correct idea from another segment or chapter that doesn't fit
+  here. Never a filler that no one would choose (״because the Pope forbade it״, ״it doesn't matter״).
+- **No wording clues.** Reword all options in fresh words: don't copy the lesson's phrase into the
+  correct option only (the validator warns). Same grammatical shape for all options. Words like always,
+  never, at all (תמיד, אף פעם, בכלל) appear in correct options as often as in wrong ones, or not at all.
+- **The correct option is not usually the longest** (the validator warns when it is in more than half
+  the questions). Vary which option is longest.
+- **The explanation teaches.** After the answer, the explanation says why the tempting wrong option is
+  tempting and wrong, or adds an example or consequence the lesson didn't spell out. It never just
+  repeats the correct option.
+- **Checks after a segment** may ask what the passage said, but their wrong options are near misses
+  (the right idea with a wrong detail, or what a careless listener would remember), not obvious mistakes.
+
+The learner answers by ear while driving, so the options must also follow these older rules:
 
 - **Same shape, same length.** Every option is one sentence of similar length (the validator warns
   when the correct one is more than 20% longer than the longest wrong one). If the correct option
@@ -112,7 +135,7 @@ items it hasn't played yet at the start of the next drive in that course.
   "title": "…",
   "estimatedMinutes": 15,
   "explanations": {
-    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson; format 2: 6–10 segments, at least 15 minutes, each with a "check"
+    "main":   [ { "id": "s1", "title": "…", "text": "…" } ],  // the lesson; format 3: 3–7 segments, 10–16 minutes, each with a "check"
                                                                 // book courses: also "reading", the passage read (in the reading voice) before "text"
     "simple": [ { "id": "simple-1", "text": "…" } ],           // same ideas through an analogy
     "deep":   [ { "id": "deep-1", "text": "…" } ]              // for when the basics are solid
@@ -158,9 +181,28 @@ Rules:
   (Gemini after the drive, Claude at night).
 - Questions are listed in ladder order: recognize → why → apply → explain.
 
-### Format 2 lessons (every new unit)
+### Format 3 lessons (every new unit, from November 2026)
 
-New units set `"format": 2`, and the validator enforces:
+A lesson must take about 30 minutes in the car, everything included: the warm-up, the lesson, the
+checks, the retell and the questions. In practice the drive adds about 15% to the estimate (thinking,
+replays, wrong answers). New units set `"format": 3`, and the validator enforces:
+
+- **Reading and explanation: 10 to 16 minutes**, at the speaking rate of the course's voice (125 words
+  a minute for recorded courses, 140 for the phone's voice): about 1300 to 2000 words, in 3 to 7 main
+  segments, each with a `check`. In a book course, about 800 words of the book and 700 to 900 words of
+  explanation per lesson; split a long chapter over two or three lessons rather than rushing it.
+- **End questions: 3 to 5 multiple-choice** (at least one `why` and two `apply`; `recognize` is
+  optional, the checks already do that), **and exactly 3 short explain parts**. Each explain part asks
+  for one idea that can be said in two or three sentences.
+- **`retell`** of at most 230 words, **`reminder`**, at least 3 **`reviewQuestions`**, `simple` and `deep`.
+- **Estimated total at most 27 minutes** (the validator warns above 27 and fails above 31).
+- Worked examples still matter, but one good example told well beats two rushed ones.
+
+Everything else from format 2 below still applies.
+
+### Format 2 lessons (units written before November 2026)
+
+Units with `"format": 2` were written to these rules, and the validator enforces them:
 
 - **At least 15 minutes of main explanation** (about 2100 words at 140 words a minute), in 6–10
   segments, with at least two worked examples told out loud.
