@@ -73,23 +73,34 @@ Android code.
 ## Book courses
 
 A course with a `book` section in `course.json` (now: `machiavelli-prince`) reads books in Hebrew. Each
-unit in `course.json` says what it reads (`reads`). Part 1 (u01 to u27) reads all of The Prince
-(`book.source`). Part 2 (u28 to u41) is about his views and his book on republics: selected chapters and
-passages from the Discourses on Livy (`book.secondSource`), one theme per unit, with comparisons to The
-Prince. When writing its units:
+unit in `course.json` says what it reads (`reads`). It reads two books in turn: all of The Prince
+(`book.source`, units `u01` to `u27`), and after a Prince unit on a theme, a unit from the Discourses on
+Livy (`book.secondSource`, units `d01` to `d14`) on the same theme: selected chapters and passages, one
+theme per unit, with comparisons to The Prince. The order in `course.json` is the order of the drives. The
+learner's main goal is to understand Machiavelli's view of the world, so he must always know which book he
+is hearing. When writing these units:
 
 - Translate from the public-domain English text named in `reads`, following `book.translationGuide`
   (`translation.md`): modern clear Hebrew split into short sentences for the ear, the glossary's words and
-  the spelling of names. In part 1 the full text, no cuts and no additions. In part 2 choose the passages
-  that carry the chapter's argument (about 800 words in all), translate each one faithfully without
-  changing it, and say in the explanation what was left out between them. Never use an existing Hebrew
-  translation of either book.
-- In part 2 the explanations bring out what he thinks and why, and where it agrees or clashes with The
-  Prince; at least one question per unit compares the two books.
+  the spelling of names. In The Prince the full text, no cuts and no additions. In the Discourses choose
+  the passages that carry the chapter's argument (about 800 words in all), translate each one faithfully
+  without changing it, never join two passages with a gap inside one `reading` (no "..."), and say in the
+  explanation what was left out between them. Never use an existing Hebrew translation of either book.
+- Always say which book: the unit title starts with the book's name and a comma (`הנסיך, פרק 6: ...` or
+  `הדיונים, ספר א פרק 9: ...`), and every `reading` opens with its source: `מתוך הנסיך, פרק שישי.` or
+  `מתוך הדיונים, ספר ראשון, פרק תשיעי.` (a passage that opens a chapter: `מתוך הנסיך. פרק שישי: ...`).
+  `tools/validate.py` checks both. The first explanation of a unit names the book again, since the
+  previous drive was from the other book.
+- Discourses units bring out what he thinks and why, and where it agrees or clashes with The Prince. The
+  last segment's explanation has a part that starts with `ומה זה אומר על תפיסת העולם שלו?`, and at least
+  one end question compares the two books. Prince units point to the Discourses unit that follows when
+  the two books meet. Don't say "in the next unit" for something two drives away; say "in the next unit
+  from The Prince" (`ביחידה הבאה של הנסיך`).
 - A lesson reads about 800 words of the book (the chapter split in `course.json` is planned for that).
 - Each main segment has `reading` (a passage of about 150 to 300 words, ending with . ! or ?) and `text`
   (the explanation: who the people are, what happened, what the passage says, in plain words, ending with
   the idea in one sentence), and a `check`. Questions check that he understood the passage and the idea.
+  A Discourses unit may open with one segment without `reading` that introduces the book or the theme.
 - Long chapters may be split over two units; update `course.json` and `curriculum.md`
   (`python3 tools/render_curriculum.py content/courses/<course>`).
 - The recordings are made by GitHub Actions after the push (`.github/workflows/audio.yml`): nothing to do.

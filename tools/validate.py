@@ -149,6 +149,7 @@ def check_course(course_dir, rep):
         "wpm": course.get("wordsPerMinute") or (118 if course.get("voice") else WORDS_PER_MINUTE),
         # A course read for interest opens a lesson with a short reminder instead of warm-up questions.
         "warmup": WARM_UP_MINUTES if course.get("practice", {}).get("warmUpQuestions", 3) > 0 else 0.5,
+        "book": bool(course.get("book")),
     }
     total_minutes = 0.0
     for u in course.get("units", []):
@@ -224,6 +225,20 @@ def check_taught_before_used(where, unit, rep, ctx, main_ids_in_order):
     ctx["taught"] |= set(teaches)
 
 
+BOOK_NAMES = ("הנסיך", "הדיונים")
+
+
+def check_book_labels(where, unit, rep):
+    """Book courses read two books in turn: every title and passage says which book it is from."""
+    title = unit.get("title", "")
+    if not any(title.startswith(b + ",") for b in BOOK_NAMES):
+        rep.err(where, "book course: the title must start with the book's name and a comma (הנסיך, or הדיונים,)")
+    for seg in unit.get("explanations", {}).get("main", []):
+        reading = seg.get("reading")
+        if reading is not None and not any(reading.startswith(f"מתוך {b}") for b in BOOK_NAMES):
+            rep.err(f"{where} main/{seg.get('id')}.reading", "book course: a passage must open with its source (מתוך הנסיך, פרק ... or מתוך הדיונים, ספר ..., פרק ...)")
+
+
 def check_unit(path, listed, rep, ctx):
     unit = load(path, rep)
     if unit is None:
@@ -236,6 +251,8 @@ def check_unit(path, listed, rep, ctx):
     is_review = unit.get("type") == "review"
     strict = unit.get("format", 1) >= 2
     unit_concepts = set(unit.get("concepts", []))
+    if ctx.get("book") and not is_review:
+        check_book_labels(where, unit, rep)
     check_text(f"{where}.title", unit.get("title"), rep)
     check_text(f"{where}.recap", unit.get("recap"), rep)
 

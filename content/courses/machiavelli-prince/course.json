@@ -9,7 +9,7 @@
     "author": "ניקולו מקיאוולי",
     "source": "source/the-prince-marriott.txt",
     "translationGuide": "translation.md",
-    "note": "חלק ראשון: כל הנסיך, בלי השמטות. חלק שני: פרקים וקטעים נבחרים מהדיונים על ליוויוס, לפי הנושאים של הדעות שלו. התרגום לעברית נעשה כאן מתרגומים אנגליים שנמצאים ברשות הציבור.",
+    "note": "שני ספרים לסירוגין: כל הנסיך, בלי השמטות, ואחרי יחידה של הנסיך בנושא מסוים, יחידה מהדיונים על ליוויוס באותו נושא, עם קטעים נבחרים. כל קטע נפתח במילים מתוך הנסיך או מתוך הדיונים, וכל כותרת מתחילה בשם הספר. המטרה העיקרית: להבין את תפיסת העולם של מקיאוולי. התרגום לעברית נעשה כאן מתרגומים אנגליים שנמצאים ברשות הציבור.",
     "secondSource": "source/discourses-thomson.txt"
   },
   "voice": {
@@ -116,7 +116,7 @@
       "title": "לראות צרות מרחוק: הלקח של הרומאים",
       "summary": "להיות המגן של השכנים החלשים, להחליש את החזקים, ולטפל בצרה כשהיא עוד קטנה, כמו מחלה בתחילתה",
       "prerequisites": [
-        "mixed-principalities"
+        "discourses-why"
       ]
     },
     {
@@ -125,7 +125,7 @@
       "title": "שש הטעויות של לואי השנים עשר",
       "summary": "איך מלך צרפת כבש את מילאנו ואיבד אותה, והכלל: מי שגורם לאחר להיות חזק, הורס את עצמו",
       "prerequisites": [
-        "roman-foresight"
+        "cycle-and-mixed-government"
       ]
     },
     {
@@ -143,7 +143,7 @@
       "title": "ערים שהיו חופשיות",
       "summary": "עיר שהתרגלה לחירות זוכרת אותה, ולכן צריך להרוס אותה, לגור בה, או להשאיר לה את חוקיה; פרק 5",
       "prerequisites": [
-        "centralized-vs-feudal"
+        "expand-or-preserve"
       ]
     },
     {
@@ -152,7 +152,7 @@
       "title": "נסיכים חדשים בכוח היכולת שלהם",
       "summary": "משה, כורש, רומולוס ותזאוס: ההזדמנות באה מהמזל, וכל השאר מהיכולת; פרק 6",
       "prerequisites": [
-        "free-cities"
+        "corruption-and-freedom"
       ]
     },
     {
@@ -161,7 +161,7 @@
       "title": "נביאים חמושים ונביאים לא חמושים",
       "summary": "מי שמביא סדר חדש צריך להיות מסוגל להכריח, ולכן סבונרולה נפל; פרק 6",
       "prerequisites": [
-        "free-cities"
+        "corruption-and-freedom"
       ]
     },
     {
@@ -170,7 +170,7 @@
       "title": "צ'זארה בורג'ה: איך בנה מדינה",
       "summary": "בנו של האפיפיור עלה בזכות המזל של אביו, ובנה מדינה ביכולת ובאכזריות מחושבת; פרק 7, חלק ראשון",
       "prerequisites": [
-        "armed-prophets"
+        "founder-alone"
       ]
     },
     {
@@ -197,7 +197,7 @@
       "title": "נסיכות אזרחית: בין העם לאצילים",
       "summary": "נסיך שעולה בזכות העם או בזכות האצילים, ולמה עדיף להישען על העם; פרק 9",
       "prerequisites": [
-        "well-used-cruelty"
+        "return-to-beginnings"
       ]
     },
     {
@@ -206,7 +206,7 @@
       "title": "איך מודדים את כוחה של נסיכות",
       "summary": "מי יכול לעמוד לבד בשדה הקרב, ומי צריך להסתגר בחומות; פרק 10",
       "prerequisites": [
-        "civil-principality"
+        "tumults-make-freedom"
       ]
     },
     {
@@ -215,7 +215,7 @@
       "title": "נסיכויות כנסייתיות",
       "summary": "מדינות של אנשי דת, ואיך האפיפיורים הפכו לכוח פוליטי באיטליה; פרק 11",
       "prerequisites": [
-        "civil-principality"
+        "tumults-make-freedom"
       ]
     },
     {
@@ -224,7 +224,7 @@
       "title": "סוגי צבאות ושכירי חרב",
       "summary": "יסודות כל מדינה הם חוקים טובים וצבא טוב, ושכירי חרב מסוכנים גם כשהם טובים וגם כשהם רעים; פרק 12, חלק ראשון",
       "prerequisites": [
-        "church-states"
+        "roman-religion"
       ]
     },
     {
@@ -242,7 +242,7 @@
       "title": "צבא עזר, צבא מעורב וצבא משלך",
       "summary": "צבא שמלך אחר שולח לעזרתך מסוכן עוד יותר; רק צבא משלך שומר עליך; פרק 13",
       "prerequisites": [
-        "italian-arms-history"
+        "love-of-liberty"
       ]
     },
     {
@@ -251,7 +251,7 @@
       "title": "הנסיך ואמנות המלחמה",
       "summary": "המלחמה היא המקצוע היחיד של הנסיך, בשלום ובמלחמה; פרק 14",
       "prerequisites": [
-        "auxiliaries-own-arms"
+        "arms-and-money"
       ]
     },
     {
@@ -260,7 +260,7 @@
       "title": "האמת המעשית",
       "summary": "מקיאוולי מכריז שהוא כותב על העולם כמו שהוא ולא כמו שהיה צריך להיות; פרק 15",
       "prerequisites": [
-        "auxiliaries-own-arms"
+        "arms-and-money"
       ]
     },
     {
@@ -287,7 +287,7 @@
       "title": "השועל והאריה: האם לשמור הבטחות",
       "summary": "נסיך צריך לדעת להשתמש גם בחוק וגם בכוח, ולהיראות טוב גם כשהוא לא; פרק 18",
       "prerequisites": [
-        "loved-or-feared"
+        "kindness-or-severity"
       ]
     },
     {
@@ -305,7 +305,7 @@
       "title": "הקיסרים הרומאים בין העם לחיילים",
       "summary": "מרקוס, פרטינקס ואלכסנדר: קיסרים טובים שנפלו, כי היה צריך לרצות את החיילים; פרק 19, חלק שני",
       "prerequisites": [
-        "contempt-and-hatred"
+        "people-wiser"
       ]
     },
     {
@@ -369,7 +369,7 @@
       "title": "הקריאה לשחרר את איטליה",
       "summary": "הפרק האחרון, הנלהב, שקורא למדיצ'י לאחד את איטליה ולגרש את הזרים; פרק 26",
       "prerequisites": [
-        "fortune-river"
+        "change-with-times"
       ]
     },
     {
@@ -378,7 +378,8 @@
       "title": "ספר אחר: למה כתב את הדיונים",
       "summary": "ספר ארוך על רפובליקות, שנכתב באותן שנים כמו הנסיך, והוקדש לחברים ולא לשליט; ההקדשה וההקדמה",
       "prerequisites": [
-        "exhortation"
+        "kinds-of-principalities",
+        "mixed-principalities"
       ]
     },
     {
@@ -387,7 +388,7 @@
       "title": "צורות שלטון והמעגל",
       "summary": "שש צורות שלטון שמתחלפות במעגל, ולמה שלטון מעורב של מלך, אצילים ועם יציב יותר; דיונים א, 2",
       "prerequisites": [
-        "discourses-why"
+        "roman-foresight"
       ]
     },
     {
@@ -396,7 +397,7 @@
       "title": "המריבות שעשו את רומא חופשית",
       "summary": "הוויכוחים בין הסנאט לעם לא החלישו את רומא אלא שמרו על החירות שלה; ומי שומר עליה טוב יותר, העם או האצילים; דיונים א, 3 עד 5",
       "prerequisites": [
-        "cycle-and-mixed-government"
+        "civil-principality"
       ]
     },
     {
@@ -405,7 +406,7 @@
       "title": "רומא או ספרטה: לגדול או לשמור",
       "summary": "רפובליקה שרוצה להישאר קטנה ושקטה, מול רפובליקה שגדלה בעזרת העם, ולמה צריך לבחור בדרך של רומא; דיונים א, 6",
       "prerequisites": [
-        "tumults-make-freedom"
+        "centralized-vs-feudal"
       ]
     },
     {
@@ -414,7 +415,7 @@
       "title": "מייסד אחד, ומייסד של עריצות",
       "summary": "מי שמייסד מדינה צריך להיות לבד, כמו רומולוס, אבל התהילה שייכת למי שמייסד חירות ולא עריצות; דיונים א, 9 ו-10",
       "prerequisites": [
-        "expand-or-preserve"
+        "armed-prophets"
       ]
     },
     {
@@ -423,7 +424,7 @@
       "title": "הדת של הרומאים והכנסייה",
       "summary": "איך הדת חיזקה את רומא, ולמה לדעתו הכנסייה של ימיו השאירה את איטליה מפולגת; דיונים א, 11 ו-12",
       "prerequisites": [
-        "founder-alone"
+        "church-states"
       ]
     },
     {
@@ -432,7 +433,7 @@
       "title": "עם מושחת וחירות",
       "summary": "עם שהתרגל לנסיך, ועם מושחת, מתקשים לשמור על חירות שקיבלו; דיונים א, 16 עד 18",
       "prerequisites": [
-        "roman-religion"
+        "free-cities"
       ]
     },
     {
@@ -441,7 +442,7 @@
       "title": "העם חכם יותר מנסיך",
       "summary": "הפרק שבו מקיאוולי טוען שההמון נבון ויציב יותר משליט יחיד, הפוך ממה שכולם אומרים; דיונים א, 58",
       "prerequisites": [
-        "corruption-and-freedom"
+        "contempt-and-hatred"
       ]
     },
     {
@@ -450,7 +451,7 @@
       "title": "צבא וכסף",
       "summary": "בושה למדינה בלי צבא משלה, וכסף איננו העורקים של המלחמה; דיונים א, 21 וב, 10 ו-20",
       "prerequisites": [
-        "people-wiser"
+        "auxiliaries-own-arms"
       ]
     },
     {
@@ -459,7 +460,7 @@
       "title": "למה העמים הקדומים אהבו חירות",
       "summary": "איך רומא גדלה מול עמים חופשיים, ולמה לדעתו אנשי זמנו אוהבים חירות פחות; דיונים ב, 2",
       "prerequisites": [
-        "arms-and-money"
+        "italian-arms-history"
       ]
     },
     {
@@ -468,8 +469,7 @@
       "title": "להשתנות עם הזמנים",
       "summary": "מי שרוצה מזל טוב לאורך זמן צריך להתאים את עצמו לזמנים, ולמה רפובליקה עושה את זה טוב יותר מאדם אחד; דיונים ג, 9 וב, 29",
       "prerequisites": [
-        "fortune-river",
-        "love-of-liberty"
+        "fortune-river"
       ]
     },
     {
@@ -478,7 +478,6 @@
       "title": "רחמים או קשיחות",
       "summary": "מנליוס ווולריוס, חניבעל וסקיפיו: שתי דרכים הפוכות להנהיג, והשוואה לפרק 17 של הנסיך; דיונים ג, 19 עד 22",
       "prerequisites": [
-        "change-with-times",
         "loved-or-feared"
       ]
     },
@@ -488,7 +487,7 @@
       "title": "לחזור להתחלה, ובני ברוטוס",
       "summary": "מדינה ודת מחזיקות מעמד רק אם הן חוזרות מדי פעם לעקרונות שלהן, ומי שמשחרר עיר צריך להרוג את בני ברוטוס; דיונים ג, 1 ו-3",
       "prerequisites": [
-        "kindness-or-severity"
+        "well-used-cruelty"
       ]
     },
     {
@@ -497,7 +496,7 @@
       "title": "מקיאוולי של הנסיך ומקיאוולי של הרפובליקה",
       "summary": "איך שני הספרים מתיישבים, מה הם הדעות שלו באמת, ואיך קראו אותו מאז: מקיאווליזם, רוסו, ופרשנים של היום",
       "prerequisites": [
-        "return-to-beginnings"
+        "exhortation"
       ]
     }
   ],
@@ -522,12 +521,28 @@
       "reads": "הנסיך: פרקים 1 עד 3, חלק ראשון"
     },
     {
+      "id": "d01-discourses-intro",
+      "concepts": [
+        "discourses-why"
+      ],
+      "status": "draft",
+      "reads": "הדיונים: ההקדמה לספר הראשון, וההקדשה בקצרה"
+    },
+    {
       "id": "u03-romans-foresight",
       "concepts": [
         "roman-foresight"
       ],
       "status": "draft",
       "reads": "הנסיך: פרק 3, חלק שני"
+    },
+    {
+      "id": "d02-kinds-of-government",
+      "concepts": [
+        "cycle-and-mixed-government"
+      ],
+      "status": "draft",
+      "reads": "הדיונים: ספר א, פרק 2, קטעים נבחרים"
     },
     {
       "id": "u04-louis-mistakes",
@@ -546,12 +561,28 @@
       "reads": "הנסיך: פרק 4"
     },
     {
+      "id": "d03-rome-or-sparta",
+      "concepts": [
+        "expand-or-preserve"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרק 6, קטעים נבחרים"
+    },
+    {
       "id": "u06-free-cities",
       "concepts": [
         "free-cities"
       ],
       "status": "draft",
       "reads": "הנסיך: פרק 5"
+    },
+    {
+      "id": "d04-corruption-and-freedom",
+      "concepts": [
+        "corruption-and-freedom"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרקים 16 עד 18, קטעים נבחרים"
     },
     {
       "id": "u07-own-arms-and-virtu",
@@ -561,6 +592,14 @@
       ],
       "status": "planned",
       "reads": "הנסיך: פרק 6"
+    },
+    {
+      "id": "d05-founder-alone",
+      "concepts": [
+        "founder-alone"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרקים 9 ו-10, קטעים נבחרים"
     },
     {
       "id": "u08-borgia-rise",
@@ -587,12 +626,28 @@
       "reads": "הנסיך: פרק 8"
     },
     {
+      "id": "d06-return-to-beginnings",
+      "concepts": [
+        "return-to-beginnings"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר ג, פרקים 1 ו-3, קטעים נבחרים"
+    },
+    {
       "id": "u11-civil-principality",
       "concepts": [
         "civil-principality"
       ],
       "status": "planned",
       "reads": "הנסיך: פרק 9"
+    },
+    {
+      "id": "d07-tumults-and-freedom",
+      "concepts": [
+        "tumults-make-freedom"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרקים 3 ו-4, וקטעים מפרק 5"
     },
     {
       "id": "u12-strength-and-church",
@@ -602,6 +657,14 @@
       ],
       "status": "planned",
       "reads": "הנסיך: פרקים 10 ו-11"
+    },
+    {
+      "id": "d08-roman-religion",
+      "concepts": [
+        "roman-religion"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרקים 11 ו-12, קטעים נבחרים"
     },
     {
       "id": "u13-mercenaries",
@@ -620,12 +683,28 @@
       "reads": "הנסיך: פרק 12, מהדוגמאות מאיטליה ועד הסוף"
     },
     {
+      "id": "d09-love-of-liberty",
+      "concepts": [
+        "love-of-liberty"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר ב, פרק 2, קטעים נבחרים"
+    },
+    {
       "id": "u15-own-arms",
       "concepts": [
         "auxiliaries-own-arms"
       ],
       "status": "planned",
       "reads": "הנסיך: פרק 13"
+    },
+    {
+      "id": "d10-arms-and-money",
+      "concepts": [
+        "arms-and-money"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרק 21, וספר ב, פרקים 10 ו-20, קטעים נבחרים"
     },
     {
       "id": "u16-war-and-effectual-truth",
@@ -653,6 +732,14 @@
       "reads": "הנסיך: פרק 17"
     },
     {
+      "id": "d11-kindness-or-severity",
+      "concepts": [
+        "kindness-or-severity"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר ג, פרקים 19 עד 21, קטעים נבחרים"
+    },
+    {
       "id": "u19-fox-and-lion",
       "concepts": [
         "fox-and-lion"
@@ -667,6 +754,14 @@
       ],
       "status": "planned",
       "reads": "הנסיך: פרק 19, עד הקיסרים הרומאים"
+    },
+    {
+      "id": "d12-people-wiser",
+      "concepts": [
+        "people-wiser"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר א, פרק 58, קטעים נבחרים"
     },
     {
       "id": "u21-emperors-and-soldiers",
@@ -718,6 +813,14 @@
       "reads": "הנסיך: פרקים 24 ו-25"
     },
     {
+      "id": "d13-change-with-times",
+      "concepts": [
+        "change-with-times"
+      ],
+      "status": "planned",
+      "reads": "הדיונים: ספר ג, פרק 9, וספר ב, פרק 29, קטעים נבחרים"
+    },
+    {
       "id": "u27-exhortation",
       "concepts": [
         "exhortation"
@@ -726,111 +829,7 @@
       "reads": "הנסיך: פרק 26"
     },
     {
-      "id": "u28-discourses-intro",
-      "concepts": [
-        "discourses-why"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ההקדשה, והקדמה לספר הראשון"
-    },
-    {
-      "id": "u29-kinds-of-government",
-      "concepts": [
-        "cycle-and-mixed-government"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרק 2, קטעים נבחרים"
-    },
-    {
-      "id": "u30-tumults-and-freedom",
-      "concepts": [
-        "tumults-make-freedom"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרקים 3 ו-4, וקטעים מפרק 5"
-    },
-    {
-      "id": "u31-rome-or-sparta",
-      "concepts": [
-        "expand-or-preserve"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרק 6, קטעים נבחרים"
-    },
-    {
-      "id": "u32-founder-alone",
-      "concepts": [
-        "founder-alone"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרקים 9 ו-10, קטעים נבחרים"
-    },
-    {
-      "id": "u33-roman-religion",
-      "concepts": [
-        "roman-religion"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרקים 11 ו-12, קטעים נבחרים"
-    },
-    {
-      "id": "u34-corruption-and-freedom",
-      "concepts": [
-        "corruption-and-freedom"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרקים 16 עד 18, קטעים נבחרים"
-    },
-    {
-      "id": "u35-people-wiser",
-      "concepts": [
-        "people-wiser"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרק 58, קטעים נבחרים"
-    },
-    {
-      "id": "u36-arms-and-money",
-      "concepts": [
-        "arms-and-money"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר א, פרק 21, וספר ב, פרקים 10 ו-20, קטעים נבחרים"
-    },
-    {
-      "id": "u37-love-of-liberty",
-      "concepts": [
-        "love-of-liberty"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר ב, פרק 2, קטעים נבחרים"
-    },
-    {
-      "id": "u38-change-with-times",
-      "concepts": [
-        "change-with-times"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר ג, פרק 9, וספר ב, פרק 29, קטעים נבחרים"
-    },
-    {
-      "id": "u39-kindness-or-severity",
-      "concepts": [
-        "kindness-or-severity"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר ג, פרקים 19 עד 21, קטעים נבחרים"
-    },
-    {
-      "id": "u40-return-to-beginnings",
-      "concepts": [
-        "return-to-beginnings"
-      ],
-      "status": "planned",
-      "reads": "הדיונים: ספר ג, פרקים 1 ו-3, קטעים נבחרים"
-    },
-    {
-      "id": "u41-machiavelli-the-republican",
+      "id": "d14-machiavelli-the-republican",
       "concepts": [
         "machiavelli-legacy"
       ],

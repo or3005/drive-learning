@@ -129,7 +129,9 @@ items it hasn't played yet at the start of the next drive in that course.
   A course read for interest sets `warmUpQuestions` to 0 (the app opens a lesson with a short reminder of
   the previous one instead of questions), `spacedReview` to false (no review questions at the start of a
   drive) and `reviewUnits` to false (the automation doesn't add review units).
-- In a book course, each entry in `units` may say what it reads: `"reads": "הנסיך: פרק 6"`.
+- In a book course, each entry in `units` may say what it reads: `"reads": "הנסיך: פרק 6"`. A book course that reads two books
+  starts every unit title with the book's name and a comma (`הנסיך,` or `הדיונים,`), and every `reading` with its
+  source (`מתוך הנסיך, פרק שישי.`); the validator checks this.
 
 ## Unit file `units/<unit-id>.json`
 
