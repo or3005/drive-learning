@@ -28,6 +28,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -73,15 +74,16 @@ def load(path, default=None):
 # ---- what the app speaks ------------------------------------------------------------------------
 
 def question_texts(q):
-    """Everything the app may say for a question: prompt, options, feedback, explanation, hint."""
-    out = [q.get("prompt", ""), q.get("explanation", "")]
+    """(text, role) for everything the app may say for a question. The question itself (prompt, options,
+    hint) is asked in the quiz voice; the answer's explanation and feedback are taught in the explain voice."""
+    out = [(q.get("prompt", ""), "quiz"), (q.get("explanation", ""), "explain")]
     if q.get("hint"):
-        out.append("רמז: " + q["hint"])
+        out.append(("רמז: " + q["hint"], "quiz"))
     for o in q.get("options", []):
         text = o.get("text", "").strip()
-        out.append(text if text[-1:] in ".!?" else text + ".")
+        out.append((text if text[-1:] in ".!?" else text + ".", "quiz"))
         if o.get("feedback"):
-            out.append(o["feedback"])
+            out.append((o["feedback"], "explain"))
     return out
 
 
@@ -103,9 +105,9 @@ def unit_texts(unit):
         for seg in ex.get(kind, []):
             pairs += segment_texts(seg)
             if seg.get("check"):
-                pairs += [(t, "explain") for t in question_texts(seg["check"])]
+                pairs += question_texts(seg["check"])
     for q in unit.get("questions", []) + unit.get("reviewQuestions", []):
-        pairs += [(t, "explain") for t in question_texts(q)]
+        pairs += question_texts(q)
     for mc in unit.get("misconceptions", []):
         pairs.append((mc.get("remedial", ""), "explain"))
     for field in ("recap", "reminder", "retell"):
@@ -129,60 +131,197 @@ def common_texts():
                 for s in split_sentences(piece):
                     if s[-1:] in ".!?" and s[0] not in ",.;:-" and len(s.split()) >= 2 and len(HEBREW.findall(s)) >= 4:
                         texts.append(s)
-    return [(t, "explain") for t in texts]
+    return [(t, "quiz") for t in texts]
+
+
+ROLE_RANK = {"quiz": 0, "explain": 1, "reading": 2}
 
 
 def sentences_of(pairs):
-    """{hash: (sentence, role)}; a sentence that is also part of a book passage is read as one."""
+    """{hash: (sentence, role)}. A sentence that appears in more than one role takes the stronger one:
+    a book passage over an explanation, an explanation over a question."""
     out = {}
     for text, role in pairs:
         for s in split_sentences(text or ""):
             h = sentence_hash(s)
-            if h not in out or role == "reading":
+            if h not in out or ROLE_RANK[role] > ROLE_RANK[out[h][1]]:
                 out[h] = (normalize(s), role)
     return out
 
 
 # ---- engines ------------------------------------------------------------------------------------
 
+RENDER_VERSION = 2  # bump when the way a sentence is turned into audio changes
+LATIN_RUN = re.compile("[A-Za-z][A-Za-z0-9.#+'’\\-]*(?:" + WS + "+[A-Za-z0-9][A-Za-z0-9.#+'’\\-]*)*")
+# English voices that go with each Hebrew voice, best first (the second is older and always there).
+ENGLISH_FOR = {
+    "he-IL-HilaNeural": ["en-US-AvaNeural", "en-US-JennyNeural"],
+    "he-IL-AvriNeural": ["en-US-AndrewNeural", "en-US-GuyNeural"],
+}
+HE = "\u0590-\u05FF"
+
+
+def runs(sentence):
+    """Hebrew and Latin runs, like engine/Text.kt Runs.split: [(text, is_latin)]."""
+    out, last = [], 0
+    for m in LATIN_RUN.finditer(sentence):
+        if m.start() > last:
+            out.append((sentence[last:m.start()], False))
+        out.append((m.group(0), True))
+        last = m.end()
+    if last < len(sentence):
+        out.append((sentence[last:], False))
+    return [(t, latin) for t, latin in out if t.strip()]
+
+
+class Pronunciation:
+    """content/pronunciation.json for the recorded voices, like engine/Pronunciation.kt: niqqud for
+    tricky Hebrew words, and how the English voice should say some terms (C# as C sharp)."""
+
+    def __init__(self, data):
+        def alt(keys):
+            return "|".join(re.escape(k) for k in sorted(keys, key=len, reverse=True))
+        self.hebrew = data.get("hebrew", {})
+        self.stems = data.get("stems", {})
+        self.prefixes = data.get("prefixes", {})
+        self.english = {k.lower(): v for k, v in data.get("english", {}).items()}
+        self.heb_re = re.compile(f"(?<![{HE}])(?:{alt(self.hebrew)})(?![{HE}])") if self.hebrew else None
+        self.stem_re = re.compile(f"(?<![{HE}])([והבכלמש]{{0,3}}?)({alt(self.stems)})(?![{HE}])") if self.stems else None
+        self.eng_re = re.compile(f"(?<![A-Za-z0-9])(?:{alt(data.get('english', {}))})(?![A-Za-z0-9])", re.I) if self.english else None
+        self.trailing = re.compile(f"(?<![{HE}])([והבכלמש]{{1,3}})-\\s*$")
+        self.hyphen = re.compile(f"(?<![{HE}])([והבכלמש]{{1,3}})-(?=[{HE}])")
+
+    def hebrew_text(self, text):
+        if self.heb_re:
+            text = self.heb_re.sub(lambda m: self.hebrew.get(m.group(0), m.group(0)), text)
+        if self.stem_re:
+            text = self.stem_re.sub(lambda m: (self.prefixes.get(m.group(1), m.group(1)) if m.group(1) else "")
+                                    + self.stems.get(m.group(2), m.group(2)), text)
+        text = self.trailing.sub(lambda m: self.prefixes.get(m.group(1), m.group(1)), text)
+        return self.hyphen.sub(r"\1", text)
+
+    def english_text(self, text):
+        return self.eng_re.sub(lambda m: self.english.get(m.group(0).lower(), m.group(0)), text) if self.eng_re else text
+
+
+class Plain(Pronunciation):
+    def __init__(self):
+        super().__init__({})
+
+
 class Engine:
     def __init__(self, voice):
         self.voice = voice
         self.name = voice.get("engine", "edge")
+        self.rate = voice.get("rate", "+0%")
+        self.ffmpeg = shutil.which("ffmpeg")
+        self.pron = Plain()
+        self.pron_sig = ""
+        if voice.get("pronunciation"):
+            path = ROOT / "content" / "pronunciation.json"
+            data = load(path, {})
+            self.pron = Pronunciation(data)
+            self.pron_sig = hashlib.sha1(path.read_bytes()).hexdigest()[:8] if path.exists() else ""
 
     def voice_for(self, role):
+        if role == "quiz":
+            return self.voice.get("quiz") or self.voice.get("explain") or "he-IL-HilaNeural"
         return self.voice.get(role) or self.voice.get("explain") or "he-IL-HilaNeural"
 
+    def english_for(self, role):
+        hebrew = self.voice_for(role)
+        mapping = self.voice.get("english", {})
+        return ([mapping[hebrew]] if hebrew in mapping else []) + ENGLISH_FOR.get(hebrew, ["en-US-JennyNeural"])
+
     def signature(self, role):
-        return f"{self.name}:{self.voice_for(role)}:{self.voice.get('rate', '+0%')}:{self.voice.get('style', '')}"
+        return (f"{self.name}:{self.voice_for(role)}:{self.english_for(role)[0]}:{self.rate}:"
+                f"{self.voice.get('style', '')}:p{self.pron_sig}:v{RENDER_VERSION}")
 
     async def render(self, text, role, path):
-        if self.name == "edge":
-            await edge_render(text, self.voice_for(role), self.voice.get("rate", "+0%"), path)
-        elif self.name == "fish":
-            await asyncio.to_thread(fish_render, text, self.voice_for(role), path)
-        elif self.name == "gemini":
-            await asyncio.to_thread(gemini_render, text, self.voice_for(role), self.voice.get("style", ""), path)
-        else:
-            raise SystemExit(f"unknown voice engine {self.name}")
+        """One sentence to one MP3. With edge, English runs are read by an English voice and joined to the
+        Hebrew ones; silences at the edges are trimmed so sentences follow each other at a natural pace."""
+        work = Path(tempfile.mkdtemp(dir=path.parent))
+        try:
+            pieces = []  # (mp3 path, gap before it in seconds)
+            if self.name == "edge":
+                parts = runs(text) if HEBREW.search(text) else [(text, True)]
+                gap = 0.0
+                for i, (part, latin) in enumerate(parts):
+                    if not re.search(r"[A-Za-z0-9\u05D0-\u05EA]", part):
+                        gap = 0.18 if re.search(r"[,;:]", part) else gap  # just punctuation between runs
+                        continue
+                    piece = work / f"{i}.mp3"
+                    if latin:
+                        await edge_render(self.pron.english_text(part), self.english_for(role), self.rate, piece)
+                    else:
+                        await edge_render(self.pron.hebrew_text(part), [self.voice_for(role)], self.rate, piece)
+                    pieces.append((piece, gap if pieces else 0.0))
+                    gap = 0.18 if part.rstrip()[-1:] in ",;:" else 0.05
+            else:
+                piece = work / "0.mp3"
+                if self.name == "fish":
+                    await asyncio.to_thread(fish_render, text, self.voice_for(role), piece)
+                elif self.name == "gemini":
+                    await asyncio.to_thread(gemini_render, text, self.voice_for(role), self.voice.get("style", ""), piece)
+                else:
+                    raise SystemExit(f"unknown voice engine {self.name}")
+                pieces.append((piece, 0.0))
+            if not pieces:
+                raise ValueError("nothing to say")
+            await asyncio.to_thread(join, pieces, path, self.ffmpeg)
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
 
     @property
     def parallel(self):
         return 8 if self.name == "edge" else 1
 
 
-async def edge_render(text, voice, rate, path):
+def join(pieces, out, ffmpeg):
+    """Joins the pieces with short gaps, trims silence at their edges, and leaves a short pause at the end."""
+    if not ffmpeg:
+        out.write_bytes(b"".join(p.read_bytes() for p, _ in pieces))
+        return
+    trim = "silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse"
+    args, chain, labels = [ffmpeg, "-loglevel", "error", "-y"], [], ["[lead]"]
+    chain.append("aevalsrc=0:s=24000:d=0.05[lead]")
+    for i, (piece, gap) in enumerate(pieces):
+        args += ["-i", str(piece)]
+        chain.append(f"[{i}:a]aformat=sample_rates=24000:channel_layouts=mono,{trim}[p{i}]")
+        if i and gap > 0:
+            chain.append(f"aevalsrc=0:s=24000:d={gap}[g{i}]")
+            labels.append(f"[g{i}]")
+        labels.append(f"[p{i}]")
+    chain.append("aevalsrc=0:s=24000:d=0.32[tail]")
+    labels.append("[tail]")
+    chain.append("".join(labels) + f"concat=n={len(labels)}:v=0:a=1[out]")
+    args += ["-filter_complex", ";".join(chain), "-map", "[out]", "-ac", "1", "-ar", "24000", "-b:a", "48k", str(out)]
+    subprocess.run(args, check=True)
+
+
+BAD_VOICES = set()  # voices that never answered in this run
+
+
+async def edge_render(text, voices, rate, path):
     import edge_tts  # pip install edge-tts
-    for attempt in range(4):
-        try:
-            await edge_tts.Communicate(text, voice, rate=rate).save(str(path))
-            if path.stat().st_size > 0:
-                return
-        except Exception as e:  # noqa: BLE001
-            if attempt == 3:
-                raise
-            print(f"  edge retry ({e})", file=sys.stderr)
-        await asyncio.sleep(2 * (attempt + 1))
+    last = None
+    usable = [v for v in voices if v not in BAD_VOICES] or voices[-1:]
+    for n, voice in enumerate(usable):
+        for attempt in range(4):
+            try:
+                await edge_tts.Communicate(text, voice, rate=rate).save(str(path))
+                if path.exists() and path.stat().st_size > 0:
+                    return
+            except Exception as e:  # noqa: BLE001
+                last = e
+                if "voice" in str(e).lower():
+                    break  # this voice doesn't exist: try the next one
+                print(f"  edge retry ({e})", file=sys.stderr)
+            await asyncio.sleep(2 * (attempt + 1))
+        if n < len(usable) - 1:
+            BAD_VOICES.add(voice)  # fall back to the next voice from now on
+            print(f"  voice {voice} gave no audio; using {usable[n + 1]}", file=sys.stderr)
+    raise RuntimeError(f"edge failed: {last}")
 
 
 def http_post(url, body, headers, timeout=120):

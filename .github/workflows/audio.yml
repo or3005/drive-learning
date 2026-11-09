@@ -46,8 +46,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install the voice client
-        run: pip install --quiet "edge-tts>=7"
+      - name: Install the voice client and ffmpeg
+        run: |
+          pip install --quiet "edge-tts>=7"
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
 
       - name: Voice samples
         env:

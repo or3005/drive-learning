@@ -37,13 +37,25 @@ class GitHubLogin(private val clientId: String) {
         }
     }
 
-    /** Waits until the code is approved on github.com, and returns the access token. */
-    suspend fun waitForToken(code: Code): Result<String> = withContext(Dispatchers.IO) {
+    /**
+     * What GitHub gives after sign-in. The access token may expire after 8 hours; then there is a
+     * refresh token (6 months, renewed on every use) that gets a new one without signing in again.
+     */
+    data class Tokens(
+        val access: String,
+        val refresh: String = "",
+        /** When [access] stops working, in epoch millis; 0 when it doesn't expire. */
+        val accessExpiresAt: Long = 0,
+        val refreshExpiresAt: Long = 0,
+    )
+
+    /** Waits until the code is approved on github.com, and returns the tokens. */
+    suspend fun waitForToken(code: Code): Result<Tokens> = withContext(Dispatchers.IO) {
         runCatching {
             var interval = code.intervalSeconds
             val deadline = System.currentTimeMillis() + code.expiresInSeconds * 1000L
-            var token: String? = null
-            while (token == null) {
+            var tokens: Tokens? = null
+            while (tokens == null) {
                 check(System.currentTimeMillis() < deadline) { "הקוד פג תוקף. לחץ שוב על התחברות." }
                 delay(interval * 1000L)
                 val json = post(
@@ -52,8 +64,8 @@ class GitHubLogin(private val clientId: String) {
                     "device_code" to code.deviceCode,
                     "grant_type" to "urn:ietf:params:oauth:grant-type:device_code",
                 )
-                token = json.optString("access_token").takeIf { it.isNotBlank() }
-                if (token == null) {
+                tokens = parseTokens(json)
+                if (tokens == null) {
                     when (json.optString("error")) {
                         "authorization_pending" -> Unit
                         "slow_down" -> interval = json.optInt("interval", interval + 5)
@@ -61,8 +73,31 @@ class GitHubLogin(private val clientId: String) {
                     }
                 }
             }
-            token
+            tokens
         }
+    }
+
+    /**
+     * Gets a new access token with the refresh token. For tokens from the device flow GitHub doesn't need
+     * the client secret, so the app can do this by itself. The old refresh token stops working.
+     */
+    suspend fun refresh(refreshToken: String): Result<Tokens> = withContext(Dispatchers.IO) {
+        runCatching {
+            val json = post(
+                "https://github.com/login/oauth/access_token",
+                "client_id" to clientId,
+                "grant_type" to "refresh_token",
+                "refresh_token" to refreshToken,
+            )
+            parseTokens(json) ?: error(describe(json))
+        }
+    }
+
+    private fun parseTokens(json: JSONObject): Tokens? {
+        val access = json.optString("access_token").takeIf { it.isNotBlank() } ?: return null
+        val now = System.currentTimeMillis()
+        fun at(field: String) = json.optLong(field, 0).let { if (it > 0) now + it * 1000 else 0L }
+        return Tokens(access, json.optString("refresh_token"), at("expires_in"), at("refresh_token_expires_in"))
     }
 
     private fun describe(json: JSONObject): String = when (json.optString("error")) {
@@ -70,6 +105,7 @@ class GitHubLogin(private val clientId: String) {
         "access_denied" -> "ההתחברות בוטלה ב-GitHub."
         "device_flow_disabled" -> "צריך לסמן Enable Device Flow בהגדרות ה-OAuth App ב-GitHub."
         "incorrect_client_credentials", "unauthorized_client" -> "ה-Client ID לא נכון."
+        "bad_refresh_token" -> "החיבור ל-GitHub פג. צריך להתחבר פעם אחת מחדש."
         else -> json.optString("error_description").ifBlank { json.optString("error") }
     }
 

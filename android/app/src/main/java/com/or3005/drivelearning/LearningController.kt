@@ -391,8 +391,8 @@ class LearningController(private val app: Application) {
             message("הקוד ${code.userCode} הועתק. הדבק אותו בדף של GitHub ואשר. אחר כך חזור לכאן.")
             onCode(code.userCode, code.verificationUri)
             login.waitForToken(code)
-                .onSuccess { token ->
-                    uploader.token = token
+                .onSuccess { tokens ->
+                    uploader.saveTokens(tokens, clientId)
                     refreshUploadState()
                     message("מחובר ל-GitHub. ההתקדמות תישלח לבד אחרי כל נסיעה. שולח עכשיו…")
                     uploadNow(report = true)

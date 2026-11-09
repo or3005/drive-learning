@@ -15,6 +15,15 @@ COURSES = ROOT / "content" / "courses"
 OPTION_LENGTH_RATIO = 1.2
 # Format 2 lessons: at least this many minutes of main explanation.
 MIN_LESSON_MINUTES = 15
+# Format 3 (Nov 2026): a lesson takes about 30 minutes in the car, everything included.
+F3_MIN_EXPLANATION = 10      # reading and explanation, in minutes
+F3_MAX_EXPLANATION = 16
+F3_TARGET_TOTAL = 27         # estimate with questions, retell and warm-up; the drive adds thinking and replays
+F3_MAX_TOTAL = 31
+F3_MAX_RETELL_WORDS = 230
+WARM_UP_MINUTES = 2.5        # the app opens each lesson with up to 3 short questions on earlier units
+HEB_WORD = re.compile(r"[\u05D0-\u05EA]{3,}")
+ABSOLUTE = re.compile(r"(?<![\u05D0-\u05EA])(תמיד|אף פעם|לעולם|בשום|לגמרי|אף אחד|כל דבר|בכלל)(?![\u05D0-\u05EA])")
 LEVELS = ["recognize", "why", "apply", "explain"]
 STATUSES = {"planned", "draft", "ready"}
 WORDS_PER_MINUTE = 140  # rough speaking rate for Hebrew TTS
@@ -136,6 +145,8 @@ def check_course(course_dir, rep):
         "loaded": {},  # unit id -> unit json, in course order
         "substantive": [t for t in course.get("substantiveTerms", [])],
         "taught": set(),  # substantive terms taught so far (lowercase)
+        # Recorded courses speak at the measured pace of the recorded voices; the phone's voice is faster.
+        "wpm": course.get("wordsPerMinute") or (125 if course.get("voice") else WORDS_PER_MINUTE),
     }
     total_minutes = 0.0
     for u in course.get("units", []):
@@ -247,8 +258,11 @@ def check_unit(path, listed, rep, ctx):
                     rep.err(f"{where} {kind}/{seg.get('id')}.reading", "must end with . ! or ? so the voice switches cleanly")
             if kind == "main":
                 words += n
-    minutes = words / WORDS_PER_MINUTE
-    if strict and minutes < MIN_LESSON_MINUTES:
+    minutes = words / ctx["wpm"]
+    f3 = unit.get("format", 1) >= 3
+    if f3 and not is_review and not F3_MIN_EXPLANATION <= minutes <= F3_MAX_EXPLANATION:
+        rep.err(where, f"format 3: reading and explanation take ~{minutes:.1f} min; keep them between {F3_MIN_EXPLANATION} and {F3_MAX_EXPLANATION}")
+    elif strict and not f3 and minutes < MIN_LESSON_MINUTES:
         rep.err(where, f"main explanation is ~{minutes:.1f} min; format 2 lessons need at least {MIN_LESSON_MINUTES}")
     elif not is_review and minutes < 5:
         rep.warn(where, f"main explanation is short (~{minutes:.1f} min)")
@@ -386,11 +400,24 @@ def check_unit(path, listed, rep, ctx):
                     rep.err(qw, "minPoints must be between 1 and the rubric length")
                 continue
             check_mc(qw, q, rep, mcs, used_mcs)
-        for lvl in LEVELS:
+        needed = ("why", "apply", "explain") if f3 else LEVELS
+        for lvl in needed:
             if lvl not in levels_seen:
                 rep.err(where, f"no {lvl} question")
         if explains < 3:
             (rep.err if strict else rep.warn)(where, f"{explains} explain question(s); split the explain-back into at least 3 short parts")
+        if f3:
+            mc = [q for q in unit.get("questions", []) if q.get("level") != "explain"]
+            if not 3 <= len(mc) <= 5:
+                rep.err(where, f"format 3: {len(mc)} multiple-choice questions at the end; use 3 to 5 (the checks already cover recognition)")
+            if sum(1 for q in mc if q.get("level") == "apply") < 2:
+                rep.err(where, "format 3: at least 2 apply questions (a new case, not a line from the lesson)")
+            if explains != 3:
+                rep.err(where, f"format 3: exactly 3 short explain parts, has {explains}")
+            if not 3 <= len(main) <= 7:
+                rep.err(where, f"format 3: 3 to 7 main segments, has {len(main)}")
+            if len((unit.get("retell") or "").split()) > F3_MAX_RETELL_WORDS:
+                rep.warn(where, f"format 3: retell is longer than {F3_MAX_RETELL_WORDS} words")
     for mc in mcs.keys() - used_mcs:
         rep.warn(where, f"misconception {mc} is not targeted by any option")
 
@@ -401,12 +428,66 @@ def check_unit(path, listed, rep, ctx):
     total = minutes + n_questions * MINUTES_PER_QUESTION
     if is_review:
         fill_words = sum(len(next((s.get("text", "") for s in ctx["loaded"].get(r.get("unit"), {}).get("explanations", {}).get("main", []) if s.get("id") == r.get("segment")), "").split()) for r in unit.get("fillIns", []))
-        total += fill_words / WORDS_PER_MINUTE
-    elif total < 12:
-        rep.warn(where, f"unit is short (~{total:.0f} min including questions)")
+        total += fill_words / ctx["wpm"]
+    else:
+        total += len((unit.get("retell") or "").split()) / ctx["wpm"] + (WARM_UP_MINUTES if strict else 0)
+        if total < 12:
+            rep.warn(where, f"unit is short (~{total:.0f} min including questions)")
+        if f3 and total > F3_MAX_TOTAL:
+            rep.err(where, f"format 3: ~{total:.0f} min with questions; a lesson must fit about 30 minutes in the car (at most {F3_MAX_TOTAL} estimated)")
+        elif f3 and total > F3_TARGET_TOTAL:
+            rep.warn(where, f"format 3: ~{total:.0f} min with questions; aim for {F3_TARGET_TOTAL} or less")
+    if f3:
+        check_giveaways(where, unit, rep)
     kind = "review" if is_review else f"{minutes:.1f} explanation"
     print(f"  {listed['id']}: ~{total:.0f} min ({kind} + {n_questions} questions), {len(mcs)} misconceptions")
     return total
+
+
+def _words(text):
+    """Hebrew words of 3+ letters, with a one-letter prefix dropped, for comparing wordings."""
+    return {w[1:] if len(w) > 3 and w[0] in "והבכלמש" else w for w in HEB_WORD.findall(text or "")}
+
+
+def check_giveaways(where, unit, rep):
+    """Format 3: multiple-choice questions shouldn't be answerable without thinking.
+
+    - The correct option shouldn't be the one that repeats the lesson's wording.
+    - The correct option shouldn't usually be the longest.
+    - Wrong options shouldn't be the only ones with absolute words (always, never), which give them away.
+    """
+    main = {s.get("id"): s for s in unit.get("explanations", {}).get("main", [])}
+    mcs = []
+    for s in main.values():
+        if s.get("check"):
+            mcs.append((f"{s.get('id')} check", s["check"], s.get("reading", "") + " " + s.get("text", "")))
+    for q in unit.get("questions", []) + unit.get("reviewQuestions", []):
+        if q.get("options"):
+            lesson = " ".join(main[i].get("reading", "") + " " + main[i].get("text", "") for i in q.get("segments", []) if i in main)
+            mcs.append((q.get("id"), q, lesson))
+    longest, wrong_abs, wrong_total, right_abs = 0, 0, 0, 0
+    for qid, q, lesson in mcs:
+        opts = q.get("options", [])
+        right = [o for o in opts if o.get("correct")]
+        wrong = [o for o in opts if not o.get("correct")]
+        if not right or not wrong:
+            continue
+        lw = _words(lesson)
+
+        def overlap(o):
+            w = _words(o.get("text"))
+            return len(w & lw) / len(w) if w else 0.0
+        if lw and overlap(right[0]) - max(overlap(o) for o in wrong) >= 0.3:
+            rep.warn(f"{where} {qid}", "the correct option repeats the lesson's words and the others don't: reword it, or let a wrong option use them too")
+        if len(right[0].get("text", "")) > max(len(o.get("text", "")) for o in wrong):
+            longest += 1
+        wrong_total += len(wrong)
+        wrong_abs += sum(1 for o in wrong if ABSOLUTE.search(o.get("text", "")))
+        right_abs += 1 if ABSOLUTE.search(right[0].get("text", "")) else 0
+    if mcs and longest > len(mcs) / 2:
+        rep.warn(where, f"the correct option is the longest in {longest} of {len(mcs)} questions: a listener learns to pick the longest")
+    if wrong_total and wrong_abs / wrong_total > 0.2 and right_abs == 0:
+        rep.warn(where, f"{wrong_abs} wrong options use words like always or never, and no correct one does: that gives them away")
 
 
 def check_index(rep):
