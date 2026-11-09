@@ -125,6 +125,11 @@ items it hasn't played yet at the start of the next drive in that course.
 - `book` (optional): a course that reads a book. `source` is the public-domain text it is translated
   from, `translationGuide` the rules and glossary for the translation (see `AUTOMATION.md`).
 - `minutesPerUnit` (optional): for `curriculum.md`; default 15.
+- `practice` (optional): `{ "warmUpQuestions": 3, "spacedReview": true, "reviewUnits": true }` by default.
+  A course read for interest sets `warmUpQuestions` to 0 (the app opens a lesson with a short reminder of
+  the previous one instead of questions), `spacedReview` to false (no review questions at the start of a
+  drive) and `reviewUnits` to false (the automation doesn't add review units).
+- In a book course, each entry in `units` may say what it reads: `"reads": "הנסיך: פרק 6"`.
 
 ## Unit file `units/<unit-id>.json`
 

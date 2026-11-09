@@ -51,7 +51,8 @@ Android code.
 4. **Keep three lessons ready.** Count the lessons (not reviews) with status `draft` or `ready` that are
    not in `completedUnits`. If fewer than 3, write the next `planned` units in `course.json` order until
    there are 3, at most 2 new lessons per run. After every 3 lessons, add a review unit (`type: review`)
-   that covers them. Every new lesson is **format 3** (`content/schema.md`): about 30 minutes in the car,
+   that covers them, unless the course's `practice.reviewUnits` is false (the Machiavelli course is read
+   for interest: no review units, and the app opens lessons with a reminder instead of warm-up questions). Every new lesson is **format 3** (`content/schema.md`): about 30 minutes in the car,
    so 10 to 16 minutes of explanation in 3 to 7 segments, a check after every segment, 3 to 5 end
    questions plus 3 short explain parts, a retell of at most 230 words, reminder and review questions,
    and every substantive term taught before it is used. **Questions must make him think** (he said
@@ -71,13 +72,20 @@ Android code.
 
 ## Book courses
 
-A course with a `book` section in `course.json` (now: `machiavelli-prince`, The Prince) reads a whole
-book, unit by unit, in Hebrew. When writing its units:
+A course with a `book` section in `course.json` (now: `machiavelli-prince`) reads books in Hebrew. Each
+unit in `course.json` says what it reads (`reads`). Part 1 (u01 to u27) reads all of The Prince
+(`book.source`). Part 2 (u28 to u41) is about his views and his book on republics: selected chapters and
+passages from the Discourses on Livy (`book.secondSource`), one theme per unit, with comparisons to The
+Prince. When writing its units:
 
-- Translate the unit's chapters from `book.source` (a public-domain English translation), following
-  `book.translationGuide` (`translation.md`): the full text, no cuts and no additions, modern clear
-  Hebrew split into short sentences for the ear, the glossary's words and the spelling of names. Never
-  use an existing Hebrew translation of the book.
+- Translate from the public-domain English text named in `reads`, following `book.translationGuide`
+  (`translation.md`): modern clear Hebrew split into short sentences for the ear, the glossary's words and
+  the spelling of names. In part 1 the full text, no cuts and no additions. In part 2 choose the passages
+  that carry the chapter's argument (about 800 words in all), translate each one faithfully without
+  changing it, and say in the explanation what was left out between them. Never use an existing Hebrew
+  translation of either book.
+- In part 2 the explanations bring out what he thinks and why, and where it agrees or clashes with The
+  Prince; at least one question per unit compares the two books.
 - A lesson reads about 800 words of the book (the chapter split in `course.json` is planned for that).
 - Each main segment has `reading` (a passage of about 150 to 300 words, ending with . ! or ?) and `text`
   (the explanation: who the people are, what happened, what the passage says, in plain words, ending with

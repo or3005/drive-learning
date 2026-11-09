@@ -17,6 +17,20 @@ data class Course(
     val units: List<UnitRef> = emptyList(),
     /** Courses recorded with a good voice (tools/tts_render.py). Without it, the phone's voice reads everything. */
     val voice: CourseVoice? = null,
+    /** How much going back over earlier units the course wants. Without it: the full practice of a technical course. */
+    val practice: CoursePractice = CoursePractice(),
+)
+
+/**
+ * A technical course wants spaced repetition; a course read for interest wants less. [warmUpQuestions]
+ * before a lesson (0: just a short reminder of the previous lesson), [spacedReview] questions at the start
+ * of a drive, and [reviewUnits] (for the content tools: whether to add review units every few lessons).
+ */
+@Serializable
+data class CoursePractice(
+    val warmUpQuestions: Int = 3,
+    val spacedReview: Boolean = true,
+    val reviewUnits: Boolean = true,
 )
 
 /** How a course is recorded. The app only needs to know that it is; the details are for the recording tool. */

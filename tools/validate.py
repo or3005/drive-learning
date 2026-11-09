@@ -18,7 +18,7 @@ MIN_LESSON_MINUTES = 15
 # Format 3 (Nov 2026): a lesson takes about 30 minutes in the car, everything included.
 F3_MIN_EXPLANATION = 8       # reading and explanation, in minutes (a short chapter may make a shorter lesson)
 F3_MAX_EXPLANATION = 16
-F3_TARGET_TOTAL = 27         # estimate with questions, retell and warm-up; the drive adds thinking and replays
+F3_TARGET_TOTAL = 28         # estimate with questions, retell and warm-up; the drive adds thinking and replays
 F3_MAX_TOTAL = 31
 F3_MAX_RETELL_WORDS = 230
 WARM_UP_MINUTES = 2.5        # the app opens each lesson with up to 3 short questions on earlier units
@@ -145,8 +145,10 @@ def check_course(course_dir, rep):
         "loaded": {},  # unit id -> unit json, in course order
         "substantive": [t for t in course.get("substantiveTerms", [])],
         "taught": set(),  # substantive terms taught so far (lowercase)
-        # Recorded courses speak at the measured pace of the recorded voices; the phone's voice is faster.
-        "wpm": course.get("wordsPerMinute") or (125 if course.get("voice") else WORDS_PER_MINUTE),
+        # Recorded courses speak at the measured pace of the recorded voices, pauses included; the phone's voice is faster.
+        "wpm": course.get("wordsPerMinute") or (118 if course.get("voice") else WORDS_PER_MINUTE),
+        # A course read for interest opens a lesson with a short reminder instead of warm-up questions.
+        "warmup": WARM_UP_MINUTES if course.get("practice", {}).get("warmUpQuestions", 3) > 0 else 0.5,
     }
     total_minutes = 0.0
     for u in course.get("units", []):
@@ -430,7 +432,7 @@ def check_unit(path, listed, rep, ctx):
         fill_words = sum(len(next((s.get("text", "") for s in ctx["loaded"].get(r.get("unit"), {}).get("explanations", {}).get("main", []) if s.get("id") == r.get("segment")), "").split()) for r in unit.get("fillIns", []))
         total += fill_words / ctx["wpm"]
     else:
-        total += len((unit.get("retell") or "").split()) / ctx["wpm"] + (WARM_UP_MINUTES if strict else 0)
+        total += len((unit.get("retell") or "").split()) / ctx["wpm"] + (ctx["warmup"] if strict else 0)
         if total < 12:
             rep.warn(where, f"unit is short (~{total:.0f} min including questions)")
         if f3 and total > F3_MAX_TOTAL:

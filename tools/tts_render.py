@@ -151,7 +151,7 @@ def sentences_of(pairs):
 
 # ---- engines ------------------------------------------------------------------------------------
 
-RENDER_VERSION = 2  # bump when the way a sentence is turned into audio changes
+RENDER_VERSION = 3  # bump when the way a sentence is turned into audio changes
 LATIN_RUN = re.compile("[A-Za-z][A-Za-z0-9.#+'’\\-]*(?:" + WS + "+[A-Za-z0-9][A-Za-z0-9.#+'’\\-]*)*")
 # English voices that go with each Hebrew voice, best first (the second is older and always there).
 ENGLISH_FOR = {
@@ -239,7 +239,7 @@ class Engine:
 
     async def render(self, text, role, path):
         """One sentence to one MP3. With edge, English runs are read by an English voice and joined to the
-        Hebrew ones; silences at the edges are trimmed so sentences follow each other at a natural pace."""
+        Hebrew ones inside the sentence."""
         work = Path(tempfile.mkdtemp(dir=path.parent))
         try:
             pieces = []  # (mp3 path, gap before it in seconds)
@@ -278,22 +278,27 @@ class Engine:
 
 
 def join(pieces, out, ffmpeg):
-    """Joins the pieces with short gaps, trims silence at their edges, and leaves a short pause at the end."""
+    """Joins the pieces of one sentence. The voice's own pauses before and after the sentence are kept (the
+    learner prefers them); only the silence inside the sentence, where a Hebrew run meets an English one,
+    is trimmed to a short natural gap."""
+    if len(pieces) == 1:
+        out.write_bytes(pieces[0][0].read_bytes())
+        return
     if not ffmpeg:
         out.write_bytes(b"".join(p.read_bytes() for p, _ in pieces))
         return
-    trim = "silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse"
-    args, chain, labels = [ffmpeg, "-loglevel", "error", "-y"], [], ["[lead]"]
-    chain.append("aevalsrc=0:s=24000:d=0.05[lead]")
+    head = "silenceremove=start_periods=1:start_threshold=-50dB"
+    tail = "areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse"
+    args, chain, labels = [ffmpeg, "-loglevel", "error", "-y"], [], []
+    last = len(pieces) - 1
     for i, (piece, gap) in enumerate(pieces):
         args += ["-i", str(piece)]
-        chain.append(f"[{i}:a]aformat=sample_rates=24000:channel_layouts=mono,{trim}[p{i}]")
+        trims = [t for t, keep in ((head, i > 0), (tail, i < last)) if keep]
+        chain.append(f"[{i}:a]aformat=sample_rates=24000:channel_layouts=mono,{','.join(trims)}[p{i}]")
         if i and gap > 0:
             chain.append(f"aevalsrc=0:s=24000:d={gap}[g{i}]")
             labels.append(f"[g{i}]")
         labels.append(f"[p{i}]")
-    chain.append("aevalsrc=0:s=24000:d=0.32[tail]")
-    labels.append("[tail]")
     chain.append("".join(labels) + f"concat=n={len(labels)}:v=0:a=1[out]")
     args += ["-filter_complex", ";".join(chain), "-map", "[out]", "-ac", "1", "-ar", "24000", "-b:a", "48k", str(out)]
     subprocess.run(args, check=True)

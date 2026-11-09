@@ -45,6 +45,27 @@ class LessonEngineTest {
     }
 
     @Test
+    fun aCourseReadForInterestOpensWithAReminderInsteadOfQuestions() {
+        val dir = File("../../content/courses/machiavelli-prince")
+        val course = ContentJson.decodeFromString<Course>(File(dir, "course.json").readText())
+        assertEquals(0, course.practice.warmUpQuestions)
+        val units = course.units.filter { it.status != "planned" }.map {
+            ContentJson.decodeFromString<LearningUnit>(File(dir, "units/${it.id}.json").readText())
+        }
+        val first = units.first { !it.isReview }
+        val store = MemoryProgressStore(ProgressState(completedUnits = setOf(first.id), schedulerVersion = Scheduler.VERSION))
+        val engine = LessonEngine(units, store, today, random = Random(2), practice = course.practice)
+        engine.start()
+        val opening = mutableListOf<Step>()
+        var step = engine.current
+        while (step is Step.Say && opening.size < 6) { opening += step; step = engine.advance() }
+        val labels = opening.filterIsInstance<Step.Say>().map { it.label }
+        assertFalse("no warm-up questions", labels.contains("חימום"))
+        assertTrue("a reminder of the previous lesson", opening.any { it is Step.Say && it.label == "תזכורת" && it.unitId == first.id })
+        assertFalse("no review questions before the lesson", (step as? Step.Ask)?.unitId == first.id)
+    }
+
+    @Test
     fun allContentParses() {
         val all = units()
         assertTrue("expected at least 6 units", all.size >= 6)

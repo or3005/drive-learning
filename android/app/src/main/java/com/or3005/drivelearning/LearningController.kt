@@ -190,7 +190,7 @@ class LearningController(private val app: Application) {
             message("לא הצלחתי לטעון את התוכן: ${it.message}")
             return
         }
-        val e = LessonEngine(loaded.units, store, LocalDate.now(), feedback = loaded.feedback)
+        val e = LessonEngine(loaded.units, store, LocalDate.now(), feedback = loaded.feedback, practice = loaded.course.practice)
         engine = e
         requestFocus()
         startService()

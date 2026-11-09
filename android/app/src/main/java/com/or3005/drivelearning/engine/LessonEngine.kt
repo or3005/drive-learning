@@ -1,5 +1,6 @@
 package com.or3005.drivelearning.engine
 
+import com.or3005.drivelearning.content.CoursePractice
 import com.or3005.drivelearning.content.FeedbackItem
 import com.or3005.drivelearning.content.LearningUnit
 import com.or3005.drivelearning.content.Question
@@ -70,6 +71,8 @@ class LessonEngine(
     private val askConfidence: Boolean = false,
     /** Feedback on explain-back answers, written after earlier drives. Unheard items open the drive. */
     private val feedback: List<FeedbackItem> = emptyList(),
+    /** How much going back over earlier units this course wants. */
+    private val practice: CoursePractice = CoursePractice(),
 ) {
     var progress: ProgressState = store.load().let { loaded ->
         if (loaded.schedulerVersion < Scheduler.VERSION) Scheduler.rebuild(loaded).also { store.save(it) } else loaded
@@ -355,7 +358,7 @@ class LessonEngine(
                 queue += Step.Plan("", Step.Plan.Kind.FEEDBACK_HEARD, covered = item.id)
             }
         }
-        val review = reviewQuestions(max = 4)
+        val review = if (practice.spacedReview) reviewQuestions(max = 4) else emptyList()
         if (review.isNotEmpty()) {
             queue += Step.Say("לפני שממשיכים, חזרה קצרה על דברים מנסיעות קודמות.")
             review.forEach { (unitId, q) ->
@@ -490,11 +493,17 @@ class LessonEngine(
     private fun warmUp(unitId: String): List<Step> {
         val index = units.indexOfFirst { it.id == unitId }
         val earlier = units.take(index.coerceAtLeast(0)).filter { !it.isReview && it.id in progress.completedUnits }
+        if (practice.warmUpQuestions <= 0) {
+            // A course read for interest: no questions, just where we left off.
+            val previous = earlier.lastOrNull() ?: return emptyList()
+            val reminder = reminderFor(previous) ?: return emptyList()
+            return listOf(Step.Say("נזכיר בקצרה את היחידה הקודמת. $reminder", previous.id, label = "תזכורת"))
+        }
         val candidates = earlier.flatMap { u -> u.concepts.map { it to u } }
             .filter { (concept, _) -> concept !in reviewedThisDrive }
             .distinctBy { it.first }
             .sortedBy { (concept, _) -> strength(concept) }
-            .take(WARM_UP_QUESTIONS)
+            .take(minOf(WARM_UP_QUESTIONS, practice.warmUpQuestions))
         if (candidates.isEmpty()) return emptyList()
         val steps = mutableListOf<Step>(
             Step.Say("לפני שמתחילים, כמה שאלות קצרות על דברים שכבר למדנו.", unitId, label = "חימום"),
