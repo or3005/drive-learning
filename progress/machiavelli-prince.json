@@ -164,23 +164,136 @@
             "sure": true,
             "day": "2026-11-08",
             "time": 1794121502019
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u01-machiavelli-world",
+            "concept": "machiavelli-life",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794206073238
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u01-machiavelli-world",
+            "concept": "florence-world",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794206123085
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u01-machiavelli-world",
+            "concept": "why-the-prince",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794206170301
+        },
+        {
+            "questionId": "c-virtu",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "kinds-of-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794206447767
+        },
+        {
+            "questionId": "c-hereditary",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "kinds-of-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794206746685
+        },
+        {
+            "questionId": "c-trap",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "mixed-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794207000493
+        },
+        {
+            "questionId": "c-milan",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "mixed-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794207282944
+        },
+        {
+            "questionId": "c-two-steps",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "mixed-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794207617814
+        },
+        {
+            "questionId": "c-reside",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "mixed-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794207937685
+        },
+        {
+            "questionId": "c-colonies",
+            "unitId": "u02-kinds-and-new-lands",
+            "concept": "mixed-principalities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-09",
+            "time": 1794208306111
         }
     ],
     "concepts": {
         "machiavelli-life": {
-            "box": 1,
-            "nextReview": "2026-11-09",
-            "lastPromoted": "2026-11-08"
+            "box": 2,
+            "nextReview": "2026-11-11",
+            "mastered": true,
+            "lastPromoted": "2026-11-09"
         },
         "florence-world": {
-            "box": 1,
-            "nextReview": "2026-11-09",
-            "lastPromoted": "2026-11-08"
+            "box": 2,
+            "nextReview": "2026-11-11",
+            "mastered": true,
+            "lastPromoted": "2026-11-09"
         },
         "why-the-prince": {
-            "box": 1,
-            "nextReview": "2026-11-09",
-            "lastPromoted": "2026-11-08"
+            "box": 2,
+            "nextReview": "2026-11-11",
+            "mastered": true,
+            "lastPromoted": "2026-11-09"
         }
     },
     "completedUnits": [
@@ -210,26 +323,6 @@
         }
     ],
     "diagnostics": [
-        "2026-11-08: listen ANSWER: 'תשובה אחד' -> Answer",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-08: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-08: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
         "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
         "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-08: listen ANSWER: 'שלוש' -> Answer",
@@ -251,7 +344,40 @@
         "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
         "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
         "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
-        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש."
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-08: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-09: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-09: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-09: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-09: listen ANSWER: 'תשובה שתיים' -> Answer",
+        "2026-11-09: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש.",
+        "2026-11-09: upload: הטוקן לא תקין או שפג תוקפו (401). צריך ליצור טוקן חדש."
     ],
-    "schedulerVersion": 2
+    "schedulerVersion": 2,
+    "heardFeedback": [
+        "fb-2026-11-08-u01-machiavelli-world-q9-1794121112631",
+        "fb-2026-11-08-u01-machiavelli-world-q10-1794121282443",
+        "fb-2026-11-08-u01-machiavelli-world-q11-1794121389956"
+    ]
 }
