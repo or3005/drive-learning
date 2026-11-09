@@ -41,6 +41,10 @@ def main():
                         if a.get("time", 0) > state.get("feedbackUntil", 0) and not a.get("feedback")]
         if new_explains:
             reasons.append(f"{cid}: {len(new_explains)} explain-back answers without feedback")
+        seen = set(state.get("pronunciationSeen", []))
+        reports = [d for d in progress.get("diagnostics", []) if ": pronunciation: " in d and d not in seen]
+        if reports:
+            reasons.append(f"{cid}: {len(reports)} pronunciation reports")
         last = max((a.get("time", 0) for a in progress.get("attempts", [])), default=0)
         if last > state.get("lastAttemptTime", 0):
             reasons.append(f"{cid}: new answers since the last run")

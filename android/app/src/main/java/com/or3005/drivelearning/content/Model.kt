@@ -41,6 +41,8 @@ data class CourseVoice(
     val explain: String = "",
     val rate: String = "",
     val style: String = "",
+    /** The course's own pronunciation list, next to course.json. Without it the shared list is used. */
+    val lexicon: String = "",
 )
 
 @Serializable

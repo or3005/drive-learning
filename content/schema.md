@@ -129,6 +129,11 @@ items it hasn't played yet at the start of the next drive in that course.
   A course read for interest sets `warmUpQuestions` to 0 (the app opens a lesson with a short reminder of
   the previous one instead of questions), `spacedReview` to false (no review questions at the start of a
   drive) and `reviewUnits` to false (the automation doesn't add review units).
+  It can also ask for fewer questions in its format 3 lessons: `"segmentChecks": "half"` (a check after
+  about half the segments, 1 to half rounded up, not after every one), `"endChoiceQuestions": 2` (exactly
+  that many multiple-choice questions at the end, with at least one `apply`) and `"explainParts": 1` (one
+  explain question that sums up the lesson, not split into parts, so its prompt doesn't start with חלק).
+  The Machiavelli course uses all three: about 5 questions a lesson instead of 11.
 - In a book course, each entry in `units` may say what it reads: `"reads": "הנסיך: פרק 6"`. A book course that reads two books
   starts every unit title with the book's name and a comma (`הנסיך,` or `הדיונים,`), and every `reading` with its
   source (`מתוך הנסיך, פרק שישי.`); the validator checks this.
@@ -196,11 +201,12 @@ replays, wrong answers). New units set `"format": 3`, and the validator enforces
 
 - **Reading and explanation: 10 to 16 minutes**, at the speaking rate of the course's voice (125 words
   a minute for recorded courses, 140 for the phone's voice): about 1300 to 2000 words, in 3 to 7 main
-  segments, each with a `check`. In a book course, about 800 words of the book and 700 to 900 words of
+  segments, each with a `check` (unless the course's `practice.segmentChecks` is `half`). In a book course, about 800 words of the book and 700 to 900 words of
   explanation per lesson; split a long chapter over two or three lessons rather than rushing it.
 - **End questions: 3 to 5 multiple-choice** (at least one `why` and two `apply`; `recognize` is
   optional, the checks already do that), **and exactly 3 short explain parts**. Each explain part asks
-  for one idea that can be said in two or three sentences.
+  for one idea that can be said in two or three sentences. A course's `practice.endChoiceQuestions` and `practice.explainParts`
+  change these counts.
 - **`retell`** of at most 230 words, **`reminder`**, at least 3 **`reviewQuestions`**, `simple` and `deep`.
 - **Estimated total at most 27 minutes** (the validator warns above 27 and fails above 31).
 - Worked examples still matter, but one good example told well beats two rushed ones.

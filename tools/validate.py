@@ -150,6 +150,7 @@ def check_course(course_dir, rep):
         # A course read for interest opens a lesson with a short reminder instead of warm-up questions.
         "warmup": WARM_UP_MINUTES if course.get("practice", {}).get("warmUpQuestions", 3) > 0 else 0.5,
         "book": bool(course.get("book")),
+        "practice": course.get("practice", {}),
     }
     total_minutes = 0.0
     for u in course.get("units", []):
@@ -342,7 +343,13 @@ def check_unit(path, listed, rep, ctx):
         if unit_concepts and q.get("concept") not in unit_concepts:
             rep.err(qw, f"concept {q.get('concept')} is not one of the unit's concepts")
         check_mc(qw, q, rep, mcs, used_mcs)
-    if strict and checks < len(main):
+    light = ctx.get("practice", {})
+    if light.get("segmentChecks") == "half" and not is_review and unit.get("format", 1) >= 3:
+        # A course read for interest: a check after about half the segments, not after every one.
+        most = (len(main) + 1) // 2
+        if not 1 <= checks <= most:
+            rep.err(where, f"segmentChecks half: 1 to {most} of the {len(main)} segments have a check, has {checks}")
+    elif strict and checks < len(main):
         rep.err(where, f"format 2: every segment needs a check question ({checks} of {len(main)})")
 
     # Review questions: short questions for warm-ups and review units.
@@ -423,16 +430,29 @@ def check_unit(path, listed, rep, ctx):
         for lvl in needed:
             if lvl not in levels_seen:
                 rep.err(where, f"no {lvl} question")
-        if explains < 3:
+        parts = light.get("explainParts")
+        choice = light.get("endChoiceQuestions")
+        if parts is None and explains < 3:
             (rep.err if strict else rep.warn)(where, f"{explains} explain question(s); split the explain-back into at least 3 short parts")
         if f3:
             mc = [q for q in unit.get("questions", []) if q.get("level") != "explain"]
-            if not 3 <= len(mc) <= 5:
-                rep.err(where, f"format 3: {len(mc)} multiple-choice questions at the end; use 3 to 5 (the checks already cover recognition)")
-            if sum(1 for q in mc if q.get("level") == "apply") < 2:
-                rep.err(where, "format 3: at least 2 apply questions (a new case, not a line from the lesson)")
-            if explains != 3:
-                rep.err(where, f"format 3: exactly 3 short explain parts, has {explains}")
+            applies = sum(1 for q in mc if q.get("level") == "apply")
+            if choice is not None:
+                if len(mc) != choice:
+                    rep.err(where, f"endChoiceQuestions {choice}: has {len(mc)} multiple-choice questions at the end")
+                if choice >= 2 and applies < 1:
+                    rep.err(where, "at least 1 apply question (a new case, not a line from the lesson)")
+            else:
+                if not 3 <= len(mc) <= 5:
+                    rep.err(where, f"format 3: {len(mc)} multiple-choice questions at the end; use 3 to 5 (the checks already cover recognition)")
+                if applies < 2:
+                    rep.err(where, "format 3: at least 2 apply questions (a new case, not a line from the lesson)")
+            if explains != (parts if parts is not None else 3):
+                rep.err(where, f"format 3: exactly {parts if parts is not None else 3} explain part(s), has {explains}")
+            if parts == 1:
+                for q in unit.get("questions", []):
+                    if q.get("level") == "explain" and q.get("prompt", "").startswith("חלק"):
+                        rep.err(f"{where} {q.get('id')}", "a single explain question is not a part: don't start it with חלק")
             if not 3 <= len(main) <= 7:
                 rep.err(where, f"format 3: 3 to 7 main segments, has {len(main)}")
             if len((unit.get("retell") or "").split()) > F3_MAX_RETELL_WORDS:

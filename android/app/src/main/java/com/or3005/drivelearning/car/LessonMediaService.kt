@@ -105,6 +105,7 @@ class LessonMediaService : MediaLibraryService() {
                 Button(SKIP, "דלג לחלק הבא", R.drawable.ic_skip),
                 Button(VOICE, "פקודה קולית", R.drawable.ic_mic),
                 Button(REPLAY, "תחזור על זה", R.drawable.ic_replay),
+                Button(PRONUNCIATION, "הגייה לא נכונה", R.drawable.ic_pronounce),
             )
         }
     }
@@ -121,6 +122,7 @@ class LessonMediaService : MediaLibraryService() {
             VOICE -> learning.listenNow()
             SKIP -> learning.onCommand(Command.Forward)
             REPEAT_QUESTION -> learning.onCommand(Command.RepeatQuestion)
+            PRONUNCIATION -> learning.reportPronunciation()
             else -> action.removePrefix("answer").toIntOrNull()?.let { learning.onCommand(Command.Answer(it)) }
         }
     }
@@ -233,7 +235,8 @@ class LessonMediaService : MediaLibraryService() {
         private const val VOICE = "voice"
         private const val SKIP = "skip"
         private const val REPEAT_QUESTION = "repeat_question"
-        private val ALL_ACTIONS = listOf(SURE, UNSURE, YES, NO, REPLAY, SIMPLER, HINT, VOICE, SKIP, REPEAT_QUESTION) +
+        private const val PRONUNCIATION = "pronunciation"
+        private val ALL_ACTIONS = listOf(SURE, UNSURE, YES, NO, REPLAY, SIMPLER, HINT, VOICE, SKIP, REPEAT_QUESTION, PRONUNCIATION) +
             (1..4).map { "answer$it" }
         private val ANSWER_ICONS = listOf(R.drawable.ic_n1, R.drawable.ic_n2, R.drawable.ic_n3, R.drawable.ic_n4)
     }

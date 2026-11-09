@@ -44,6 +44,20 @@ Android code.
    the correct idea, and one short line that is easy to remember. No ASCII double quotes. Then set
    `feedbackUntil` to the newest graded `time`.
 
+2a. **Pronunciation reports.** A line in `diagnostics` like `<day>: pronunciation: <unitId>: <sentence> | <sentence>`
+   means he pressed "הגייה לא נכונה" in the car: the voice said a word wrong in the sentence being read
+   or the one before it. `(phone voice)` after a sentence means it wasn't recorded (the pack was missing),
+   so the fix is the recording, not the word. Skip lines already in `pronunciationSeen` for the course in
+   `progress/processed.json`. For each new line, find the word the voice most likely got wrong: a
+   foreign name, an Italian or Latin word, a word whose letters allow two readings (עם, ספר, עונה,
+   מעלה), or a rare word. Add it to the course's pronunciation list (`voice.lexicon` in `course.json`:
+   `content/courses/machiavelli-prince/pronunciation.json`; a course without one uses
+   `content/pronunciation.json`), with full and correct niqqud: `stems` for a name (it also covers the
+   prefixes ו, ה, ל...; a name that starts with ו is doubled after a prefix, so list forms like לווטורי
+   in `hebrew`), `hebrew` for an exact word or a short phrase when the reading depends on the context.
+   If you can't tell which word it was, add the likeliest one or two. Then add the line to
+   `pronunciationSeen` (keep the last 60). The course is recorded again after the push.
+
 3. **Mistakes that keep coming back.** If the same misconception appears in 2 or more wrong attempts,
    the remedial didn't land: rewrite that misconception's `remedial` with a concrete image or example
    (keep it about one minute). Small, focused edits only.
@@ -55,7 +69,12 @@ Android code.
    for interest: no review units, and the app opens lessons with a reminder instead of warm-up questions). Every new lesson is **format 3** (`content/schema.md`): about 30 minutes in the car,
    so 10 to 16 minutes of explanation in 3 to 7 segments, a check after every segment, 3 to 5 end
    questions plus 3 short explain parts, a retell of at most 230 words, reminder and review questions,
-   and every substantive term taught before it is used. **Questions must make him think** (he said
+   and every substantive term taught before it is used. A course's `practice` can ask for fewer
+   questions: the Machiavelli course (he asked for fewer questions, it's for interest) has a check after
+   only about half the segments (`segmentChecks: half`), 2 end multiple-choice questions (one `why`,
+   one `apply`; in a Discourses unit one of them compares the two books) and a single explain question
+   that sums up the lesson (`endChoiceQuestions: 2`, `explainParts: 1`). Put the checks where the
+   passage is hardest, not by position. **Questions must make him think** (he said
    they were too easy): new cases rather than lines from the lesson, wrong options that are real
    temptations, no wording or length clues, and explanations that teach something extra. Read the
    section on multiple-choice options in `content/schema.md` before writing any question. Use his weak

@@ -210,15 +210,21 @@ class Plain(Pronunciation):
 
 
 class Engine:
-    def __init__(self, voice):
+    def __init__(self, voice, course_dir=None):
         self.voice = voice
         self.name = voice.get("engine", "edge")
         self.rate = voice.get("rate", "+0%")
         self.ffmpeg = shutil.which("ffmpeg")
         self.pron = Plain()
         self.pron_sig = ""
-        if voice.get("pronunciation"):
+        # A course's own list (voice.lexicon, next to course.json) replaces the shared one, whose
+        # technical words would be wrong in a book (שרת as a server, לקוח as a client).
+        path = None
+        if voice.get("lexicon") and course_dir is not None:
+            path = Path(course_dir) / voice["lexicon"]
+        elif voice.get("pronunciation"):
             path = ROOT / "content" / "pronunciation.json"
+        if path is not None:
             data = load(path, {})
             self.pron = Pronunciation(data)
             self.pron_sig = hashlib.sha1(path.read_bytes()).hexdigest()[:8] if path.exists() else ""
@@ -482,7 +488,7 @@ async def render_course(cid, do_upload, max_units):
     voice = course.get("voice")
     if not voice:
         return
-    engine = Engine(voice)
+    engine = Engine(voice, COURSES / cid)
     tag = f"audio-{cid}"
     print(f"{cid}: engine {engine.name}")
     work = BUILD / cid
@@ -490,12 +496,18 @@ async def render_course(cid, do_upload, max_units):
     online = do_upload or bool(os.environ.get("CI"))
     old = fetch_manifest(tag, old_dir) if online else load(old_dir / "manifest.json", {})
     packs = {}
+    # Feedback on his spoken answers opens the next drive; it goes in the pack of its unit (one of the
+    # last lessons, which the app keeps), so it is said in the recorded voice and not the phone's.
+    feedback = {}
+    for item in load(COURSES / cid / "feedback.json", {}).get("items", []):
+        if item.get("unitId") and item.get("text"):
+            feedback.setdefault(item["unitId"], []).append((item["text"], "explain"))
     for u in course.get("units", []):
         if u.get("status") == "planned":
             continue
         unit = load(COURSES / cid / "units" / f"{u['id']}.json")
         if unit:
-            packs[u["id"]] = sentences_of(unit_texts(unit))
+            packs[u["id"]] = sentences_of(unit_texts(unit) + feedback.get(u["id"], []))
     packs["common"] = sentences_of(common_texts())
     manifest = {"course": cid, "format": FORMAT, "engine": engine.name, "units": {}}
     changed = []

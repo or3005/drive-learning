@@ -63,4 +63,17 @@ class PronunciationTest {
         assertFalse(out.contains("לפרק "))
         assertTrue(out.contains("לְפָרֵק"))
     }
+
+    @Test
+    fun aBookCourseHasItsOwnList() {
+        val book = Pronunciation.parse(File("../../content/courses/machiavelli-prince/pronunciation.json").readText())
+        // Names with prefixes, and a word that starts with ו doubled after a prefix.
+        assertEquals("לוּאִי עזר לאפיפיור בְּרוֹמַנְיָה.", book.apply("לואי עזר לאפיפיור ברומניה."))
+        assertEquals("אומר שֶׁהַוִּירְטוּ חשובה.", book.apply("אומר שהווירטו חשובה."))
+        // A word read by its context: tortured, not answers.
+        assertTrue(book.apply("הוא פוטר ועונה.").contains("עֻנָּה"))
+        assertEquals("מקיאוולי עונה בלעג.", book.apply("מקיאוולי עונה בלעג."))
+        // The technical list's words keep their everyday reading in a book.
+        assertEquals("הרפובליקה שהוא עצמו שירת.", book.apply("הרפובליקה שהוא עצמו שירת."))
+    }
 }

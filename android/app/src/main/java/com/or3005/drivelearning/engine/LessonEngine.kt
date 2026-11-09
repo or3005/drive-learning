@@ -267,7 +267,11 @@ class LessonEngine(
     }
 
     fun logDiagnostic(text: String) {
-        progress = progress.copy(diagnostics = (progress.diagnostics + "${today}: $text").takeLast(50))
+        val all = progress.diagnostics + "${today}: $text"
+        // Pronunciation reports wait for the next content update, so other lines don't push them out.
+        val reports = all.filter { PRONUNCIATION_REPORT in it }.takeLast(30).toSet()
+        val others = all.filterNot { PRONUNCIATION_REPORT in it }.takeLast(50).toSet()
+        progress = progress.copy(diagnostics = all.filter { it in reports || it in others })
         store.save(progress)
     }
 
@@ -689,6 +693,7 @@ class LessonEngine(
     private fun key(unitId: String, q: Question) = "$unitId/${q.id}"
 
     private companion object {
+        const val PRONUNCIATION_REPORT = "pronunciation:"
         const val WARM_UP_QUESTIONS = 3
         const val REVIEW_SHORT_QUESTIONS = 3
         const val REVIEW_MAIN_QUESTIONS = 2

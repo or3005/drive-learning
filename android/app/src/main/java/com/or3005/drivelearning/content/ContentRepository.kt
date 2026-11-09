@@ -57,9 +57,15 @@ class ContentRepository(private val context: Context) {
     fun loadConfig(): AppConfig =
         runCatching { ContentJson.decodeFromString<AppConfig>(read("app-config.json")) }.getOrDefault(AppConfig())
 
-    /** How the voice should say English terms and tricky Hebrew words. */
-    fun loadPronunciation(): Pronunciation =
-        runCatching { Pronunciation.parse(read("pronunciation.json")) }.getOrDefault(Pronunciation.NONE)
+    /**
+     * How the voice should say names, English terms and tricky Hebrew words: the course's own list
+     * if it has one (a book's words differ from a technical course's: שרת, לקוח), the shared one otherwise.
+     */
+    fun loadPronunciation(course: Course? = null): Pronunciation {
+        val lexicon = course?.voice?.lexicon.orEmpty()
+        val path = if (lexicon.isNotBlank()) "courses/${course!!.id}/$lexicon" else "pronunciation.json"
+        return runCatching { Pronunciation.parse(read(path)) }.getOrDefault(Pronunciation.NONE)
+    }
 
     private fun read(path: String): String {
         val synced = File(syncedRoot, path)
@@ -101,6 +107,13 @@ class ContentRepository(private val context: Context) {
         val unitsDir = File(syncedRoot, "courses/$courseId/units").apply { mkdirs() }
         texts.forEach { (id, text) -> File(unitsDir, "$id.json").writeText(text) }
         File(syncedRoot, "courses/$courseId/course.json").writeText(courseText)
+        course.voice?.lexicon?.takeIf { it.isNotBlank() }?.let { name ->
+            runCatching {
+                val text = download("content/courses/$courseId/$name")
+                Pronunciation.parse(text) // only save it if it parses
+                File(syncedRoot, "courses/$courseId/$name").writeText(text)
+            }
+        }
         runCatching {
             val feedback = download("content/courses/$courseId/feedback.json")
             ContentJson.decodeFromString<FeedbackFile>(feedback)

@@ -3,7 +3,7 @@
   "title": "מקיאוולי: הנסיך והרפובליקה",
   "language": "he",
   "audience": "מפתח ג׳וניור סקרן, בלי רקע בהיסטוריה של איטליה; שומע את הספרים עצמם בתרגום לעברית, עם הסברים. נושא לעניין ולהנאה, לא לשינון: בלי יחידות חזרה",
-  "minutesPerUnit": 28,
+  "minutesPerUnit": 21,
   "book": {
     "title": "הנסיך",
     "author": "ניקולו מקיאוולי",
@@ -16,7 +16,8 @@
     "engine": "edge",
     "reading": "he-IL-AvriNeural",
     "explain": "he-IL-HilaNeural",
-    "rate": "+0%"
+    "rate": "+0%",
+    "lexicon": "pronunciation.json"
   },
   "substantiveTerms": [
     "וירטו",
@@ -840,6 +841,9 @@
   "practice": {
     "warmUpQuestions": 0,
     "spacedReview": false,
-    "reviewUnits": false
+    "reviewUnits": false,
+    "segmentChecks": "half",
+    "endChoiceQuestions": 2,
+    "explainParts": 1
   }
 }

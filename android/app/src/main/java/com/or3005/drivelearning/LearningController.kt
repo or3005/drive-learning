@@ -112,6 +112,8 @@ class LearningController(private val app: Application) {
     /** Index of the sentence being spoken in the current Say step, for pause, resume and seeking. */
     private var sentence = 0
     private var resumeTarget: Step.Say? = null
+    /** When the drive was paused, to start afresh (with the newest content) after a long break. */
+    private var pausedAt = 0L
     private var resumeSentence = 0
     private var listenTries = 0
     private var uploadJob: Job? = null
@@ -149,7 +151,7 @@ class LearningController(private val app: Application) {
         .build()
 
     init {
-        speaker.pronunciation = repo.loadPronunciation()
+        applyPronunciation()
         val englishVoice = prefs.getBoolean(KEY_ENGLISH_VOICE, true)
         speaker.englishVoiceForTerms = englishVoice
         _state.update { it.copy(englishVoiceForTerms = englishVoice) }
@@ -157,15 +159,21 @@ class LearningController(private val app: Application) {
         refreshUploadState()
         refreshGemini()
         applyAudio()
-        // New units, pronunciation fixes and settings arrive without a new APK.
+        // New units, pronunciation fixes and settings arrive without a new APK. The app can stay
+        // alive for days, so it checks again every few hours between drives.
         scope.launch {
-            repo.sync().onSuccess {
-                speaker.pronunciation = repo.loadPronunciation()
-                refreshCounts()
-                refreshGemini()
+            while (true) {
+                if (engine == null || _state.value.mode in setOf(Mode.IDLE, Mode.PAUSED, Mode.FINISHED)) {
+                    repo.sync().onSuccess {
+                        applyPronunciation()
+                        refreshCounts()
+                        refreshGemini()
+                    }
+                    applyAudio()
+                    syncAudio()
+                }
+                delay(CONTENT_REFRESH_MS)
             }
-            applyAudio()
-            syncAudio()
         }
     }
 
@@ -181,6 +189,7 @@ class LearningController(private val app: Application) {
         progressFile = progressFileFor(id)
         store = FileProgressStore(progressFile)
         refreshCounts()
+        applyPronunciation()
         applyAudio()
         syncAudio()
     }
@@ -203,6 +212,7 @@ class LearningController(private val app: Application) {
         interrupt()
         resumeTarget = engine?.current as? Step.Say
         resumeSentence = sentence
+        pausedAt = System.currentTimeMillis()
         _state.update { it.copy(mode = Mode.PAUSED, awaiting = null) }
         uploadNow()
     }
@@ -210,6 +220,13 @@ class LearningController(private val app: Application) {
     fun resume() {
         val e = engine ?: return start()
         if (e.current is Step.End) return start()
+        if (pausedAt > 0 && System.currentTimeMillis() - pausedAt > LONG_PAUSE_MS) {
+            // The next drive (the way back, or tomorrow): start again from the saved progress, so
+            // lessons written or fixed since then are used. It continues where the last one stopped.
+            pausedAt = 0
+            stop()
+            return start()
+        }
         requestFocus()
         run()
     }
@@ -222,6 +239,31 @@ class LearningController(private val app: Application) {
         _state.update { it.copy(mode = Mode.IDLE, awaiting = null, label = "", prompt = "", options = emptyList()) }
         refreshCounts()
         uploadNow()
+    }
+
+    /**
+     * Car button: a word was just said wrong. Notes the sentence being read and the one before it
+     * (the button is pressed a moment after the word) in the progress file, so the next content
+     * update can add the word to the course's pronunciation list. Playback goes on.
+     */
+    fun reportPronunciation() {
+        val e = engine ?: return
+        val step = e.current
+        val note = when (step) {
+            is Step.Say -> {
+                val parts = Sentences.split(step.text)
+                if (parts.isEmpty()) return
+                val i = sentence.coerceIn(0, parts.size - 1)
+                parts.subList((i - 1).coerceAtLeast(0), i + 1).joinToString(" | ") { s ->
+                    if (speaker.recorded?.invoke(s) != null) s else "$s (phone voice)"
+                }
+            }
+            is Step.Ask -> "question ${step.question.id}: ${step.question.prompt}"
+            else -> return
+        }
+        e.logDiagnostic("pronunciation: ${step.unitId ?: "-"}: $note")
+        message("רשמתי את המשפט. ההגייה תתוקן בעדכון הבא.")
+        uploadSoon()
     }
 
     /** Mic button: listen for an answer if one is expected, otherwise for a command. */
@@ -310,7 +352,7 @@ class LearningController(private val app: Application) {
         scope.launch {
             repo.sync()
                 .onSuccess { n ->
-                    speaker.pronunciation = repo.loadPronunciation()
+                    applyPronunciation()
                     message("התוכן עודכן: $n יחידות.")
                     refreshCounts()
                 }
@@ -323,6 +365,12 @@ class LearningController(private val app: Application) {
     // ---- recorded voice -----------------------------------------------------------------------------
 
     private fun courseHasVoice(): Boolean = runCatching { repo.load(courseId).course.voice != null }.getOrDefault(false)
+
+    /** The pronunciation list of the chosen course, for the phone's voice (the recordings already have it). */
+    private fun applyPronunciation() {
+        speaker.pronunciation = runCatching { repo.loadPronunciation(repo.load(courseId).course) }
+            .getOrElse { repo.loadPronunciation() }
+    }
 
     /** Uses the recordings already on the phone for the chosen course, or the phone's voice for a course without them. */
     private fun applyAudio() {
@@ -924,6 +972,8 @@ class LearningController(private val app: Application) {
         private const val SEEK_WORDS = 32
         /** Lessons ahead whose recordings are kept on the phone. */
         private const val AUDIO_AHEAD = 3
+        private const val CONTENT_REFRESH_MS = 3 * 60 * 60 * 1000L
+        private const val LONG_PAUSE_MS = 60 * 60 * 1000L
         private const val MAX_EXPLAIN_ROUNDS = 12
         private const val MAX_TRANSIENT_RETRIES = 3
         /** Recognizer errors that usually pass on a second try: network hiccups, busy or disconnected service. */
