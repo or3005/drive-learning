@@ -74,7 +74,10 @@ Android code.
    only about half the segments (`segmentChecks: half`), 2 end multiple-choice questions (one `why`,
    one `apply`; in a Discourses unit one of them compares the two books) and a single explain question
    that sums up the lesson (`endChoiceQuestions: 2`, `explainParts: 1`). Put the checks where the
-   passage is hardest, not by position. **Questions must make him think** (he said
+   passage is hardest, not by position. The Node.js course keeps its reviews but opens a lesson with fewer
+   questions (`warmUpQuestions: 1`, `reviewQuestions: 3`). A lesson that comes out longer than the limit is
+   split into two lessons with a concept each (as units 7 to 9 were), never squeezed by cutting the
+   explanation; a review unit covers at most three lessons. **Questions must make him think** (he said
    they were too easy): new cases rather than lines from the lesson, wrong options that are real
    temptations, no wording or length clues, and explanations that teach something extra. Read the
    section on multiple-choice options in `content/schema.md` before writing any question. Use his weak
@@ -110,8 +113,9 @@ is hearing. When writing these units:
   `מתוך הדיונים, ספר ראשון, פרק תשיעי.` (a passage that opens a chapter: `מתוך הנסיך. פרק שישי: ...`).
   `tools/validate.py` checks both. The first explanation of a unit names the book again, since the
   previous drive was from the other book.
-- Discourses units bring out what he thinks and why, and where it agrees or clashes with The Prince. The
-  last segment's explanation has a part that starts with `ומה זה אומר על תפיסת העולם שלו?`, and at least
+- Every lesson, from either book, says what the passage shows about how he sees the world: the last
+  segment's explanation has a short part that starts with `ומה זה אומר על תפיסת העולם שלו?` (the validator
+  checks it). Discourses units bring out what he thinks and why, and where it agrees or clashes with The Prince, and at least
   one end question compares the two books. Prince units point to the Discourses unit that follows when
   the two books meet. Don't say "in the next unit" for something two drives away; say "in the next unit
   from The Prince" (`ביחידה הבאה של הנסיך`).

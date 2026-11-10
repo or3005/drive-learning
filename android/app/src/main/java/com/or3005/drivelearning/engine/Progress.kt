@@ -66,7 +66,13 @@ data class ProgressState(
     val heardFeedback: Set<String> = emptySet(),
     /** Questions asked out loud and answered live by Gemini. */
     val liveAnswers: List<LiveAnswer> = emptyList(),
+    /** Where the lesson in progress was last heard, so the next drive continues from that sentence. */
+    val bookmark: Bookmark? = null,
 )
+
+/** [part] is a main segment's id, or "retell"; [sentence] is the next sentence to say in it. */
+@Serializable
+data class Bookmark(val unitId: String, val part: String, val sentence: Int = 0)
 
 interface ProgressStore {
     fun load(): ProgressState

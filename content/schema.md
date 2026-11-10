@@ -129,6 +129,8 @@ items it hasn't played yet at the start of the next drive in that course.
   A course read for interest sets `warmUpQuestions` to 0 (the app opens a lesson with a short reminder of
   the previous one instead of questions), `spacedReview` to false (no review questions at the start of a
   drive) and `reviewUnits` to false (the automation doesn't add review units).
+  `reviewQuestions` (default 4) is the most spaced-review questions that open a drive; the Node.js course
+  uses `warmUpQuestions: 1` and `reviewQuestions: 3`, so a half-hour lesson stays about half an hour.
   It can also ask for fewer questions in its format 3 lessons: `"segmentChecks": "half"` (a check after
   about half the segments, 1 to half rounded up, not after every one), `"endChoiceQuestions": 2` (exactly
   that many multiple-choice questions at the end, with at least one `apply`) and `"explainParts": 1` (one

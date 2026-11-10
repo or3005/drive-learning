@@ -118,21 +118,42 @@
       "id": "node-runtime",
       "module": "m2",
       "title": "מה זה Node.js: V8 ו-libuv",
-      "summary": "סביבת ריצה שמריצה JavaScript מחוץ לדפדפן, בנויה ממנוע V8 ומספריית libuv",
+      "summary": "סביבת ריצה שמריצה JavaScript מחוץ לדפדפן, בנויה ממנוע V8 ומספריית libuv, עם Thread אחד לקוד שלך",
       "prerequisites": [
         "backend-role"
       ],
       "dotnetBridge": "התפקיד שה-.NET Runtime ממלא עבור קוד C#"
     },
     {
+      "id": "node-limits",
+      "module": "m2",
+      "title": "Node.js בעומס: Thread Pool, זיכרון ושגיאות",
+      "summary": "מה תוקע או מפיל שרת Node: חישוב כבד, Thread Pool שמתמלא, דליפת זיכרון, ושגיאה שלא נתפסה",
+      "prerequisites": [
+        "node-runtime"
+      ],
+      "dotnetBridge": "ב-ASP.NET שגיאה בבקשה אחת מחזירה 500 רק לה; ב-Node היא יכולה להפיל את כל התהליך"
+    },
+    {
       "id": "event-loop",
       "module": "m2",
       "title": "Event Loop ו-I/O שלא חוסם",
-      "summary": "איך Thread אחד מטפל באלפי בקשות במקביל בזכות פעולות I/O שלא חוסמות",
+      "summary": "איך לולאה אחת מריצה Callback אחרי Callback, מה await עושה, ולמה יש מרוצים גם עם Thread אחד",
       "prerequisites": [
         "node-runtime"
       ],
       "dotnetBridge": "ב-ASP.NET יש Thread Pool שמטפל בבקשות במקביל; ב-Node יש Thread ראשי אחד"
+    },
+    {
+      "id": "loop-in-practice",
+      "module": "m2",
+      "title": "Event Loop בעבודה: מקביליות, חתיכות ומדידה",
+      "summary": "Promise.all עם גבול, פירוק עבודה ארוכה לחתיכות, ו-Event Loop Lag כמדד לחסימה",
+      "prerequisites": [
+        "event-loop",
+        "node-limits"
+      ],
+      "dotnetBridge": "ב-ASP.NET ה-Thread Pool מחפה על Thread תקוע; ב-Node אחד תקוע, כולם תקועים"
     },
     {
       "id": "microtasks",
@@ -141,6 +162,16 @@
       "summary": "למה Promise שהסתיים רץ לפני setTimeout של אפס, ומה זה אומר על סדר הביצוע",
       "prerequisites": [
         "event-loop"
+      ]
+    },
+    {
+      "id": "loop-phases",
+      "module": "m2",
+      "title": "סיבוב של הלולאה: setImmediate ו-process.nextTick",
+      "summary": "השלבים של סיבוב אחד בלולאה, מה באמת מפנה את הדרך לבקשות אחרות, ומה קודם לכולם",
+      "prerequisites": [
+        "microtasks",
+        "loop-in-practice"
       ]
     },
     {
@@ -621,9 +652,28 @@
       "status": "draft"
     },
     {
+      "id": "u07b-node-limits",
+      "concepts": [
+        "node-limits"
+      ],
+      "status": "draft"
+    },
+    {
       "id": "u08-event-loop",
       "concepts": [
         "event-loop"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "r3-review-runtime",
+      "concepts": [],
+      "status": "draft"
+    },
+    {
+      "id": "u08b-loop-in-practice",
+      "concepts": [
+        "loop-in-practice"
       ],
       "status": "draft"
     },
@@ -635,7 +685,14 @@
       "status": "draft"
     },
     {
-      "id": "r3-review-runtime",
+      "id": "u09b-loop-phases",
+      "concepts": [
+        "loop-phases"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "r4-review-loop",
       "concepts": [],
       "status": "draft"
     },
@@ -947,5 +1004,10 @@
     "quiz": "he-IL-AvriNeural",
     "rate": "+0%",
     "pronunciation": true
-  }
+  },
+  "practice": {
+    "warmUpQuestions": 1,
+    "reviewQuestions": 3
+  },
+  "minutesPerUnit": 28
 }

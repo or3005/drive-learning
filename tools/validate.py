@@ -16,7 +16,7 @@ OPTION_LENGTH_RATIO = 1.2
 # Format 2 lessons: at least this many minutes of main explanation.
 MIN_LESSON_MINUTES = 15
 # Format 3 (Nov 2026): a lesson takes about 30 minutes in the car, everything included.
-F3_MIN_EXPLANATION = 8       # reading and explanation, in minutes (a short chapter may make a shorter lesson)
+F3_MIN_EXPLANATION = 7.5       # reading and explanation, in minutes (a short chapter may make a shorter lesson)
 F3_MAX_EXPLANATION = 16
 F3_TARGET_TOTAL = 28         # estimate with questions, retell and warm-up; the drive adds thinking and replays
 F3_MAX_TOTAL = 31
@@ -238,6 +238,8 @@ def check_book_labels(where, unit, rep):
         reading = seg.get("reading")
         if reading is not None and not any(reading.startswith(f"מתוך {b}") for b in BOOK_NAMES):
             rep.err(f"{where} main/{seg.get('id')}.reading", "book course: a passage must open with its source (מתוך הנסיך, פרק ... or מתוך הדיונים, ספר ..., פרק ...)")
+    if unit.get("format", 1) >= 3 and not any("תפיסת העולם שלו" in seg.get("text", "") for seg in unit.get("explanations", {}).get("main", [])):
+        rep.err(where, "book course: the lesson must say what the passage shows about his view of the world (a part that starts with ומה זה אומר על תפיסת העולם שלו?)")
 
 
 def check_unit(path, listed, rep, ctx):

@@ -31,6 +31,8 @@ data class CoursePractice(
     val warmUpQuestions: Int = 3,
     val spacedReview: Boolean = true,
     val reviewUnits: Boolean = true,
+    /** How many spaced-review questions open a drive, at most (when [spacedReview] is on). */
+    val reviewQuestions: Int = 4,
 )
 
 /** How a course is recorded. The app only needs to know that it is; the details are for the recording tool. */

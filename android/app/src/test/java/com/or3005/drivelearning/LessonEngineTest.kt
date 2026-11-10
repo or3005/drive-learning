@@ -66,6 +66,39 @@ class LessonEngineTest {
     }
 
     @Test
+    fun aLessonStoppedInTheMiddleContinuesFromTheSameSentence() {
+        val dir = File("../../content/courses/machiavelli-prince")
+        val course = ContentJson.decodeFromString<Course>(File(dir, "course.json").readText())
+        val units = course.units.filter { it.status != "planned" }.map {
+            ContentJson.decodeFromString<LearningUnit>(File(dir, "units/${it.id}.json").readText())
+        }
+        val done = units.take(2).map { it.id }.toSet()
+        val lesson = units[2]
+        // A segment without a check: before the bookmark, the lesson went back to the last check.
+        val index = lesson.explanations.main.indexOfLast { it.check == null }
+        assertTrue(index > 0)
+        val store = MemoryProgressStore(ProgressState(completedUnits = done, schedulerVersion = Scheduler.VERSION))
+        val first = LessonEngine(units, store, today, random = Random(2), practice = course.practice)
+        first.start()
+        first.answerRightUntil { it is Step.Say && it.unitId == lesson.id && it.segmentIndex == index }
+        first.bookmark(5)
+        assertEquals(lesson.explanations.main[index].id, store.load().bookmark?.part)
+
+        // The next drive: a new engine from the saved progress.
+        val second = LessonEngine(units, store, today.plusDays(1), random = Random(3), practice = course.practice)
+        second.start()
+        val opening = second.current as Step.Say
+        assertTrue(opening.text, opening.text.startsWith("ממשיכים מאיפה שעצרנו"))
+        val resumed = second.advance() as Step.Say
+        assertEquals(index, resumed.segmentIndex)
+        assertEquals("one sentence back", 4, resumed.startAt)
+        // Finishing the lesson forgets the place.
+        second.answerRightUntil { it.unitId == units[3].id }
+        assertEquals(null, store.load().bookmark)
+        assertTrue(lesson.id in store.load().completedUnits)
+    }
+
+    @Test
     fun allContentParses() {
         val all = units()
         assertTrue("expected at least 6 units", all.size >= 6)
@@ -360,7 +393,7 @@ class LessonEngineTest {
         engine.start()
         val seen = engine.answerRightUntil { it.unitId == "u08-event-loop" }
         val openings = seen.filterIsInstance<Step.Say>().filter { it.label == "פתיחה" }
-        assertEquals(listOf("r1-review-foundations", "r2-review-http", "u07-node-runtime"), openings.map { it.unitId })
+        assertEquals(listOf("r1-review-foundations", "r2-review-http", "u07-node-runtime", "u07b-node-limits"), openings.map { it.unitId })
         // The first review stopped in the unit 3 block: it continues there, without the fill-ins again.
         assertTrue(openings.first().text.startsWith("ממשיכים"))
         val r1 = seen.takeWhile { it.unitId != "r2-review-http" || (it as? Step.Say)?.label != "פתיחה" }

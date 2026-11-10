@@ -212,6 +212,7 @@ class LearningController(private val app: Application) {
         interrupt()
         resumeTarget = engine?.current as? Step.Say
         resumeSentence = sentence
+        engine?.bookmark(sentence)
         pausedAt = System.currentTimeMillis()
         _state.update { it.copy(mode = Mode.PAUSED, awaiting = null) }
         uploadNow()
@@ -232,6 +233,8 @@ class LearningController(private val app: Application) {
     }
 
     fun stop() {
+        // After a pause the place is already saved; `sentence` may have been reset since.
+        if (_state.value.mode != Mode.PAUSED) engine?.bookmark(sentence)
         interrupt()
         abandonFocus()
         engine = null
@@ -579,11 +582,14 @@ class LearningController(private val app: Application) {
         refreshCounts()
         when (val step = e.current) {
             is Step.Say -> {
-                val from = if (resumeTarget === step) resumeSentence else 0
+                val from = if (resumeTarget === step) resumeSentence else step.startAt
                 resumeTarget = null
                 sentence = from
                 show(step, Mode.SPEAKING)
-                speaker.speak(step.text, from, onSentence = { i -> sentence = i + 1 }) {
+                speaker.speak(step.text, from, onSentence = { i ->
+                    sentence = i + 1
+                    if (i % 3 == 0) e.bookmark(i + 1)
+                }) {
                     sentence = 0
                     e.advance()
                     run()

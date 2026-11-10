@@ -1,0 +1,23 @@
+{
+  "id": "r4-review-loop",
+  "type": "review",
+  "concepts": [],
+  "title": "יחידות 10 עד 12: ה-Event Loop בעבודה, Microtasks, וסיבוב הלולאה",
+  "estimatedMinutes": 25,
+  "covers": [
+    "u08b-loop-in-practice",
+    "u09-microtasks",
+    "u09b-loop-phases"
+  ],
+  "fillIns": [],
+  "explanations": {
+    "main": [
+      {
+        "id": "s1",
+        "title": "חזרה על הלולאה מבפנים",
+        "text": "יחידת חזרה על שלוש יחידות: ה-Event Loop בעבודה, Microtasks מול Macrotasks, וסיבוב שלם של הלולאה. אלה היחידות שמסבירות מי רץ קודם, איך נותנים לבקשות אחרות לרוץ, ואיך יודעים שהלולאה חסומה. לכל יחידה תשמע תזכורת קצרה, כמה שאלות, ושאלה קצרה להסביר במילים שלך. בסוף, סיכום של מה יושב טוב ומה צריך חיזוק. אחרי החזרה הזו נמשיך לחסימה של ה-Event Loop בחישובים כבדים, ולדרכים לטפל בה."
+      }
+    ]
+  },
+  "recap": "סיימנו את החזרה על הלולאה מבפנים: Promise.all עם גבול, פירוק לחתיכות, Event Loop Lag, שני התורים של Macrotasks ו-Microtasks, ו-setImmediate מול process.nextTick. עם הבסיס הזה, היחידה הבאה תראה איך מתמודדים עם חישוב כבד בלי לתקוע את כל השרת."
+}

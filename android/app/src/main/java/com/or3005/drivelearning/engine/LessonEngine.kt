@@ -18,6 +18,10 @@ sealed interface Step {
         override val unitId: String? = null,
         val segmentIndex: Int? = null,
         val label: String = "",
+        /** A part of a lesson that can be continued on the next drive: a segment's id, or "retell". */
+        val part: String? = null,
+        /** The sentence to start from, when continuing a part that was stopped in the middle. */
+        val startAt: Int = 0,
     ) : Step
 
     /** [order] is the shuffled order of the options as read out: order[0] is the option read as ״one״. */
@@ -266,6 +270,21 @@ class LessonEngine(
         store.save(progress)
     }
 
+    /**
+     * Remembers the place in the lesson being heard: [sentence] is the next sentence of the current
+     * step. Only parts of a lesson not yet completed are remembered.
+     */
+    fun bookmark(sentence: Int) {
+        val step = current as? Step.Say ?: return
+        val unitId = step.unitId ?: return
+        val part = step.part ?: return
+        if (unitId in progress.completedUnits) return
+        val mark = Bookmark(unitId, part, sentence)
+        if (mark == progress.bookmark) return
+        progress = progress.copy(bookmark = mark)
+        store.save(progress)
+    }
+
     fun logDiagnostic(text: String) {
         val all = progress.diagnostics + "${today}: $text"
         // Pronunciation reports wait for the next content update, so other lines don't push them out.
@@ -362,7 +381,7 @@ class LessonEngine(
                 queue += Step.Plan("", Step.Plan.Kind.FEEDBACK_HEARD, covered = item.id)
             }
         }
-        val review = if (practice.spacedReview) reviewQuestions(max = 4) else emptyList()
+        val review = if (practice.spacedReview) reviewQuestions(max = practice.reviewQuestions.coerceIn(0, 4)) else emptyList()
         if (review.isNotEmpty()) {
             queue += Step.Say("לפני שממשיכים, חזרה קצרה על דברים מנסיעות קודמות.")
             review.forEach { (unitId, q) ->
@@ -399,24 +418,51 @@ class LessonEngine(
             queue += Step.UnitDone(unit.id)
             return
         }
-        // Stopped in the middle of the lesson: continue after the last segment whose check was answered.
+        // Stopped in the middle of the lesson: continue from the sentence that was being said (the
+        // bookmark), or at least after the last segment whose check was answered.
+        val main = unit.explanations.main
         val checkIds = earlier.map { it.questionId }.toSet()
-        val lastChecked = unit.explanations.main.indexOfLast { seg -> seg.check?.id?.let { it in checkIds } == true }
-        val from = lastChecked + 1
-        if (from > 0) {
-            queue += Step.Say(
-                "ממשיכים מאיפה שעצרנו, ב${unitName(unit.id)}. בפעם הקודמת הגענו עד החלק: " +
-                    "${unit.explanations.main[lastChecked].title}.",
-                unit.id, label = "המשך",
-            )
+        val lastChecked = main.indexOfLast { seg -> seg.check?.id?.let { it in checkIds } == true }
+        val mark = progress.bookmark?.takeIf { it.unitId == unit.id && (it.part != main.firstOrNull()?.id || it.sentence > 2) }
+        val markIndex = when {
+            mark == null -> -1
+            mark.part == RETELL -> if (unit.retell.isNotBlank()) main.size else -1
+            else -> main.indexOfFirst { it.id == mark.part }
+        }
+        val from = maxOf(lastChecked + 1, markIndex)
+        // One sentence back, to pick up the thread.
+        fun resumed(step: Step.Say): Step.Say {
+            val last = Sentences.split(step.text).size - 1
+            return step.copy(startAt = ((mark?.sentence ?: 0) - 1).coerceIn(0, last.coerceAtLeast(0)))
+        }
+        val inside = markIndex >= 0 && markIndex == from
+        if (from > 0 || inside) {
+            val where = when {
+                from < main.size && inside -> " אנחנו בחלק: ${main[from].title}."
+                from < main.size -> " החלק הבא: ${main[from].title}."
+                else -> ""
+            }
+            queue += Step.Say("ממשיכים מאיפה שעצרנו, ב${unitName(unit.id)}.$where", unit.id, label = "המשך")
         } else {
             queue += Step.Say("${unitName(unit.id)}.", unit.id, label = "פתיחה")
             queue += Step.Plan(unit.id, Step.Plan.Kind.WARM_UP)
         }
-        for (i in from until unit.explanations.main.size) addSegment(unit, i)
+        for (i in from until main.size) {
+            if (inside && i == from) {
+                queue += resumed(segmentStep(unit, i))
+                checkFor(unit, i)?.takeIf { it.id !in checkIds }?.let { queue += ask(unit.id, it) }
+            } else {
+                addSegment(unit, i)
+            }
+        }
         if (unit.retell.isNotBlank()) {
-            queue += Step.Say("עכשיו נעבור על כל מה שלמדנו ביחידה הזו שוב, בדרך אחרת.", unit.id, label = "במילים אחרות")
-            queue += Step.Say(unit.retell, unit.id, label = "במילים אחרות")
+            val retell = Step.Say(unit.retell, unit.id, label = "במילים אחרות", part = RETELL)
+            if (inside && from == main.size) {
+                queue += resumed(retell)
+            } else {
+                queue += Step.Say("עכשיו נעבור על כל מה שלמדנו ביחידה הזו שוב, בדרך אחרת.", unit.id, label = "במילים אחרות")
+                queue += retell
+            }
         }
         unit.questions.forEach { queue += ask(unit.id, it) }
         if (unit.recap.isNotBlank()) queue += Step.Say(unit.recap, unit.id, label = "סיכום")
@@ -645,7 +691,10 @@ class LessonEngine(
     }
 
     private fun completeUnit(unitId: String) {
-        progress = progress.copy(completedUnits = progress.completedUnits + unitId)
+        progress = progress.copy(
+            completedUnits = progress.completedUnits + unitId,
+            bookmark = progress.bookmark?.takeIf { it.unitId != unitId },
+        )
         store.save(progress)
         val retries = mutableListOf<Step>()
         // After a review, every question that went wrong comes back once more.
@@ -687,13 +736,14 @@ class LessonEngine(
 
     private fun segmentStep(unit: LearningUnit, index: Int): Step.Say {
         val seg = unit.explanations.main[index]
-        return Step.Say(seg.spoken, unit.id, segmentIndex = index, label = seg.title)
+        return Step.Say(seg.spoken, unit.id, segmentIndex = index, label = seg.title, part = seg.id)
     }
 
     private fun key(unitId: String, q: Question) = "$unitId/${q.id}"
 
     private companion object {
         const val PRONUNCIATION_REPORT = "pronunciation:"
+        const val RETELL = "retell"
         const val WARM_UP_QUESTIONS = 3
         const val REVIEW_SHORT_QUESTIONS = 3
         const val REVIEW_MAIN_QUESTIONS = 2
