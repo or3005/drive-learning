@@ -43,13 +43,20 @@ class ProgressUploader(private val context: Context) {
     private val expiresAt: Long get() = prefs.getLong(KEY_EXPIRES, 0)
     private val refreshLock = Mutex()
 
+    /** Why the last renewal didn't happen, for the diagnostics: it is the only way to see it from outside. */
+    private var renewProblem = ""
+
     /** Renews the access token with the refresh token. False when there's nothing to renew with. */
     private suspend fun renew(): Boolean = refreshLock.withLock {
         val refresh = refreshToken
         val clientId = prefs.getString(KEY_CLIENT, "").orEmpty()
-        if (refresh.isBlank() || clientId.isBlank()) return false
+        if (refresh.isBlank() || clientId.isBlank()) {
+            renewProblem = "no refresh token saved (signed in before the update, or a token pasted by hand)"
+            return false
+        }
         GitHubLogin(clientId).refresh(refresh)
-            .onSuccess { saveTokens(it, clientId) }
+            .onSuccess { saveTokens(it, clientId); renewProblem = "" }
+            .onFailure { renewProblem = "renewal failed: ${it.message}" }
             .isSuccess
     }
 
@@ -70,7 +77,11 @@ class ProgressUploader(private val context: Context) {
     suspend fun upload(progressFile: File, remotePath: String): Result<Unit> = withContext(Dispatchers.IO) {
         renewIfDue()
         val first = put(progressFile, remotePath)
-        if (first.exceptionOrNull() is Unauthorized && renew()) put(progressFile, remotePath) else first
+        when {
+            first.exceptionOrNull() !is Unauthorized -> first
+            renew() -> put(progressFile, remotePath)
+            else -> Result.failure(Exception("${first.exceptionOrNull()?.message} [$renewProblem]"))
+        }
     }
 
     private class Unauthorized(message: String) : Exception(message)
