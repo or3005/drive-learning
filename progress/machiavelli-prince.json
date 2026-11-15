@@ -671,6 +671,17 @@
             "sure": true,
             "day": "2026-11-15",
             "time": 1794758660809
+        },
+        {
+            "questionId": "c-arm-or-close",
+            "unitId": "d03-rome-or-sparta",
+            "concept": "expand-or-preserve",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-15",
+            "time": 1794759346842
         }
     ],
     "concepts": {
@@ -877,6 +888,7 @@
         "2026-11-15: listen YES_NO: 'לא' -> YesNo",
         "2026-11-15: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-15: explain: 1068 chars, ended by סיימתי",
+        "2026-11-15: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-15: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
@@ -894,7 +906,7 @@
     ],
     "bookmark": {
         "unitId": "d03-rome-or-sparta",
-        "part": "s2",
-        "sentence": 9
+        "part": "s5",
+        "sentence": 8
     }
 }
