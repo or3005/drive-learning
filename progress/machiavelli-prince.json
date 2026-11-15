@@ -605,6 +605,17 @@
             "sure": true,
             "day": "2026-11-15",
             "time": 1794726120242
+        },
+        {
+            "questionId": "c-sultan-hard",
+            "unitId": "u05-darius-kingdoms",
+            "concept": "centralized-vs-feudal",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-15",
+            "time": 1794757296664
         }
     ],
     "concepts": {
@@ -791,7 +802,8 @@
         "2026-11-15: listen ANSWER: 'תשובה שתיים' -> Answer",
         "2026-11-15: explain: 1241 chars, ended by סיימתי",
         "2026-11-15: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
-        "2026-11-15: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש."
+        "2026-11-15: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
+        "2026-11-15: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
