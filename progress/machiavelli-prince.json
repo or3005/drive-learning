@@ -660,6 +660,17 @@
             "sure": true,
             "day": "2026-11-15",
             "time": 1794758382246
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u05-darius-kingdoms",
+            "concept": "centralized-vs-feudal",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-15",
+            "time": 1794758660809
         }
     ],
     "concepts": {
@@ -722,7 +733,8 @@
         "d01-discourses-intro",
         "u03-romans-foresight",
         "d02-kinds-of-government",
-        "u04-louis-mistakes"
+        "u04-louis-mistakes",
+        "u05-darius-kingdoms"
     ],
     "explainAnswers": [
         {
@@ -864,7 +876,8 @@
         "2026-11-15: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-15: listen YES_NO: 'לא' -> YesNo",
         "2026-11-15: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-15: explain: 1068 chars, ended by סיימתי"
+        "2026-11-15: explain: 1068 chars, ended by סיימתי",
+        "2026-11-15: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -878,10 +891,5 @@
         "fb-2026-11-12-u03-romans-foresight-q3-1794465577666",
         "fb-2026-11-15-d02-kinds-of-government-q3-1794724848281",
         "fb-2026-11-15-u04-louis-mistakes-q3-1794726304188"
-    ],
-    "bookmark": {
-        "unitId": "u05-darius-kingdoms",
-        "part": "retell",
-        "sentence": 13
-    }
+    ]
 }
