@@ -1172,6 +1172,17 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794810024615
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794810221770
         }
     ],
     "concepts": {
@@ -1206,9 +1217,10 @@
             "lastPromoted": "2026-11-16"
         },
         "statelessness": {
-            "box": 1,
-            "nextReview": "2026-11-05",
-            "lastPromoted": "2026-11-04"
+            "box": 2,
+            "nextReview": "2026-11-18",
+            "mastered": true,
+            "lastPromoted": "2026-11-16"
         }
     },
     "completedUnits": [
@@ -1348,7 +1360,8 @@
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-16: explain: 456 chars, ended by סיימתי"
+        "2026-11-16: explain: 456 chars, ended by סיימתי",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
