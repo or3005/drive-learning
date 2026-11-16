@@ -382,9 +382,39 @@ class LessonEngineTest {
         assertEquals(0, cp.box)
     }
 
+    /**
+     * The learner's live progress changes after every drive, so this test checks only what always
+     * holds: the file loads, and the next drive opens the first lesson he hasn't finished (continuing
+     * it if he stopped in the middle). Fixed expectations belong on a frozen copy, as below.
+     */
     @Test
-    fun theLearnersRealProgressGoesToBothReviewsThenUnitSeven() {
-        val file = File("../../progress/nodejs-backend.json")
+    fun theLearnersLiveProgressLoadsAndOpensTheNextLesson() {
+        for (courseId in listOf("nodejs-backend", "machiavelli-prince")) {
+            val dir = File("../../content/courses/$courseId")
+            val course = ContentJson.decodeFromString<Course>(File(dir, "course.json").readText())
+            val lessons = course.units.filter { it.status != "planned" }.map {
+                ContentJson.decodeFromString<LearningUnit>(File(dir, "units/${it.id}.json").readText())
+            }
+            val file = File("../../progress/$courseId.json")
+            if (!file.exists()) continue
+            val state = com.or3005.drivelearning.engine.FileProgressStore(file).load()
+            val next = lessons.firstOrNull { it.id !in state.completedUnits } ?: continue
+            val engine = LessonEngine(lessons, MemoryProgressStore(state), LocalDate.now(), random = Random(1), practice = course.practice)
+            engine.start()
+            val seen = engine.answerRightUntil { (it as? Step.Say)?.label in setOf("פתיחה", "המשך") }
+            val opening = engine.current as? Step.Say
+            assertTrue("$courseId: no lesson opened after ${seen.size} steps", opening != null)
+            assertEquals(courseId, next.id, opening!!.unitId)
+            if (state.bookmark?.unitId == next.id) {
+                assertTrue("$courseId: ${opening.text}", opening.text.startsWith("ממשיכים"))
+            }
+        }
+    }
+
+    /** A frozen copy of his progress from 2026-11-05: two reviews were due, the first stopped in the middle. */
+    @Test
+    fun theLearnersProgressOfNovemberFifthGoesToBothReviewsThenUnitSeven() {
+        val file = File("src/test/resources/progress-nodejs-2026-11-05.json")
         val state = com.or3005.drivelearning.engine.FileProgressStore(file).load()
         val store = MemoryProgressStore(state)
         val engine = LessonEngine(units(), store, LocalDate.of(2026, 11, 6), random = Random(1))
