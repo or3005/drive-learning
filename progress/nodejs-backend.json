@@ -1271,6 +1271,61 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794811099699
+        },
+        {
+            "questionId": "c-libuv",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794811355426
+        },
+        {
+            "questionId": "c-one-thread",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794811612264
+        },
+        {
+            "questionId": "c-sync",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794811802031
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794811995393
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794812061945
         }
     ],
     "concepts": {
@@ -1308,6 +1363,11 @@
             "box": 2,
             "nextReview": "2026-11-18",
             "mastered": true,
+            "lastPromoted": "2026-11-16"
+        },
+        "node-runtime": {
+            "box": 1,
+            "nextReview": "2026-11-17",
             "lastPromoted": "2026-11-16"
         }
     },
@@ -1403,7 +1463,6 @@
     "diagnostics": [
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
@@ -1412,10 +1471,6 @@
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen YES_NO: 'לא' -> YesNo",
-        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-05: explain: 116 chars, ended by סיימתי",
-        "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-05: listen YES_NO: 'כן' -> YesNo",
         "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה אחת' -> Answer",
@@ -1460,7 +1515,12 @@
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-16: listen ANSWER: 'ארבע' -> Answer"
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
@@ -1475,7 +1535,7 @@
     ],
     "bookmark": {
         "unitId": "u07-node-runtime",
-        "part": "s3",
-        "sentence": 12
+        "part": "retell",
+        "sentence": 13
     }
 }
