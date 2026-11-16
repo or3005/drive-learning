@@ -1039,6 +1039,72 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794808985725
+        },
+        {
+            "questionId": "c-redis",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809226915
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809303761
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809358100
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809406552
+        },
+        {
+            "questionId": "q5",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809469748
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809521962
         }
     ],
     "concepts": {
@@ -1143,18 +1209,16 @@
             "transcript": "תשובה בנויה מהדר יו הראל סטרינג ומת הוד ובאדי תשובה נכונה יכולה להיות 201 כאשר יוצרים משהו חדש אז אתה נותן לו 201 כדי שידע שזה נוצר בתוך הבאדי אתה נותן איזה את הדברים שקשורים לזה בנוסף צריך שיהיה גם איזה פורמט משתמשים זהו",
             "day": "2026-11-16",
             "time": 1794808890667
+        },
+        {
+            "questionId": "q10",
+            "unitId": "u04-http-methods",
+            "transcript": "אייטם פונטנט זה כאשר אנחנו עושים פעולה כמו גט ששתי פעולות שלה לא משנות את השרת אז נגיד אם עשיתי גט עבור גטו יוזר פעם אחת אוקיי קיבלתי אותה ואז אני עושה פעם שניה אוקיי קיבלתי אותה שוב לא עשיתי שום שינוי בשרת יש דברים שהם לא הייתם פורטנט כמו פקודה של פוסט שהיא יוצרת באמת משהו חדש בשרת לכן כשאנחנו עושים פוסט פעם אחת עבור איזה יוזר יצרנו משהו חדש בשרת ואם נעשה עוד פעם פוסט שינינו שוב פעם את השרת לכן זה לא אייטם פורטנט וכאן אנחנו נצטרך לשלוח איזה שהוא כי או איי די מסוים בשביל שהשרת לא באמת ישתנה כאשר אנחנו עושים את אותו בק או כשיש איזה שהיא בעיה כלשהי",
+            "day": "2026-11-16",
+            "time": 1794809615176
         }
     ],
     "diagnostics": [
-        "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
-        "2026-11-04: listen ANSWER: 'תשובה שתיים' -> Answer",
-        "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-04: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-04: listen ANSWER: 'תשובה שלוש' -> Answer",
-        "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
         "2026-11-04: explain: 424 chars, ended by silence",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה שתיים' -> Answer",
@@ -1197,11 +1261,19 @@
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-16: explain: 221 chars, ended by סיימתי",
-        "2026-11-16: listen ANSWER: 'ארבע' -> Answer"
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: explain: 552 chars, ended by סיימתי"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
-        "r1-review-foundations/u03-http-anatomy"
+        "r1-review-foundations/u03-http-anatomy",
+        "r2-review-http/u04-http-methods"
     ],
     "heardFeedback": [
         "fb-2026-11-05-u01-backend-role-q10",
