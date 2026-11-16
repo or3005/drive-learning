@@ -928,6 +928,51 @@
             "sure": true,
             "day": "2026-11-05",
             "time": 1793861034668
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u03-http-anatomy",
+            "concept": "http-anatomy",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794808240266
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 2,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794808288217,
+            "misconception": "mc-https-means-safe-site"
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794808390528
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u04-http-methods",
+            "concept": "http-methods",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794808442519
         }
     ],
     "concepts": {
@@ -939,21 +984,21 @@
         },
         "request-journey": {
             "box": 1,
-            "nextReview": "2026-11-06",
+            "nextReview": "2026-11-17",
             "mastered": true,
-            "lastPromoted": "2026-11-05"
+            "lastPromoted": "2026-11-16"
         },
         "http-anatomy": {
-            "box": 1,
-            "nextReview": "2026-11-06",
+            "box": 2,
+            "nextReview": "2026-11-18",
             "mastered": true,
-            "lastPromoted": "2026-11-05"
+            "lastPromoted": "2026-11-16"
         },
         "http-methods": {
-            "box": 2,
-            "nextReview": "2026-11-07",
+            "box": 3,
+            "nextReview": "2026-11-20",
             "mastered": true,
-            "lastPromoted": "2026-11-05"
+            "lastPromoted": "2026-11-16"
         },
         "status-codes": {
             "box": 2,
@@ -1030,7 +1075,6 @@
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-04: listen ANSWER: 'תשובה אחת' -> Answer",
         "2026-11-04: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-04: listen YES_NO: 'כן' -> YesNo",
         "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
@@ -1076,7 +1120,12 @@
         "2026-11-05: listen YES_NO: 'לא' -> YesNo",
         "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-05: listen YES_NO: 'לא' -> YesNo",
-        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer"
+        "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: listen ANSWER: 'שלוש' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
