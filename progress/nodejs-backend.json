@@ -1105,6 +1105,51 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794809521962
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "apply",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809709814,
+            "misconception": "mc-stack-trace-to-client"
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809795835
+        },
+        {
+            "questionId": "r2",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809853261
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u05-status-codes",
+            "concept": "status-codes",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794809906086
         }
     ],
     "concepts": {
@@ -1133,10 +1178,10 @@
             "lastPromoted": "2026-11-16"
         },
         "status-codes": {
-            "box": 2,
-            "nextReview": "2026-11-07",
+            "box": 1,
+            "nextReview": "2026-11-17",
             "mastered": true,
-            "lastPromoted": "2026-11-05"
+            "lastPromoted": "2026-11-16"
         },
         "statelessness": {
             "box": 1,
@@ -1219,9 +1264,7 @@
         }
     ],
     "diagnostics": [
-        "2026-11-04: explain: 424 chars, ended by silence",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-05: listen ANSWER: 'תשובה שתיים' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
@@ -1268,7 +1311,12 @@
         "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-16: explain: 552 chars, ended by סיימתי"
+        "2026-11-16: explain: 552 chars, ended by סיימתי",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
