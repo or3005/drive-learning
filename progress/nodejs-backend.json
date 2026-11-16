@@ -1028,6 +1028,17 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794808821175
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u02-request-journey",
+            "concept": "request-journey",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794808985725
         }
     ],
     "concepts": {
@@ -1073,7 +1084,8 @@
         "u03-http-anatomy",
         "u04-http-methods",
         "u05-status-codes",
-        "u06-statelessness"
+        "u06-statelessness",
+        "r1-review-foundations"
     ],
     "explainAnswers": [
         {
@@ -1136,8 +1148,6 @@
     "diagnostics": [
         "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-04: microphone: שגיאה בזיהוי הדיבור (קוד 11)",
-        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-04: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-04: listen ANSWER: 'תשובה שתיים' -> Answer",
         "2026-11-04: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-04: listen ANSWER: 'תשובה ארבע' -> Answer",
@@ -1186,7 +1196,8 @@
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-16: explain: 221 chars, ended by סיימתי"
+        "2026-11-16: explain: 221 chars, ended by סיימתי",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
@@ -1195,5 +1206,10 @@
     "heardFeedback": [
         "fb-2026-11-05-u01-backend-role-q10",
         "fb-2026-11-05-u02-request-journey-q10"
-    ]
+    ],
+    "bookmark": {
+        "unitId": "r2-review-http",
+        "part": "s1",
+        "sentence": 4
+    }
 }
