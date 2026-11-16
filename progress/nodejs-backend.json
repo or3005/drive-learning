@@ -1260,6 +1260,17 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794810903198
+        },
+        {
+            "questionId": "c-v8",
+            "unitId": "u07-node-runtime",
+            "concept": "node-runtime",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794811099699
         }
     ],
     "concepts": {
@@ -1396,15 +1407,10 @@
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'ארבע' -> Answer",
-        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer",
-        "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-05: listen YES_NO: 'לא' -> YesNo",
         "2026-11-05: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-05: explain: 116 chars, ended by סיימתי",
@@ -1453,6 +1459,7 @@
         "2026-11-16: explain: 285 chars, ended by סיימתי",
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-16: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
@@ -1468,7 +1475,7 @@
     ],
     "bookmark": {
         "unitId": "u07-node-runtime",
-        "part": "s2",
-        "sentence": 6
+        "part": "s3",
+        "sentence": 10
     }
 }
