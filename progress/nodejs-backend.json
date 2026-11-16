@@ -1183,6 +1183,50 @@
             "sure": true,
             "day": "2026-11-16",
             "time": 1794810221770
+        },
+        {
+            "questionId": "r1",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794810326630
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794810385398
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "recognize",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794810439387
+        },
+        {
+            "questionId": "r3",
+            "unitId": "u06-statelessness",
+            "concept": "statelessness",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-16",
+            "time": 1794810491592
         }
     ],
     "concepts": {
@@ -1302,6 +1346,13 @@
             "transcript": "ההבדל בין 41 ל-403 זה ש-401 אני יודע מי אתה ואין לך הרשאה לבדוק לא סליחה ההפך 403 אני יודע מי אתה ואין לך הרשאה לבדוק ו-401 זה אני לא יודע מי אתה תתחבר כל עוד הוא לא יודע מי הוא אז אין לו אפשרות לעשות שינויים או לבקש דברים כל עוד הוא לא התחבר עבור האחרים שאמרת מה אמרת 404 זה תקלה שצריך לבדוק אותה ו-400 זה גם תקלה שהיא קשורה לקליינט אני לא זוכר מה זה 404 האמת אבל אני זוכר ש-403 זה קשור ואחד לזה שהוא בכלל לא התחבר והוא לא יודע מי הוא זה בערך מה שאני זוכר",
             "day": "2026-11-16",
             "time": 1794810125064
+        },
+        {
+            "questionId": "q11",
+            "unitId": "u06-statelessness",
+            "transcript": "שומרים את המצב ברדיס או באיזה שהוא שרת שהוא חיצוני שהוא שומר את כל המצבים של השרתים האחרים בשביל שאחרי זה שאם קורה איזה משהו הוא יוכל להעלות אותם מהמקום האחרון שהם היו והוא יוכל לנהל אותם כמו שצריך לגבי השאלה השניה שלך אני לא זוכר אני לא זוכר מה שאלת זה לא שאני לא יודע מה לענות אז זהו",
+            "day": "2026-11-16",
+            "time": 1794810553098
         }
     ],
     "diagnostics": [
@@ -1315,7 +1366,6 @@
         "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-05: explain: 159 chars, ended by סיימתי",
         "2026-11-05: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
         "2026-11-05: listen ANSWER: 'אחד' -> Answer",
@@ -1361,13 +1411,19 @@
         "2026-11-16: listen ANSWER: 'אחד' -> Answer",
         "2026-11-16: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-16: explain: 456 chars, ended by סיימתי",
-        "2026-11-16: listen ANSWER: 'שתיים' -> Answer"
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-16: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-16: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-16: explain: 285 chars, ended by סיימתי"
     ],
     "schedulerVersion": 2,
     "reviewBlocksDone": [
         "r1-review-foundations/u03-http-anatomy",
         "r2-review-http/u04-http-methods",
-        "r2-review-http/u05-status-codes"
+        "r2-review-http/u05-status-codes",
+        "r2-review-http/u06-statelessness"
     ],
     "heardFeedback": [
         "fb-2026-11-05-u01-backend-role-q10",
