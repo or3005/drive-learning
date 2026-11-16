@@ -1078,5 +1078,9 @@
         "2026-11-05: listen YES_NO: 'לא' -> YesNo",
         "2026-11-05: listen ANSWER: 'תשובה ארבע' -> Answer"
     ],
-    "schedulerVersion": 2
+    "schedulerVersion": 2,
+    "heardFeedback": [
+        "fb-2026-11-05-u01-backend-role-q10",
+        "fb-2026-11-05-u02-request-journey-q10"
+    ]
 }
