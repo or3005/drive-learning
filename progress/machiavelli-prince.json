@@ -715,6 +715,17 @@
             "sure": true,
             "day": "2026-11-15",
             "time": 1794760083629
+        },
+        {
+            "questionId": "c-oligarchy-loyal",
+            "unitId": "u06-free-cities",
+            "concept": "free-cities",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-19",
+            "time": 1795067297579
         }
     ],
     "concepts": {
@@ -875,7 +886,6 @@
     "diagnostics": [
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
-        "2026-11-12: listen ANSWER: 'תשובה אחד' -> Answer",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
@@ -887,7 +897,6 @@
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
-        "2026-11-12: listen ANSWER: 'תשובה אחד' -> Answer",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: listen ANSWER: 'אחד' -> Answer",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
@@ -936,7 +945,8 @@
         "2026-11-15: listen ANSWER: 'אחד' -> Answer",
         "2026-11-15: listen ANSWER: 'ארבע' -> Answer",
         "2026-11-15: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-15: explain: 589 chars, ended by סיימתי"
+        "2026-11-15: explain: 589 chars, ended by סיימתי",
+        "2026-11-19: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -949,6 +959,13 @@
         "fb-2026-11-12-d01-discourses-intro-q3-1794464120251",
         "fb-2026-11-12-u03-romans-foresight-q3-1794465577666",
         "fb-2026-11-15-d02-kinds-of-government-q3-1794724848281",
-        "fb-2026-11-15-u04-louis-mistakes-q3-1794726304188"
-    ]
+        "fb-2026-11-15-u04-louis-mistakes-q3-1794726304188",
+        "fb-2026-11-15-u05-darius-kingdoms-q3-1794758541940",
+        "fb-2026-11-15-d03-rome-or-sparta-q3-1794760190014"
+    ],
+    "bookmark": {
+        "unitId": "u06-free-cities",
+        "part": "s2",
+        "sentence": 41
+    }
 }
