@@ -770,6 +770,39 @@
             "sure": true,
             "day": "2026-11-19",
             "time": 1795068813869
+        },
+        {
+            "questionId": "c-good-man-bad-way",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-19",
+            "time": 1795069429207
+        },
+        {
+            "questionId": "q1",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "why",
+            "choice": 3,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-19",
+            "time": 1795069585469
+        },
+        {
+            "questionId": "q2",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "apply",
+            "choice": 4,
+            "correct": false,
+            "sure": true,
+            "day": "2026-11-19",
+            "time": 1795069671702
         }
     ],
     "concepts": {
@@ -834,6 +867,9 @@
             "box": 1,
             "nextReview": "2026-11-20",
             "lastPromoted": "2026-11-19"
+        },
+        "corruption-and-freedom": {
+            "nextReview": "2026-11-19"
         }
     },
     "completedUnits": [
@@ -958,7 +994,6 @@
         "2026-11-12: listen ANSWER: 'אחד' -> Answer",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
-        "2026-11-12: explain: 436 chars, ended by סיימתי",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
         "2026-11-12: upload: החיבור ל-GitHub פג (401). צריך להתחבר פעם אחת מחדש.",
@@ -1007,7 +1042,11 @@
         "2026-11-19: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-19: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-19: explain: 760 chars, ended by זהו זה",
-        "2026-11-19: listen ANSWER: 'שלוש' -> Answer"
+        "2026-11-19: listen ANSWER: 'שלוש' -> Answer",
+        "2026-11-19: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-19: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-19: listen YES_NO: 'לא' -> YesNo",
+        "2026-11-19: listen ANSWER: 'אחד' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -1026,7 +1065,7 @@
     ],
     "bookmark": {
         "unitId": "d04-corruption-and-freedom",
-        "part": "s3",
-        "sentence": 8
+        "part": "retell",
+        "sentence": 16
     }
 }
