@@ -833,7 +833,8 @@
         "d02-kinds-of-government",
         "u04-louis-mistakes",
         "u05-darius-kingdoms",
-        "d03-rome-or-sparta"
+        "d03-rome-or-sparta",
+        "u06-free-cities"
     ],
     "explainAnswers": [
         {
@@ -1012,8 +1013,8 @@
         "fb-2026-11-15-d03-rome-or-sparta-q3-1794760190014"
     ],
     "bookmark": {
-        "unitId": "u06-free-cities",
-        "part": "retell",
-        "sentence": 13
+        "unitId": "d04-corruption-and-freedom",
+        "part": "s1",
+        "sentence": 1
     }
 }
