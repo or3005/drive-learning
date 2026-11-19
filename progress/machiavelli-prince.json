@@ -759,6 +759,17 @@
             "sure": true,
             "day": "2026-11-19",
             "time": 1795068141822
+        },
+        {
+            "questionId": "c-no-friends",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-19",
+            "time": 1795068813869
         }
     ],
     "concepts": {
@@ -995,7 +1006,8 @@
         "2026-11-19: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-19: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-19: listen ANSWER: 'שלוש' -> Answer",
-        "2026-11-19: explain: 760 chars, ended by זהו זה"
+        "2026-11-19: explain: 760 chars, ended by זהו זה",
+        "2026-11-19: listen ANSWER: 'שלוש' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -1014,7 +1026,7 @@
     ],
     "bookmark": {
         "unitId": "d04-corruption-and-freedom",
-        "part": "s2",
-        "sentence": 28
+        "part": "s3",
+        "sentence": 3
     }
 }
