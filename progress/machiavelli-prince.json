@@ -869,6 +869,39 @@
             "sure": true,
             "day": "2026-11-23",
             "time": 1795415981513
+        },
+        {
+            "questionId": "c-savonarola",
+            "unitId": "u07-own-arms-and-virtu",
+            "concept": "armed-prophets",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795416435186
+        },
+        {
+            "questionId": "q1",
+            "unitId": "u07-own-arms-and-virtu",
+            "concept": "armed-prophets",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795416759109
+        },
+        {
+            "questionId": "q2",
+            "unitId": "u07-own-arms-and-virtu",
+            "concept": "virtu-and-fortuna",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795416830091
         }
     ],
     "concepts": {
@@ -935,6 +968,16 @@
             "lastPromoted": "2026-11-19"
         },
         "corruption-and-freedom": {
+            "box": 1,
+            "nextReview": "2026-11-24",
+            "lastPromoted": "2026-11-23"
+        },
+        "armed-prophets": {
+            "box": 1,
+            "nextReview": "2026-11-24",
+            "lastPromoted": "2026-11-23"
+        },
+        "virtu-and-fortuna": {
             "box": 1,
             "nextReview": "2026-11-24",
             "lastPromoted": "2026-11-23"
@@ -1050,6 +1093,13 @@
             "transcript": "כדי לתקן עיר מושחתת צריך איש רע שיקח הכל בידיים וינסה לעשות חוקים טובים יותר לכן הוא אומר שזה קשה מאוד למצוא אישרה שיעשה דברים טובים כי בדרך כלל זה הפוך איש טוב עושה דברים טובים ויש טוב לא יוכל לתפוס עיר מושחתת בנוסף לגבי הדבר הראשון שאמרת שזה היה על אני לא זוכר אתה נותן לי כל הזמן שתי נושאים ואז אני זוכר רק לענות לך על הנושא אחד אני מבקש שבשיחות הבאות שאתה שואל אותי שאלה פתוחה תן שאלה על על נושא אחד כי אני לא זוכר מה לענות לך זהו",
             "day": "2026-11-23",
             "time": 1795415268035
+        },
+        {
+            "questionId": "q3",
+            "unitId": "u07-own-arms-and-virtu",
+            "transcript": "עבור כל אחד מהדוגמאות שהוא נתן הפורטונה שיחקה מזל בזה שהעם היה חלש משועבד וכן הלאה ככה מה שאפשר לנסיך לנצל את הפורטונה ולראות בעזרת היכולת שלו לראות והוירטו שלו היכולת לעשות דברים באמת להשתלט ולהציל את העם ולעשות כל מה שצריך נגיד אצל משה הזה שבני ישראל היו עם משועבד זה היה בעצם הפורטונה בנוסף הדבר השני שאמרת שכל אחד מהם היה צריך צבא כי יכול להיות שההתלהבות הייתה מחזיקה אבל כשברגע שהיא נגמרת הזרוע בשביל לשמור על על האנשים באידיאולוגיה שלך זהו",
+            "day": "2026-11-23",
+            "time": 1795416938014
         }
     ],
     "diagnostics": [
@@ -1105,7 +1155,11 @@
         "2026-11-23: explain: 434 chars, ended by סיימתי",
         "2026-11-23: listen ANSWER: 'שתיים' -> Answer",
         "2026-11-23: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-23: listen ANSWER: 'ארבע' -> Answer"
+        "2026-11-23: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-23: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-23: listen ANSWER: 'ארבע' -> Answer",
+        "2026-11-23: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-23: explain: 445 chars, ended by סיימתי"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -1125,7 +1179,7 @@
     ],
     "bookmark": {
         "unitId": "u07-own-arms-and-virtu",
-        "part": "s3",
-        "sentence": 2
+        "part": "retell",
+        "sentence": 13
     }
 }
