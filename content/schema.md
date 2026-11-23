@@ -135,6 +135,8 @@ items it hasn't played yet at the start of the next drive in that course.
   about half the segments, 1 to half rounded up, not after every one), `"endChoiceQuestions": 2` (exactly
   that many multiple-choice questions at the end, with at least one `apply`) and `"explainParts": 1` (one
   explain question that sums up the lesson, not split into parts, so its prompt doesn't start with חלק).
+  That one question asks about a single topic, never two questions joined in one prompt: the learner
+  asked for this (November 2026), because while driving he remembers to answer only one of them.
   The Machiavelli course uses all three: about 5 questions a lesson instead of 11.
 - In a book course, each entry in `units` may say what it reads: `"reads": "הנסיך: פרק 6"`. A book course that reads two books
   starts every unit title with the book's name and a comma (`הנסיך,` or `הדיונים,`), and every `reading` with its
