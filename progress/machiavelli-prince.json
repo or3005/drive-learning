@@ -858,6 +858,17 @@
             "sure": true,
             "day": "2026-11-23",
             "time": 1795415438617
+        },
+        {
+            "questionId": "c-opportunity",
+            "unitId": "u07-own-arms-and-virtu",
+            "concept": "virtu-and-fortuna",
+            "level": "check",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795415981513
         }
     ],
     "concepts": {
@@ -1093,7 +1104,8 @@
         "2026-11-23: listen ANSWER: 'אחד' -> Answer",
         "2026-11-23: explain: 434 chars, ended by סיימתי",
         "2026-11-23: listen ANSWER: 'שתיים' -> Answer",
-        "2026-11-23: listen ANSWER: 'אחד' -> Answer"
+        "2026-11-23: listen ANSWER: 'אחד' -> Answer",
+        "2026-11-23: listen ANSWER: 'ארבע' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -1113,7 +1125,7 @@
     ],
     "bookmark": {
         "unitId": "u07-own-arms-and-virtu",
-        "part": "s1",
-        "sentence": 9
+        "part": "s3",
+        "sentence": 2
     }
 }
