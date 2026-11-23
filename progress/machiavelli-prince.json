@@ -836,6 +836,28 @@
             "sure": true,
             "day": "2026-11-23",
             "time": 1795415175960
+        },
+        {
+            "questionId": "q1",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "why",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795415370390
+        },
+        {
+            "questionId": "q2",
+            "unitId": "d04-corruption-and-freedom",
+            "concept": "corruption-and-freedom",
+            "level": "apply",
+            "choice": 1,
+            "correct": true,
+            "sure": true,
+            "day": "2026-11-23",
+            "time": 1795415438617
         }
     ],
     "concepts": {
@@ -916,7 +938,8 @@
         "u04-louis-mistakes",
         "u05-darius-kingdoms",
         "d03-rome-or-sparta",
-        "u06-free-cities"
+        "u06-free-cities",
+        "d04-corruption-and-freedom"
     ],
     "explainAnswers": [
         {
@@ -1068,7 +1091,9 @@
         "2026-11-23: listen ANSWER: 'שלוש' -> Answer",
         "2026-11-23: listen YES_NO: 'לא' -> YesNo",
         "2026-11-23: listen ANSWER: 'אחד' -> Answer",
-        "2026-11-23: explain: 434 chars, ended by סיימתי"
+        "2026-11-23: explain: 434 chars, ended by סיימתי",
+        "2026-11-23: listen ANSWER: 'שתיים' -> Answer",
+        "2026-11-23: listen ANSWER: 'אחד' -> Answer"
     ],
     "schedulerVersion": 2,
     "heardFeedback": [
@@ -1087,8 +1112,8 @@
         "fb-2026-11-19-u06-free-cities-q3-1795068280822"
     ],
     "bookmark": {
-        "unitId": "d04-corruption-and-freedom",
-        "part": "retell",
-        "sentence": 16
+        "unitId": "u07-own-arms-and-virtu",
+        "part": "s1",
+        "sentence": 9
     }
 }
